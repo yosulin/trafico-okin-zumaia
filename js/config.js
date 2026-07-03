@@ -6,7 +6,9 @@
  *    - añadir o quitar destinos
  *    - añadir o quitar rutas dentro de un destino
  *    - cambiar los umbrales de color del semáforo
- *    - cambiar la frecuencia de actualización
+ *    - cambiar el horario/frecuencia de actualización
+ *    - cambiar cuánto tiempo se conserva un dato en caché
+ *    - cambiar el rango y la resolución del histórico visual
  *
  *  No hace falta tocar ningún otro fichero .js ni .html para
  *  gestionar el contenido del panel.
@@ -25,10 +27,30 @@ const CONFIG = {
   },
 
   /**
-   * Frecuencia de actualización automática, en milisegundos.
-   * 180000 = 3 minutos
+   * Planificador de actualizaciones.
+   * Permite tener una frecuencia distinta según la franja horaria,
+   * para no gastar innecesariamente las peticiones del plan gratuito
+   * de TomTom fuera del horario de oficina.
+   *
+   * Cada tramo: { inicio: "HH:MM", fin: "HH:MM", intervaloMin: N }
+   *   - "inicio" y "fin" en formato 24h.
+   *   - Un tramo que termina en "00:00" se entiende como "hasta medianoche".
+   *   - Los tramos deben cubrir las 24 horas sin huecos ni solapes.
+   *   - El orden de los tramos en el array no importa: se evalúa
+   *     cuál contiene la hora actual.
    */
-  refreshIntervalMs: 180000,
+  horarios: [
+    { inicio: "00:00", fin: "05:00", intervaloMin: 60 },
+    { inicio: "05:00", fin: "14:00", intervaloMin: 30 },
+    { inicio: "14:00", fin: "18:00", intervaloMin: 3 },
+    { inicio: "18:00", fin: "00:00", intervaloMin: 60 }
+  ],
+
+  /**
+   * Frecuencia de actualización a usar si, por lo que sea, la hora
+   * actual no encaja en ningún tramo de "horarios" (red de seguridad).
+   */
+  intervaloPorDefectoMin: 15,
 
   /**
    * Umbrales de retraso (en minutos) que determinan el color del semáforo.
@@ -136,5 +158,38 @@ const CONFIG = {
     proveedor: "tomtom",
     baseUrl: "https://api.tomtom.com/routing/1/calculateRoute",
     localStorageKey: "okin_traffic_tomtom_api_key"
+  },
+
+  /**
+   * Caché del último dato válido por ruta.
+   * Si una consulta falla, se sigue mostrando el último dato bueno
+   * mientras no supere esta antigüedad máxima (en minutos).
+   * Pasado ese tiempo, la ruta pasa a mostrarse como "Sin datos".
+   */
+  cache: {
+    maxAntiguedadMin: 10,
+    localStorageKey: "okin_traffic_cache_v1"
+  },
+
+  /**
+   * Histórico visual tipo "Uptime Kuma" bajo cada destino.
+   * Se muestran "bloques" bloques de "minutosPorBloque" minutos cada uno,
+   * cubriendo entre los dos un total de (bloques * minutosPorBloque) minutos.
+   * Con los valores por defecto: 16 bloques x 30 min = últimas 8 horas.
+   */
+  historial: {
+    bloques: 16,
+    minutosPorBloque: 30,
+    localStorageKey: "okin_traffic_historial_v1"
+  },
+
+  /**
+   * PWA / Service Worker.
+   * Nombre de la caché de "app shell" (HTML/CSS/JS/iconos). Cambia el
+   * número de versión cuando quieras forzar que los usuarios que ya
+   * tienen la app instalada descarguen los ficheros nuevos.
+   */
+  pwa: {
+    cacheVersion: "okin-traffic-v1"
   }
 };

@@ -241,6 +241,51 @@ html, body {
   font-style: italic;
 }
 
+.ruta__badge-cache {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-tinta-suave);
+  margin-left: 0.3rem;
+}
+
+.ruta--cache .ruta__tiempo,
+.ruta--cache .ruta__retraso {
+  opacity: 0.7;
+}
+
+/* ============================================================
+   HISTORIAL — tira de bloques tipo Uptime Kuma
+   ============================================================ */
+
+.card__historial {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--color-borde);
+}
+
+.historial__tira {
+  display: flex;
+  gap: 3px;
+}
+
+.historial__bloque {
+  flex: 1 1 0;
+  height: 1.3rem;
+  border-radius: 3px;
+  background: var(--color-sin-datos);
+  opacity: 0.9;
+  transition: background-color 0.3s ease;
+}
+
+.historial__etiquetas {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  color: var(--color-tinta-suave);
+}
+
 /* ============================================================
    PIE
    ============================================================ */
@@ -350,13 +395,72 @@ html, body {
   .ruta__semaforo { display: none; }
 }
 
-/* Pantallas grandes / TV: todo un poco más generoso */
+/* ============================================================
+   MODO TV — pantallas grandes en oficina (1080p / 4K)
+   Se activa automáticamente por tamaño de viewport, y también se
+   puede forzar a mano con el botón 📺 (clase .modo-tv en <body>),
+   útil cuando el navegador no ocupa toda la resolución real de
+   la pantalla compartida.
+   ============================================================ */
+
 @media (min-width: 1400px) {
   .cabecera__titulo { font-size: 3.2rem; }
   .card__titulo { font-size: 1.6rem; }
   .ruta__nombre { font-size: 1.05rem; }
   .ruta__tiempo { font-size: 1.2rem; }
 }
+
+/* ~1080p y superiores: tarjetas más grandes, más aire, texto legible a distancia */
+@media (min-width: 1900px) {
+  .grid-destinos { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.75rem; }
+  .cabecera__titulo { font-size: 3.8rem; }
+  .cabecera__eyebrow { font-size: 1rem; }
+  .cabecera__actualizacion { font-size: 1.05rem; }
+  .card { padding: 2rem 2.25rem 1.75rem; }
+  .card__titulo { font-size: 2rem; }
+  .card__estado-dot { width: 1.15rem; height: 1.15rem; }
+  .ruta { padding: 0.85rem 0.2rem; }
+  .ruta__nombre { font-size: 1.3rem; }
+  .ruta__tiempo { font-size: 1.55rem; }
+  .ruta__retraso { font-size: 1.05rem; }
+  .ruta__semaforo { font-size: 1.5rem; width: 1.9rem; }
+  .historial__bloque { height: 1.9rem; }
+  .historial__etiquetas { font-size: 0.85rem; }
+  .pie { font-size: 1rem; }
+}
+
+/* 4K y pantallas muy grandes */
+@media (min-width: 3000px) {
+  .grid-destinos { grid-template-columns: repeat(auto-fit, minmax(620px, 1fr)); gap: 2.5rem; }
+  .cabecera__titulo { font-size: 5.5rem; }
+  .card { padding: 3rem 3.25rem 2.75rem; border-radius: 22px; }
+  .card__titulo { font-size: 2.9rem; }
+  .ruta__nombre { font-size: 1.9rem; }
+  .ruta__tiempo { font-size: 2.2rem; }
+  .ruta__retraso { font-size: 1.5rem; }
+  .ruta__semaforo { font-size: 2.1rem; width: 2.6rem; }
+  .historial__bloque { height: 2.6rem; border-radius: 5px; }
+  .historial__etiquetas { font-size: 1.1rem; }
+}
+
+/* Forzado manual del modo TV, independientemente del ancho real
+   del viewport (por ejemplo, si el navegador no está a pantalla
+   completa en la resolución nativa de la pantalla compartida). */
+body.modo-tv .grid-destinos { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.75rem; }
+body.modo-tv .cabecera__titulo { font-size: 3.8rem; }
+body.modo-tv .cabecera__eyebrow { font-size: 1rem; }
+body.modo-tv .cabecera__actualizacion { font-size: 1.05rem; }
+body.modo-tv .card { padding: 2rem 2.25rem 1.75rem; }
+body.modo-tv .card__titulo { font-size: 2rem; }
+body.modo-tv .card__estado-dot { width: 1.15rem; height: 1.15rem; }
+body.modo-tv .ruta { padding: 0.85rem 0.2rem; }
+body.modo-tv .ruta__nombre { font-size: 1.3rem; }
+body.modo-tv .ruta__tiempo { font-size: 1.55rem; }
+body.modo-tv .ruta__retraso { font-size: 1.05rem; }
+body.modo-tv .ruta__semaforo { font-size: 1.5rem; width: 1.9rem; }
+body.modo-tv .historial__bloque { height: 1.9rem; }
+body.modo-tv .historial__etiquetas { font-size: 0.85rem; }
+body.modo-tv #boton-tv { background: var(--color-linea); color: #fff; border-color: var(--color-linea); }
 
 /* Accesibilidad: respetar preferencia de movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
