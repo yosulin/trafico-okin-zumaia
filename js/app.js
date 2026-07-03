@@ -16,6 +16,9 @@ const App = (() => {
   const elIndicadorCarga = document.getElementById("indicador-carga");
   const elBotonAjustes = document.getElementById("boton-ajustes");
   const elBotonTV = document.getElementById("boton-tv");
+  const elBotonInstalar = document.getElementById("boton-instalar");
+  const elAvisoIOS = document.getElementById("aviso-ios");
+  const elCerrarAvisoIOS = document.getElementById("cerrar-aviso-ios");
   const elModal = document.getElementById("modal-api-key");
   const elFormApiKey = document.getElementById("form-api-key");
   const elInputApiKey = document.getElementById("input-api-key");
@@ -248,6 +251,56 @@ const App = (() => {
     });
   }
 
+  /* ---------- Instalación como app (PWA) ---------- */
+
+  const AVISO_IOS_CERRADO_KEY = "okin_traffic_aviso_ios_cerrado";
+  let promptDiferido = null;
+
+  function enModoStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function esIOS() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  }
+
+  function inicializarInstalacion() {
+    if (enModoStandalone()) return; // ya está instalada: no mostramos nada
+
+    // Chrome / Edge / Android: el navegador nos avisa cuando la app cumple
+    // los requisitos de instalación. Mostramos entonces nuestro propio botón,
+    // en vez de depender de que el usuario note el icono discreto del navegador.
+    window.addEventListener("beforeinstallprompt", (evento) => {
+      evento.preventDefault();
+      promptDiferido = evento;
+      elBotonInstalar.hidden = false;
+    });
+
+    elBotonInstalar.addEventListener("click", async () => {
+      if (!promptDiferido) return;
+      elBotonInstalar.hidden = true;
+      promptDiferido.prompt();
+      await promptDiferido.userChoice;
+      promptDiferido = null;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      elBotonInstalar.hidden = true;
+      promptDiferido = null;
+    });
+
+    // iOS Safari nunca dispara "beforeinstallprompt": mostramos un aviso
+    // manual una única vez (hasta que el usuario lo cierre).
+    if (esIOS() && localStorage.getItem(AVISO_IOS_CERRADO_KEY) !== "1") {
+      elAvisoIOS.hidden = false;
+    }
+
+    elCerrarAvisoIOS.addEventListener("click", () => {
+      elAvisoIOS.hidden = true;
+      localStorage.setItem(AVISO_IOS_CERRADO_KEY, "1");
+    });
+  }
+
   /* ---------- Service Worker (PWA) ---------- */
 
   function registrarServiceWorker() {
@@ -267,6 +320,7 @@ const App = (() => {
     construirGrid();
     inicializarModal();
     inicializarModoTV();
+    inicializarInstalacion();
     registrarServiceWorker();
 
     // Si ya hay datos en caché de una sesión anterior, los pintamos

@@ -30,10 +30,16 @@
     <div class="cabecera__estado">
       <span class="indicador-carga" id="indicador-carga" aria-hidden="true"></span>
       <span class="cabecera__actualizacion" id="ultima-actualizacion">Cargando datos de tráfico…</span>
+      <button class="boton boton--primario boton-instalar" id="boton-instalar" type="button" hidden>📲 Instalar app</button>
       <button class="boton-ajustes" id="boton-tv" type="button" aria-label="Modo TV">📺</button>
       <button class="boton-ajustes" id="boton-ajustes" type="button" aria-label="Configurar clave API">⚙️</button>
     </div>
   </header>
+
+  <div class="aviso-ios" id="aviso-ios" hidden>
+    <span>En iPhone/iPad: pulsa <strong>Compartir</strong> <span aria-hidden="true">⬆️</span> y luego <strong>«Añadir a pantalla de inicio»</strong> para instalar la app.</span>
+    <button type="button" id="cerrar-aviso-ios" aria-label="Cerrar aviso">✕</button>
+  </div>
 
   <main class="grid-destinos" id="grid-destinos" aria-live="polite">
     <!-- Las tarjetas de destino se generan dinámicamente desde config.js -->

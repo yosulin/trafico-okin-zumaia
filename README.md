@@ -78,8 +78,19 @@ Sin build step: es HTML/CSS/JS puro, incluido el Service Worker.
 
 ## 4. Instalar como aplicación (PWA)
 
-Al abrir la web desde Chrome, Edge o Android, el navegador ofrecerá "Instalar
-aplicación" / "Añadir a pantalla de inicio". Una vez instalada:
+Al abrir la web desde Chrome, Edge o Android, aparece un botón **📲 Instalar app**
+en la cabecera en cuanto el navegador confirma que la app cumple los requisitos
+de instalación (no hace falta buscar el icono discreto de la barra de
+direcciones). Se implementa capturando el evento `beforeinstallprompt` y
+mostrando nuestro propio botón — así la opción de instalar es visible y
+explícita, en vez de depender del aviso silencioso de cada navegador.
+
+**En iOS (Safari) no existe ese evento** — es una limitación de la propia
+plataforma, no de la app — así que en su lugar se muestra un aviso con las
+instrucciones manuales (Compartir → «Añadir a pantalla de inicio»), que el
+usuario puede cerrar y no vuelve a aparecer.
+
+Una vez instalada:
 
 - Se abre en su propia ventana, sin barra de navegador.
 - Si no hay conexión, sigue mostrando el **último estado conocido** (guardado
