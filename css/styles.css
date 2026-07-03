@@ -1,0 +1,364 @@
+/* ============================================================
+   TOKENS
+   ============================================================ */
+
+:root {
+  /* Paleta — grises azulados suaves + acento "carretera" + semáforo */
+  --color-fondo: #EEF1F4;
+  --color-superficie: #FFFFFF;
+  --color-tinta: #2B3440;
+  --color-tinta-suave: #64707D;
+  --color-linea: #4A6FA5;
+  --color-borde: #DDE3E9;
+  --color-sin-datos: #B8C0C8;
+
+  /* Sombra suave, sin dramatismo */
+  --sombra-card: 0 1px 2px rgba(43, 52, 64, 0.04), 0 6px 16px rgba(43, 52, 64, 0.06);
+
+  --fuente-display: "Oswald", "Arial Narrow", sans-serif;
+  --fuente-texto: "Inter", system-ui, sans-serif;
+
+  --radio: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-fondo);
+  color: var(--color-tinta);
+  font-family: var(--fuente-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   FIRMA VISUAL — línea de marcas viales
+   Una tira de "rayas de carretera" en la parte superior de la
+   página: el único guiño decorativo explícito al tema (tráfico).
+   ============================================================ */
+
+.carretera-decorativa {
+  height: 6px;
+  width: 100%;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-linea) 0px,
+    var(--color-linea) 28px,
+    transparent 28px,
+    transparent 52px
+  );
+  opacity: 0.55;
+}
+
+/* ============================================================
+   CABECERA
+   ============================================================ */
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem clamp(1rem, 4vw, 3rem) 1.25rem;
+}
+
+.cabecera__eyebrow {
+  display: block;
+  font-family: var(--fuente-texto);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-tinta-suave);
+  margin-bottom: 0.15rem;
+}
+
+.cabecera__titulo {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  color: var(--color-tinta);
+}
+
+.cabecera__estado {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cabecera__actualizacion {
+  font-size: 0.9rem;
+  color: var(--color-tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.boton-ajustes {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.boton-ajustes:hover { box-shadow: var(--sombra-card); }
+.boton-ajustes:active { transform: scale(0.94); }
+.boton-ajustes:focus-visible { outline: 2px solid var(--color-linea); outline-offset: 2px; }
+
+.indicador-carga {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--color-borde);
+  transition: background 0.2s ease;
+}
+
+.indicador-carga--activo {
+  background: var(--color-linea);
+  animation: pulso 1s ease-in-out infinite;
+}
+
+@keyframes pulso {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+/* ============================================================
+   GRID DE DESTINOS
+   ============================================================ */
+
+.grid-destinos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  padding: 0 clamp(1rem, 4vw, 3rem) 2rem;
+}
+
+.card {
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-card);
+  padding: 1.35rem 1.5rem 1.1rem;
+  border: 1px solid var(--color-borde);
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--color-borde);
+}
+
+.card__estado-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--color-sin-datos);
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+}
+
+.card__titulo {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.35rem;
+}
+
+/* ---------- Filas de ruta ---------- */
+
+.card__rutas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ruta {
+  display: grid;
+  grid-template-columns: 4px 1fr auto auto auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  padding: 0.55rem 0.15rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.ruta__linea {
+  align-self: stretch;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--color-sin-datos);
+  transition: background-color 0.3s ease;
+}
+
+.ruta__nombre {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-tinta);
+}
+
+.ruta__tiempo {
+  font-family: var(--fuente-texto);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-tinta);
+  min-width: 4.5ch;
+  text-align: right;
+}
+
+.ruta__retraso {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: var(--color-tinta-suave);
+  min-width: 5ch;
+  text-align: right;
+}
+
+.ruta__semaforo {
+  font-size: 1.1rem;
+  width: 1.4rem;
+  text-align: center;
+}
+
+.ruta--sin-datos .ruta__nombre,
+.ruta--sin-datos .ruta__tiempo {
+  color: var(--color-tinta-suave);
+  font-style: italic;
+}
+
+/* ============================================================
+   PIE
+   ============================================================ */
+
+.pie {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-tinta-suave);
+  padding: 1rem 1rem 2rem;
+}
+
+/* ============================================================
+   MODAL — clave API
+   ============================================================ */
+
+.modal {
+  border: none;
+  border-radius: var(--radio);
+  padding: 0;
+  box-shadow: var(--sombra-card);
+  max-width: 420px;
+  width: calc(100% - 2rem);
+}
+
+.modal::backdrop {
+  background: rgba(43, 52, 64, 0.45);
+}
+
+.modal__form {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal__titulo {
+  margin: 0;
+  font-family: var(--fuente-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.25rem;
+}
+
+.modal__texto {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-tinta-suave);
+  line-height: 1.5;
+}
+
+.modal__input {
+  font-family: var(--fuente-texto);
+  font-size: 0.95rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  background: var(--color-fondo);
+  color: var(--color-tinta);
+}
+
+.modal__input:focus-visible {
+  outline: 2px solid var(--color-linea);
+  outline-offset: 1px;
+}
+
+.modal__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.boton {
+  font-family: var(--fuente-texto);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.boton--secundario {
+  background: transparent;
+  border-color: var(--color-borde);
+  color: var(--color-tinta-suave);
+}
+
+.boton--primario {
+  background: var(--color-linea);
+  color: #fff;
+}
+
+.boton:focus-visible { outline: 2px solid var(--color-linea); outline-offset: 2px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .ruta {
+    grid-template-columns: 4px 1fr auto;
+    row-gap: 0.15rem;
+  }
+  .ruta__retraso { grid-column: 3; order: 3; }
+  .ruta__tiempo { grid-column: 3; order: 2; }
+  .ruta__semaforo { display: none; }
+}
+
+/* Pantallas grandes / TV: todo un poco más generoso */
+@media (min-width: 1400px) {
+  .cabecera__titulo { font-size: 3.2rem; }
+  .card__titulo { font-size: 1.6rem; }
+  .ruta__nombre { font-size: 1.05rem; }
+  .ruta__tiempo { font-size: 1.2rem; }
+}
+
+/* Accesibilidad: respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .indicador-carga--activo { animation: none; }
+}

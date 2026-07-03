@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tráfico desde OKIN Zumaia</title>
+  <meta name="description" content="Estado del tráfico en tiempo real desde OKIN Zumaia hacia Zarautz, Donostia, Eibar e Irún.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="carretera-decorativa" aria-hidden="true"></div>
+
+  <header class="cabecera">
+    <div class="cabecera__origen">
+      <span class="cabecera__eyebrow">Salida desde</span>
+      <h1 class="cabecera__titulo">OKIN Zumaia</h1>
+    </div>
+
+    <div class="cabecera__estado">
+      <span class="indicador-carga" id="indicador-carga" aria-hidden="true"></span>
+      <span class="cabecera__actualizacion" id="ultima-actualizacion">Cargando datos de tráfico…</span>
+      <button class="boton-ajustes" id="boton-ajustes" type="button" aria-label="Configurar clave API">⚙️</button>
+    </div>
+  </header>
+
+  <main class="grid-destinos" id="grid-destinos" aria-live="polite">
+    <!-- Las tarjetas de destino se generan dinámicamente desde config.js -->
+  </main>
+
+  <footer class="pie">
+    Este panel es un indicador orientativo. Antes de salir, comprueba siempre la mejor ruta en tu navegador GPS.
+  </footer>
+
+  <dialog id="modal-api-key" class="modal">
+    <form id="form-api-key" class="modal__form">
+      <h2 class="modal__titulo">Clave de la API de TomTom</h2>
+      <p class="modal__texto">
+        Introduce tu clave de <strong>TomTom Routing API</strong>. Se guarda únicamente en
+        este navegador (no se sube al repositorio ni a ningún servidor).
+      </p>
+      <input
+        type="text"
+        id="input-api-key"
+        class="modal__input"
+        placeholder="Pega aquí tu clave API"
+        autocomplete="off"
+        required
+      >
+      <div class="modal__acciones">
+        <button type="button" id="cerrar-modal" class="boton boton--secundario">Cancelar</button>
+        <button type="submit" class="boton boton--primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
