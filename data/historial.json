@@ -1,9 +1,13 @@
 {
-  "actualizado": "2026-07-04T06:43:47.468Z",
+  "actualizado": "2026-07-04T06:46:37.232Z",
   "muestras": {
     "zarautz": [
       {
         "t": 1783147427468,
+        "i": 0
+      },
+      {
+        "t": 1783147597232,
         "i": 0
       }
     ],
@@ -11,12 +15,34 @@
       {
         "t": 1783147427468,
         "i": 0
+      },
+      {
+        "t": 1783147597232,
+        "i": 0
       }
     ],
     "irun": [
       {
         "t": 1783147427468,
         "i": 0
+      },
+      {
+        "t": 1783147597232,
+        "i": 0
+      }
+    ],
+    "eibar": [
+      {
+        "t": 1783147597232,
+        "i": 0
+      }
+    ]
+  },
+  "ultimosFallos": {
+    "donostia": [
+      {
+        "ruta": "n634",
+        "motivo": "HTTP 429 — {\"detailedError\":{\"code\":\"TooManyRequests\",\"message\":\"You have exceeded the permitted rate limit\"}}"
       }
     ]
   }
