@@ -22,6 +22,13 @@ traffic-dashboard-okin/
 ├── index.html                  → estructura de la página (sin datos ni lógica)
 ├── manifest.webmanifest        → metadatos de instalación como PWA
 ├── service-worker.js           → caché offline del "app shell"
+├── .github/
+│   └── workflows/
+│       └── actualizar-historial.yml  → cron que recoge histórico 24h (ver punto 8)
+├── scripts/
+│   └── actualizar-historial.mjs      → script que ejecuta ese cron (reutiliza js/config.js, estado.js, api.js)
+├── data/
+│   └── historial.json          → histórico compartido; lo actualiza el Action, la web solo lo lee
 ├── css/
 │   └── styles.css              → todo el diseño visual
 ├── icons/                      → iconos de la PWA (192/512/maskable/apple/favicon)
@@ -30,7 +37,7 @@ traffic-dashboard-okin/
 │   ├── estado.js                → traduce minutos de retraso a color/índice de semáforo
 │   ├── api.js                   → llamadas a la API de TomTom (sin caché, sin DOM)
 │   ├── cache.js                 → guarda el último dato válido por ruta y decide qué mostrar
-│   ├── historial.js             → guarda muestras y calcula los bloques de la línea temporal
+│   ├── historial.js             → descarga data/historial.json y calcula los bloques a pintar
 │   ├── scheduler.js             → calcula cada cuánto tocar según la hora (config.horarios)
 │   └── app.js                   → orquesta todo lo anterior y pinta el DOM
 └── README.md
@@ -38,17 +45,20 @@ traffic-dashboard-okin/
 
 Separación de responsabilidades:
 
-| Fichero            | Qué contiene                                                        | Cuándo tocarlo |
-|---------------------|-----------------------------------------------------------------------|----------------|
-| `js/config.js`      | Origen, destinos, rutas, umbrales, horarios, caché, histórico          | Cada vez que cambie el contenido |
-| `js/estado.js`      | Conversión retraso → tramo de color                                    | Casi nunca |
-| `js/api.js`         | Cómo se llama a la API de tráfico                                      | Solo si cambias de proveedor |
-| `js/cache.js`       | Qué hacer cuando una consulta falla                                    | Solo si cambias la política de caché |
-| `js/historial.js`   | Cómo se guardan y agrupan las muestras de la línea temporal            | Solo si cambias el histórico |
-| `js/scheduler.js`   | Cada cuánto se actualiza según la hora                                 | Solo si cambias la lógica de planificación |
-| `js/app.js`         | Construcción del grid, pintado, modal de clave API, modo TV            | Solo si cambias el comportamiento de la interfaz |
-| `css/styles.css`    | Todo el aspecto visual                                                 | Solo si quieres cambiar el diseño |
-| `service-worker.js` | Qué ficheros quedan disponibles offline                                | Solo si añades/quitas ficheros del proyecto |
+| Fichero                              | Qué contiene                                                        | Cuándo tocarlo |
+|----------------------------------------|-----------------------------------------------------------------------|----------------|
+| `js/config.js`                        | Origen, destinos, rutas, umbrales, horarios, caché, histórico          | Cada vez que cambie el contenido |
+| `js/estado.js`                        | Conversión retraso → tramo de color                                    | Casi nunca |
+| `js/api.js`                           | Cómo se llama a la API de tráfico                                      | Solo si cambias de proveedor |
+| `js/cache.js`                         | Qué hacer cuando una consulta falla (rutas en vivo)                    | Solo si cambias la política de caché |
+| `js/historial.js`                     | Cómo se lee y agrupa el histórico compartido                           | Solo si cambias el histórico |
+| `js/scheduler.js`                     | Cada cuánto se actualizan las tarjetas en vivo según la hora            | Solo si cambias la lógica de planificación |
+| `js/app.js`                           | Construcción del grid, pintado, modal de clave API, modo TV, instalación | Solo si cambias el comportamiento de la interfaz |
+| `css/styles.css`                      | Todo el aspecto visual                                                 | Solo si quieres cambiar el diseño |
+| `service-worker.js`                   | Qué ficheros quedan disponibles offline                                | Solo si añades/quitas ficheros del proyecto |
+| `scripts/actualizar-historial.mjs`    | Recogida de histórico 24h en segundo plano                             | Casi nunca (usa la misma config que el resto) |
+| `.github/workflows/actualizar-historial.yml` | Cuándo se ejecuta ese script                                    | Si quieres cambiar la frecuencia del cron |
+| `data/historial.json`                 | Datos del histórico (los escribe el Action, no se edita a mano)        | Nunca a mano |
 
 ---
 
@@ -218,12 +228,48 @@ configurables en `CONFIG.historial`:
 historial: {
   bloques: 16,
   minutosPorBloque: 30,
-  // ...
+  datosUrl: "data/historial.json"
 }
 ```
 
-Las muestras se guardan en el navegador (`localStorage`) y se purgan
-automáticamente pasada la ventana visible, así que no crecen sin límite.
+**Importante — de dónde salen estos datos:** la propia web (el navegador de
+quien la visita) **no** genera este histórico. Si dependiera de eso, cualquier
+hueco en el que nadie tuviera la página abierta (por ejemplo, toda la noche)
+aparecería en gris, aunque hubiera habido tráfico real durante esas horas.
+
+En su lugar, un **GitHub Action programado** (`.github/workflows/actualizar-historial.yml`)
+consulta TomTom cada 15 minutos, las 24 horas, funcione o no funcione nadie
+teniendo la web abierta, y deja el resultado en `data/historial.json`. La web
+simplemente descarga ese fichero (con un parámetro anti-caché) cada vez que
+actualiza las tarjetas, y lo usa para pintar la tira de bloques. Así el
+histórico queda completo independientemente de quién tenga o no la pantalla
+abierta.
+
+Puesto en marcha requiere dos pasos manuales, solo una vez (ver punto 4.1).
+
+Las muestras se purgan automáticamente pasadas 24h (algo más que la ventana de
+8h que se enseña, por margen), así que el fichero no crece sin límite.
+
+### 8.1. Puesta en marcha del histórico (una sola vez)
+
+1. **Settings → Secrets and variables → Actions → New repository secret**, con:
+   - Name: `TOMTOM_API_KEY`
+   - Value: tu misma clave de TomTom (la misma que usas en el icono ⚙️ de la web)
+2. **Settings → Actions → General → Workflow permissions**, comprobar que está
+   en "Read and write permissions" (necesario para que el Action pueda hacer
+   commit del fichero de histórico actualizado).
+3. Opcional: en la pestaña **Actions** del repositorio, puedes lanzar el
+   workflow "Actualizar historial de tráfico" manualmente la primera vez
+   (botón "Run workflow") en vez de esperar a la siguiente ejecución programada.
+
+A partir de ahí funciona solo. Si más adelante cambias de clave de TomTom,
+actualiza también este secret (además del valor guardado en el navegador).
+
+**Sobre el consumo de peticiones:** el Action añade unas 576 peticiones/día
+(6 rutas × 4 veces/hora × 24h) a lo que ya consuma cada navegador que tenga la
+web abierta según `CONFIG.horarios`. Con el plan gratuito habitual de TomTom
+(miles de peticiones/día) hay margen de sobra, pero si algún día tienes dudas,
+revisa tu consumo real en el panel de developer.tomtom.com.
 
 ---
 

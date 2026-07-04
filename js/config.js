@@ -173,14 +173,19 @@ const CONFIG = {
 
   /**
    * Histórico visual tipo "Uptime Kuma" bajo cada destino.
-   * Se muestran "bloques" bloques de "minutosPorBloque" minutos cada uno,
+   * Se muestran "bloques" de "minutosPorBloque" minutos cada uno,
    * cubriendo entre los dos un total de (bloques * minutosPorBloque) minutos.
    * Con los valores por defecto: 16 bloques x 30 min = últimas 8 horas.
+   *
+   * Los datos NO se generan en el navegador: los recoge un GitHub Action
+   * programado (ver .github/workflows/actualizar-historial.yml) que consulta
+   * TomTom cada 15 minutos y actualiza "datosUrl", para que el histórico
+   * quede completo aunque nadie tenga la web abierta durante esas horas.
    */
   historial: {
     bloques: 16,
     minutosPorBloque: 30,
-    localStorageKey: "okin_traffic_historial_v1"
+    datosUrl: "data/historial.json"
   },
 
   /**

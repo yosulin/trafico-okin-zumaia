@@ -64,6 +64,14 @@ self.addEventListener("fetch", (evento) => {
     return;
   }
 
+  // Tampoco interceptar el fichero de histórico compartido: cambia con
+  // frecuencia (lo actualiza un GitHub Action) y se pide con un parámetro
+  // de cache-busting distinto cada vez, así que cachearlo aquí solo
+  // acumularía entradas sin límite sin aportar nada útil offline.
+  if (url.pathname.includes("/data/historial.json")) {
+    return;
+  }
+
   // App shell: estrategia "cache primero, con actualización en segundo plano".
   evento.respondWith(
     caches.match(evento.request).then((respuestaCacheada) => {

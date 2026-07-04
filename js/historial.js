@@ -2,66 +2,39 @@
  * ============================================================
  *  HISTORIAL — línea temporal tipo Uptime Kuma
  * ============================================================
- *  Cada ciclo de actualización, se guarda una "muestra" por destino
- *  con el peor estado alcanzado en ese momento. Al pintar, esas
- *  muestras se agrupan en bloques de tiempo fijos (por defecto,
- *  16 bloques de 30 min = últimas 8h) tomando el peor estado de
- *  cada bloque.
- *
- *  No sabe nada de HTML: solo guarda datos y calcula los bloques.
+ *  Los datos NO se generan aquí: los recoge un GitHub Action programado
+ *  (independiente de si alguien tiene la web abierta) y los deja en
+ *  CONFIG.historial.datosUrl como un JSON estático. Este módulo solo:
+ *    - descarga/actualiza ese fichero en memoria (cargar())
+ *    - agrupa las muestras en bloques de tiempo fijos para pintarlos
+ *      (calcularBloques())
  * ============================================================
  */
 
 const Historial = (() => {
 
-  function leerTodo() {
-    try {
-      const crudo = localStorage.getItem(CONFIG.historial.localStorageKey);
-      return crudo ? JSON.parse(crudo) : {};
-    } catch (err) {
-      return {};
-    }
-  }
-
-  function guardarTodo(datos) {
-    try {
-      localStorage.setItem(CONFIG.historial.localStorageKey, JSON.stringify(datos));
-    } catch (err) {
-      // Igual que en cache.js: si no se puede persistir, seguimos en memoria.
-    }
-  }
+  let datosEnMemoria = { actualizado: null, muestras: {} };
 
   /**
-   * Registra, para cada destino, el peor estadoIndex de este ciclo
-   * (a partir del mapa "estado efectivo" ya resuelto por cache.js).
-   * Purga automáticamente muestras más antiguas que la ventana visible
-   * (con un pequeño margen extra) para que localStorage no crezca sin límite.
+   * Descarga (o refresca) el histórico compartido. Se puede llamar tantas
+   * veces como se quiera (por ejemplo, en cada ciclo de actualización) para
+   * ir reflejando lo que el GitHub Action vaya añadiendo con el tiempo.
+   * Si falla (sin red, primer despliegue sin Action configurado aún…),
+   * simplemente se conserva lo último que había en memoria.
    */
-  function registrarMuestra(estadoEfectivoPorRuta) {
-    const ahora = Date.now();
-    const ventanaMs = CONFIG.historial.bloques * CONFIG.historial.minutosPorBloque * 60 * 1000;
-    const margenMs = 30 * 60 * 1000; // margen extra para no perder muestras al calcular bordes de bloque
-    const limiteAntiguedad = ahora - ventanaMs - margenMs;
-
-    const datos = leerTodo();
-
-    CONFIG.destinos.forEach(destino => {
-      let peorIndex = Estado.SIN_DATOS_INDEX;
-
-      destino.rutas.forEach(ruta => {
-        const clave = `${destino.id}.${ruta.id}`;
-        const entrada = estadoEfectivoPorRuta[clave];
-        if (entrada && entrada.disponible && entrada.estadoIndex > peorIndex) {
-          peorIndex = entrada.estadoIndex;
-        }
-      });
-
-      if (!datos[destino.id]) datos[destino.id] = [];
-      datos[destino.id].push({ t: ahora, i: peorIndex });
-      datos[destino.id] = datos[destino.id].filter(muestra => muestra.t >= limiteAntiguedad);
-    });
-
-    guardarTodo(datos);
+  async function cargar() {
+    try {
+      // Cache-busting: GitHub Pages puede servir el JSON con caché agresiva,
+      // y queremos ver los datos nuevos que vaya dejando el Action.
+      const respuesta = await fetch(`${CONFIG.historial.datosUrl}?t=${Date.now()}`);
+      if (!respuesta.ok) return;
+      const datos = await respuesta.json();
+      if (datos && typeof datos === "object") {
+        datosEnMemoria = { actualizado: datos.actualizado || null, muestras: datos.muestras || {} };
+      }
+    } catch (err) {
+      // Sin conexión o fichero aún no publicado: seguimos con lo que había.
+    }
   }
 
   /**
@@ -71,8 +44,7 @@ const Historial = (() => {
    * si no hubo ninguna muestra dentro de ese bloque.
    */
   function calcularBloques(destinoId) {
-    const datos = leerTodo();
-    const muestras = datos[destinoId] || [];
+    const muestras = datosEnMemoria.muestras[destinoId] || [];
     const { bloques, minutosPorBloque } = CONFIG.historial;
     const duracionBloqueMs = minutosPorBloque * 60 * 1000;
     const ahora = Date.now();
@@ -99,5 +71,5 @@ const Historial = (() => {
     return resultado;
   }
 
-  return { registrarMuestra, calcularBloques };
+  return { cargar, calcularBloques };
 })();

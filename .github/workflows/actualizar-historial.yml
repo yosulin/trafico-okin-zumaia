@@ -1,0 +1,40 @@
+name: Actualizar historial de tráfico
+
+on:
+  schedule:
+    # Cada 15 minutos, 24h. GitHub no garantiza más resolución que ~5 min
+    # en workflows programados, así que este intervalo es holgado y fiable.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {} # permite lanzarlo a mano desde la pestaña "Actions"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar-historial
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Consultar TomTom y actualizar data/historial.json
+        env:
+          TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+        run: node scripts/actualizar-historial.mjs
+
+      - name: Guardar el histórico actualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/historial.json
+          git diff --cached --quiet || git commit -m "Actualizar historial de tráfico [skip ci]"
+          git push

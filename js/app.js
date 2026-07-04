@@ -175,7 +175,10 @@ const App = (() => {
 
     let estadoEfectivo;
     try {
-      const resultadosCrudos = await TrafficAPI.fetchTodasLasRutas(apiKey);
+      const [resultadosCrudos] = await Promise.all([
+        TrafficAPI.fetchTodasLasRutas(apiKey),
+        Historial.cargar() // refresco del histórico compartido en paralelo
+      ]);
       estadoEfectivo = Cache.resolverEstadoEfectivo(resultadosCrudos);
     } catch (err) {
       // Fallo inesperado (ej. sin conexión): tratamos como si todas las
@@ -189,7 +192,6 @@ const App = (() => {
       estadoEfectivo = Cache.resolverEstadoEfectivo(todasFallidas);
     }
 
-    Historial.registrarMuestra(estadoEfectivo);
     pintarTodo(estadoEfectivo);
 
     elIndicadorCarga.classList.remove("indicador-carga--activo");
@@ -316,12 +318,16 @@ const App = (() => {
 
   /* ---------- Arranque ---------- */
 
-  function init() {
+  async function init() {
     construirGrid();
     inicializarModal();
     inicializarModoTV();
     inicializarInstalacion();
     registrarServiceWorker();
+
+    // Cargamos el histórico compartido (recogido por el GitHub Action) antes
+    // del primer pintado, para no enseñar la tira en gris un instante de más.
+    await Historial.cargar();
 
     // Si ya hay datos en caché de una sesión anterior, los pintamos
     // inmediatamente (aunque estén algo desfasados) para que la pantalla
