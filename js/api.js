@@ -42,10 +42,11 @@ const TrafficAPI = (() => {
    * Llama a la API para una única ruta y devuelve un objeto normalizado:
    *   { ok: true, travelTimeMin, delayMin }
    * o, si algo falla:
-   *   { ok: false }
-   * Nunca lanza una excepción hacia fuera: cualquier fallo de red o de
-   * la API se traduce en { ok: false } para que esa ruta se muestre
-   * como "Sin datos" sin afectar al resto del panel.
+   *   { ok: false, motivo }
+   * "motivo" es solo informativo (para depurar), nadie más lo exige: el
+   * resto de la app únicamente mira "ok". Nunca lanza una excepción hacia
+   * fuera: cualquier fallo de red o de la API se traduce en { ok: false }
+   * para que esa ruta se muestre como "Sin datos" sin afectar al resto.
    */
   async function fetchRuta(ruta, apiKey) {
     try {
@@ -53,14 +54,16 @@ const TrafficAPI = (() => {
       const res = await fetch(url);
 
       if (!res.ok) {
-        return { ok: false };
+        let cuerpo = "";
+        try { cuerpo = (await res.text()).slice(0, 200); } catch (e) { /* ignorar */ }
+        return { ok: false, motivo: `HTTP ${res.status}${cuerpo ? " — " + cuerpo : ""}` };
       }
 
       const data = await res.json();
       const summary = data?.routes?.[0]?.summary;
 
       if (!summary) {
-        return { ok: false };
+        return { ok: false, motivo: "Respuesta sin \"routes[0].summary\"" };
       }
 
       const travelTimeMin = Math.round(summary.travelTimeInSeconds / 60);
@@ -69,7 +72,7 @@ const TrafficAPI = (() => {
 
       return { ok: true, travelTimeMin, delayMin };
     } catch (err) {
-      return { ok: false };
+      return { ok: false, motivo: err && err.message ? err.message : String(err) };
     }
   }
 

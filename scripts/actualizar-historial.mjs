@@ -81,6 +81,7 @@ async function main() {
 
   const datos = leerHistorialExistente();
   const ahora = Date.now();
+  const fallos = {};
 
   CONFIG.destinos.forEach((destino) => {
     let peorIndex = null;
@@ -91,6 +92,9 @@ async function main() {
       if (resultado && resultado.ok) {
         const { index } = Estado.porRetraso(resultado.delayMin);
         if (peorIndex === null || index > peorIndex) peorIndex = index;
+      } else {
+        if (!fallos[destino.id]) fallos[destino.id] = [];
+        fallos[destino.id].push({ ruta: ruta.id, motivo: resultado ? resultado.motivo : "sin respuesta" });
       }
     });
 
@@ -110,6 +114,9 @@ async function main() {
   });
 
   datos.actualizado = new Date(ahora).toISOString();
+  // Diagnóstico del último ciclo únicamente (no se acumula histórico de errores,
+  // solo sirve para poder ver "qué falló la última vez" sin bucear en logs).
+  datos.ultimosFallos = Object.keys(fallos).length > 0 ? fallos : null;
 
   writeFileSync(RUTA_DATOS, JSON.stringify(datos, null, 2) + "\n");
   console.log("Historial actualizado:", datos.actualizado);
