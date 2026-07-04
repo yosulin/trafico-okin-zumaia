@@ -36,7 +36,7 @@ function cargarConfiguracionNavegador() {
   // propiedades del objeto global automáticamente. Por eso, al final añadimos
   // un pequeño puente con "var" (que sí crea propiedades reales) para poder
   // leerlas desde fuera del contexto.
-  const sandbox = { console, fetch, URLSearchParams };
+  const sandbox = { console, fetch, URLSearchParams, setTimeout, clearTimeout, Math };
   createContext(sandbox);
 
   const ficheros = ["js/config.js", "js/estado.js", "js/api.js"];
