@@ -2,10 +2,9 @@
  * ============================================================
  *  APLICACIÓN — lógica de pantalla
  * ============================================================
- *  No contiene datos de destinos/rutas (config.js), ni lógica de
- *  red (api.js), ni de caché (cache.js), ni de histórico (historial.js),
- *  ni de planificación (scheduler.js). Solo orquesta esas piezas y
- *  pinta el resultado en el DOM, siempre de una vez ("atómico").
+ *  No contiene datos de destinos/rutas (config.js), ni acceso a datos
+ *  (datos.js). Solo construye el grid, pinta lo que datos.js entrega,
+ *  y gestiona el modo TV y la instalación como PWA.
  * ============================================================
  */
 
@@ -14,18 +13,13 @@ const App = (() => {
   const elGrid = document.getElementById("grid-destinos");
   const elUltimaActualizacion = document.getElementById("ultima-actualizacion");
   const elIndicadorCarga = document.getElementById("indicador-carga");
-  const elBotonAjustes = document.getElementById("boton-ajustes");
   const elBotonTV = document.getElementById("boton-tv");
   const elBotonInstalar = document.getElementById("boton-instalar");
   const elAvisoIOS = document.getElementById("aviso-ios");
   const elCerrarAvisoIOS = document.getElementById("cerrar-aviso-ios");
-  const elModal = document.getElementById("modal-api-key");
-  const elFormApiKey = document.getElementById("form-api-key");
-  const elInputApiKey = document.getElementById("input-api-key");
-  const elCerrarModal = document.getElementById("cerrar-modal");
 
   const MODO_TV_KEY = "okin_traffic_modo_tv";
-  let temporizadorSiguienteCiclo = null;
+  let temporizadorRefresco = null;
 
   /* ---------- Construcción del grid de tarjetas (una vez) ---------- */
 
@@ -75,28 +69,26 @@ const App = (() => {
 
   /* ---------- Pintado atómico: todo el cálculo antes, el DOM al final ---------- */
 
-  function pintarTodo(estadoEfectivoPorRuta) {
-    // 1) Preparamos en memoria todo lo que hay que pintar, destino a destino.
+  function pintarTodo() {
     const actualizacionesPorDestino = CONFIG.destinos.map(destino => {
       let peorIndex = Estado.SIN_DATOS_INDEX;
 
       const filas = destino.rutas.map(ruta => {
         const clave = `${destino.id}.${ruta.id}`;
-        const entrada = estadoEfectivoPorRuta[clave];
+        const entrada = Datos.obtenerEstadoActual(clave);
 
-        if (entrada && entrada.estadoIndex > peorIndex) {
+        if (entrada.disponible && entrada.estadoIndex > peorIndex) {
           peorIndex = entrada.estadoIndex;
         }
 
         return { destinoId: destino.id, rutaId: ruta.id, entrada };
       });
 
-      const bloquesHistorial = Historial.calcularBloques(destino.id);
+      const bloquesHistorial = Datos.calcularBloques(destino.id);
 
       return { destinoId: destino.id, peorIndex, filas, bloquesHistorial };
     });
 
-    // 2) Con todo ya calculado, aplicamos los cambios al DOM de un tirón.
     actualizacionesPorDestino.forEach(({ destinoId, peorIndex, filas, bloquesHistorial }) => {
       filas.forEach(({ rutaId, entrada }) => pintarFila(destinoId, rutaId, entrada));
       pintarDot(destinoId, peorIndex);
@@ -132,11 +124,15 @@ const App = (() => {
     elSemaforo.textContent = tramo.emoji;
     elLinea.style.backgroundColor = tramo.color;
 
-    if (entrada.origen === "cache") {
+    // Aviso discreto de antigüedad: los datos los deja un GitHub Action
+    // programado (best-effort, ver README punto 9), así que puede que
+    // el último dato tenga ya unos minutos. A partir de 20 min se avisa;
+    // por debajo se considera "reciente" y no hace falta decir nada.
+    const minutos = Math.round((Date.now() - entrada.timestamp) / 60000);
+    if (minutos >= 20) {
       elFila.classList.add("ruta--cache");
-      const minutos = Math.round((Date.now() - entrada.timestamp) / 60000);
       elBadge.textContent = `· hace ${minutos} min`;
-      elFila.title = "Último dato disponible; la última consulta ha fallado.";
+      elFila.title = "Último dato disponible; puede que haya cambiado desde entonces.";
     } else {
       elFila.classList.remove("ruta--cache");
       elBadge.textContent = "";
@@ -162,82 +158,25 @@ const App = (() => {
     }).join("");
   }
 
-  /* ---------- Ciclo de actualización (atómico + con caché + con planificador) ---------- */
+  /* ---------- Ciclo de refresco: solo relee el fichero compartido ---------- */
 
   async function ejecutarCiclo() {
-    const apiKey = obtenerApiKey();
-    if (!apiKey) {
-      abrirModal();
-      return;
-    }
-
     elIndicadorCarga.classList.add("indicador-carga--activo");
 
-    let estadoEfectivo;
-    try {
-      const [resultadosCrudos] = await Promise.all([
-        TrafficAPI.fetchTodasLasRutas(apiKey),
-        Historial.cargar() // refresco del histórico compartido en paralelo
-      ]);
-      estadoEfectivo = Cache.resolverEstadoEfectivo(resultadosCrudos);
-    } catch (err) {
-      // Fallo inesperado (ej. sin conexión): tratamos como si todas las
-      // rutas hubieran fallado, así la caché decide qué mostrar igualmente.
-      const todasFallidas = {};
-      CONFIG.destinos.forEach(destino => {
-        destino.rutas.forEach(ruta => {
-          todasFallidas[`${destino.id}.${ruta.id}`] = { ok: false };
-        });
-      });
-      estadoEfectivo = Cache.resolverEstadoEfectivo(todasFallidas);
-    }
-
-    pintarTodo(estadoEfectivo);
+    await Datos.cargar();
+    pintarTodo();
 
     elIndicadorCarga.classList.remove("indicador-carga--activo");
-    elUltimaActualizacion.textContent =
-      `Actualizado a las ${new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
 
-    programarSiguienteCiclo();
+    const ultima = Datos.ultimaActualizacion();
+    elUltimaActualizacion.textContent = ultima
+      ? `Datos de las ${ultima.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`
+      : "Sin datos todavía";
   }
 
-  function programarSiguienteCiclo() {
-    if (temporizadorSiguienteCiclo) clearTimeout(temporizadorSiguienteCiclo);
-    const intervaloMin = Planificador.intervaloActualMin();
-    temporizadorSiguienteCiclo = setTimeout(ejecutarCiclo, intervaloMin * 60000);
-  }
-
-  /* ---------- Gestión de la clave API (solo en el navegador del usuario) ---------- */
-
-  function obtenerApiKey() {
-    return localStorage.getItem(CONFIG.api.localStorageKey) || "";
-  }
-
-  function guardarApiKey(valor) {
-    localStorage.setItem(CONFIG.api.localStorageKey, valor.trim());
-  }
-
-  function abrirModal() {
-    elInputApiKey.value = obtenerApiKey();
-    elModal.showModal();
-  }
-
-  function cerrarModal() {
-    elModal.close();
-  }
-
-  function inicializarModal() {
-    elBotonAjustes.addEventListener("click", abrirModal);
-    elCerrarModal.addEventListener("click", cerrarModal);
-
-    elFormApiKey.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      const valor = elInputApiKey.value.trim();
-      if (!valor) return;
-      guardarApiKey(valor);
-      cerrarModal();
-      ejecutarCiclo();
-    });
+  function iniciarRefrescoPeriodico() {
+    if (temporizadorRefresco) clearInterval(temporizadorRefresco);
+    temporizadorRefresco = setInterval(ejecutarCiclo, CONFIG.datosCompartidos.refrescoMin * 60000);
   }
 
   /* ---------- Modo TV: tarjetas grandes, legibles a distancia ---------- */
@@ -269,9 +208,6 @@ const App = (() => {
   function inicializarInstalacion() {
     if (enModoStandalone()) return; // ya está instalada: no mostramos nada
 
-    // Chrome / Edge / Android: el navegador nos avisa cuando la app cumple
-    // los requisitos de instalación. Mostramos entonces nuestro propio botón,
-    // en vez de depender de que el usuario note el icono discreto del navegador.
     window.addEventListener("beforeinstallprompt", (evento) => {
       evento.preventDefault();
       promptDiferido = evento;
@@ -291,8 +227,6 @@ const App = (() => {
       promptDiferido = null;
     });
 
-    // iOS Safari nunca dispara "beforeinstallprompt": mostramos un aviso
-    // manual una única vez (hasta que el usuario lo cierre).
     if (esIOS() && localStorage.getItem(AVISO_IOS_CERRADO_KEY) !== "1") {
       elAvisoIOS.hidden = false;
     }
@@ -307,12 +241,11 @@ const App = (() => {
 
   function registrarServiceWorker() {
     if (!("serviceWorker" in navigator)) return;
-    // Solo tiene sentido bajo http(s), no al abrir el fichero en local con file://
     if (location.protocol !== "http:" && location.protocol !== "https:") return;
 
     navigator.serviceWorker.register("service-worker.js").catch(() => {
-      // Si falla el registro (ej. navegador sin soporte completo), la app
-      // sigue funcionando con normalidad, simplemente sin modo offline.
+      // Si falla el registro, la app sigue funcionando con normalidad,
+      // simplemente sin modo offline.
     });
   }
 
@@ -320,31 +253,12 @@ const App = (() => {
 
   async function init() {
     construirGrid();
-    inicializarModal();
     inicializarModoTV();
     inicializarInstalacion();
     registrarServiceWorker();
 
-    // Cargamos el histórico compartido (recogido por el GitHub Action) antes
-    // del primer pintado, para no enseñar la tira en gris un instante de más.
-    await Historial.cargar();
-
-    // Si ya hay datos en caché de una sesión anterior, los pintamos
-    // inmediatamente (aunque estén algo desfasados) para que la pantalla
-    // nunca aparezca vacía mientras llega la primera respuesta de red.
-    const cacheVacia = {};
-    CONFIG.destinos.forEach(destino => {
-      destino.rutas.forEach(ruta => {
-        cacheVacia[`${destino.id}.${ruta.id}`] = { ok: false };
-      });
-    });
-    pintarTodo(Cache.resolverEstadoEfectivo(cacheVacia));
-
-    if (obtenerApiKey()) {
-      ejecutarCiclo();
-    } else {
-      abrirModal();
-    }
+    await ejecutarCiclo();       // primera carga
+    iniciarRefrescoPeriodico();  // y a partir de ahí, refrescos periódicos
   }
 
   return { init };

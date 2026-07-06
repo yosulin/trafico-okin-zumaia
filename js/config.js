@@ -6,51 +6,32 @@
  *    - añadir o quitar destinos
  *    - añadir o quitar rutas dentro de un destino
  *    - cambiar los umbrales de color del semáforo
- *    - cambiar el horario/frecuencia de actualización
- *    - cambiar cuánto tiempo se conserva un dato en caché
+ *    - cambiar cada cuánto refresca el navegador el fichero compartido
  *    - cambiar el rango y la resolución del histórico visual
  *
  *  No hace falta tocar ningún otro fichero .js ni .html para
  *  gestionar el contenido del panel.
+ *
+ *  IMPORTANTE — arquitectura: el navegador de quien visita la web NUNCA
+ *  llama a TomTom directamente, y nunca se le pide ninguna clave de API.
+ *  La única llamada a TomTom la hace un GitHub Action programado (con
+ *  una clave guardada como secret del repositorio, ver README punto 4),
+ *  que deja el resultado en un fichero JSON compartido. La web
+ *  simplemente lee ese fichero. Así la clave nunca viaja por el
+ *  navegador de nadie, y nadie tiene que configurar nada para poder ver
+ *  el panel.
  * ============================================================
  */
 
 const CONFIG = {
 
   /**
-   * Punto de origen fijo de todas las rutas.
-   * "coords" se usa como primer punto en cada llamada a la API.
+   * Punto de origen fijo de todas las rutas (lo usa el GitHub Action).
    */
   origin: {
     nombre: "OKIN Zumaia",
     coords: { lat: 43.2975, lon: -2.2565 } // TODO: ajusta a la ubicación exacta de la oficina
   },
-
-  /**
-   * Planificador de actualizaciones.
-   * Permite tener una frecuencia distinta según la franja horaria,
-   * para no gastar innecesariamente las peticiones del plan gratuito
-   * de TomTom fuera del horario de oficina.
-   *
-   * Cada tramo: { inicio: "HH:MM", fin: "HH:MM", intervaloMin: N }
-   *   - "inicio" y "fin" en formato 24h.
-   *   - Un tramo que termina en "00:00" se entiende como "hasta medianoche".
-   *   - Los tramos deben cubrir las 24 horas sin huecos ni solapes.
-   *   - El orden de los tramos en el array no importa: se evalúa
-   *     cuál contiene la hora actual.
-   */
-  horarios: [
-    { inicio: "00:00", fin: "05:00", intervaloMin: 60 },
-    { inicio: "05:00", fin: "14:00", intervaloMin: 30 },
-    { inicio: "14:00", fin: "18:00", intervaloMin: 3 },
-    { inicio: "18:00", fin: "00:00", intervaloMin: 60 }
-  ],
-
-  /**
-   * Frecuencia de actualización a usar si, por lo que sea, la hora
-   * actual no encaja en ningún tramo de "horarios" (red de seguridad).
-   */
-  intervaloPorDefectoMin: 15,
 
   /**
    * Umbrales de retraso (en minutos) que determinan el color del semáforo.
@@ -149,26 +130,38 @@ const CONFIG = {
   ],
 
   /**
-   * Configuración de la API de tráfico.
-   * La clave API NUNCA se guarda aquí ni en ningún fichero del repositorio.
-   * Se introduce una vez desde la propia web (icono ⚙️) y se guarda solo
-   * en el navegador del usuario (localStorage). Ver README.md.
+   * Configuración de la API de tráfico. Solo la usa el GitHub Action
+   * (scripts/actualizar-historial.mjs), nunca el navegador. La clave en
+   * sí NUNCA está aquí ni en ningún fichero del repositorio: vive
+   * únicamente como secret del repositorio (Settings → Secrets and
+   * variables → Actions → TOMTOM_API_KEY). Ver README punto 4.
    */
   api: {
     proveedor: "tomtom",
-    baseUrl: "https://api.tomtom.com/routing/1/calculateRoute",
-    localStorageKey: "okin_traffic_tomtom_api_key"
+    baseUrl: "https://api.tomtom.com/routing/1/calculateRoute"
   },
 
   /**
-   * Caché del último dato válido por ruta.
-   * Si una consulta falla, se sigue mostrando el último dato bueno
-   * mientras no supere esta antigüedad máxima (en minutos).
-   * Pasado ese tiempo, la ruta pasa a mostrarse como "Sin datos".
+   * Fichero de datos compartido: lo escribe el GitHub Action, lo lee la
+   * web. Es la ÚNICA fuente de datos de tráfico para todo el mundo que
+   * visita la página — nadie hace peticiones propias a TomTom.
    */
-  cache: {
-    maxAntiguedadMin: 10,
-    localStorageKey: "okin_traffic_cache_v1"
+  datosCompartidos: {
+    url: "data/historial.json",
+
+    // Cada cuánto vuelve a pedir el navegador este fichero (es un simple
+    // fichero estático, así que no hay ningún límite de peticiones que
+    // cuidar aquí; esto solo controla cómo de rápido se entera la pantalla
+    // de que el Action ha dejado un dato nuevo).
+    refrescoMin: 2,
+
+    // Si el último dato bueno de una ruta supera esta antigüedad (en
+    // minutos), se muestra como "Sin datos" en vez de un número
+    // desactualizado. Se pone generoso a propósito: los workflows
+    // programados de GitHub Actions son "best effort" y a veces se
+    // retrasan bastante (ver README punto 9), así que un umbral muy
+    // ajustado haría parpadear "Sin datos" sin motivo real.
+    maxAntiguedadEstadoActualMin: 90
   },
 
   /**
@@ -176,25 +169,21 @@ const CONFIG = {
    * Se muestran "bloques" de "minutosPorBloque" minutos cada uno,
    * cubriendo entre los dos un total de (bloques * minutosPorBloque) minutos.
    * Con los valores por defecto: 16 bloques x 30 min = últimas 8 horas.
-   *
-   * Los datos NO se generan en el navegador: los recoge un GitHub Action
-   * programado (ver .github/workflows/actualizar-historial.yml) que consulta
-   * TomTom cada 15 minutos y actualiza "datosUrl", para que el histórico
-   * quede completo aunque nadie tenga la web abierta durante esas horas.
    */
   historial: {
     bloques: 16,
-    minutosPorBloque: 30,
-    datosUrl: "data/historial.json"
+    minutosPorBloque: 30
   },
 
   /**
    * PWA / Service Worker.
-   * Nombre de la caché de "app shell" (HTML/CSS/JS/iconos). Cambia el
-   * número de versión cuando quieras forzar que los usuarios que ya
-   * tienen la app instalada descarguen los ficheros nuevos.
+   * Puramente informativo / documental: el valor real que manda es la
+   * constante CACHE_NAME de service-worker.js (los service workers no
+   * pueden leer config.js en tiempo de instalación). Cuando cambies
+   * ficheros y quieras forzar la descarga en quien ya tenga la app
+   * instalada, sube el número en AMBOS sitios a la vez.
    */
   pwa: {
-    cacheVersion: "okin-traffic-v1"
+    cacheVersion: "okin-traffic-v2"
   }
 };

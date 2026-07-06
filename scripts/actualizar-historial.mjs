@@ -5,13 +5,19 @@
  * ============================================================
  *  Se ejecuta periódicamente (ver .github/workflows/actualizar-historial.yml),
  *  independientemente de si alguien tiene la web abierta en un navegador.
- *  Así el histórico de las últimas horas queda completo aunque nadie haya
- *  estado mirando el panel durante ese tiempo.
+ *  Es la ÚNICA pieza que llama a TomTom en todo el proyecto: el navegador
+ *  de quien visita la web nunca hace esa llamada ni necesita ninguna clave.
+ *
+ *  Deja en data/historial.json dos cosas:
+ *    - estadoActual: el dato "en vivo" de cada ruta (lo que pintan las
+ *      tarjetas), con el último valor bueno aunque la consulta de este
+ *      ciclo haya fallado (mientras no supere la antigüedad máxima).
+ *    - muestras: el histórico por destino para la línea temporal.
  *
  *  Reutiliza js/config.js, js/estado.js y js/api.js tal cual — el mismo
- *  código que usa el navegador — para no duplicar la lógica de rutas,
- *  umbrales ni llamadas a la API. Node ya trae "fetch" incorporado desde
- *  la versión 18, así que esos ficheros funcionan sin cambios.
+ *  código que usaba antes el navegador — para no duplicar la lógica de
+ *  rutas, umbrales ni llamadas a la API. Node ya trae "fetch" incorporado
+ *  desde la versión 18, así que esos ficheros funcionan sin cambios.
  * ============================================================
  */
 
@@ -55,15 +61,16 @@ function cargarConfiguracionNavegador() {
 
 function leerHistorialExistente() {
   if (!existsSync(RUTA_DATOS)) {
-    return { actualizado: null, muestras: {} };
+    return { actualizado: null, estadoActual: {}, muestras: {} };
   }
   try {
     const datos = JSON.parse(readFileSync(RUTA_DATOS, "utf8"));
+    if (!datos.estadoActual) datos.estadoActual = {};
     if (!datos.muestras) datos.muestras = {};
     return datos;
   } catch (err) {
     console.warn("No se pudo leer el historial existente, se empieza de cero:", err.message);
-    return { actualizado: null, muestras: {} };
+    return { actualizado: null, estadoActual: {}, muestras: {} };
   }
 }
 
@@ -82,6 +89,7 @@ async function main() {
   const datos = leerHistorialExistente();
   const ahora = Date.now();
   const fallos = {};
+  const maxAntiguedadEstadoActualMs = CONFIG.datosCompartidos.maxAntiguedadEstadoActualMin * 60 * 1000;
 
   CONFIG.destinos.forEach((destino) => {
     let peorIndex = null;
@@ -89,20 +97,38 @@ async function main() {
     destino.rutas.forEach((ruta) => {
       const clave = `${destino.id}.${ruta.id}`;
       const resultado = resultados[clave];
+
       if (resultado && resultado.ok) {
+        // Dato fresco: se usa tanto para "estadoActual" (lo que ve la web
+        // en vivo) como para la muestra de este ciclo en el histórico.
         const { index } = Estado.porRetraso(resultado.delayMin);
+        datos.estadoActual[clave] = {
+          travelTimeMin: resultado.travelTimeMin,
+          delayMin: resultado.delayMin,
+          estadoIndex: index,
+          timestamp: ahora
+        };
         if (peorIndex === null || index > peorIndex) peorIndex = index;
       } else {
+        // Ha fallado esta consulta: para "estadoActual" mantenemos el
+        // último dato bueno mientras no supere la antigüedad máxima
+        // configurada (la web no debe mostrar un número más viejo que
+        // eso). Para el histórico, en cambio, NO contamos esta ruta en
+        // la muestra de este ciclo: si nadie respondió, no inventamos.
+        const previo = datos.estadoActual[clave];
+        if (previo && (ahora - previo.timestamp) > maxAntiguedadEstadoActualMs) {
+          delete datos.estadoActual[clave];
+        }
         if (!fallos[destino.id]) fallos[destino.id] = [];
         fallos[destino.id].push({ ruta: ruta.id, motivo: resultado ? resultado.motivo : "sin respuesta" });
       }
     });
 
     // Si ninguna ruta de este destino ha respondido esta vez, no añadimos
-    // muestra: se deja el hueco (se pintará como "sin datos" ese instante)
-    // en vez de inventar un estado.
+    // muestra al histórico: se deja el hueco (se pintará como "sin datos"
+    // ese instante) en vez de inventar un estado.
     if (peorIndex === null) {
-      console.warn(`Sin datos válidos para "${destino.id}" en este ciclo.`);
+      console.warn(`Sin datos frescos para "${destino.id}" en este ciclo.`);
       return;
     }
 

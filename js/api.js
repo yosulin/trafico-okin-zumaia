@@ -2,10 +2,15 @@
  * ============================================================
  *  ACCESO A LA API — TomTom Routing API
  * ============================================================
- *  Único fichero que sabe cómo hablar con el proveedor de tráfico.
+ *  IMPORTANTE: este fichero ya NO lo carga el navegador. Lo usa
+ *  únicamente scripts/actualizar-historial.mjs (el GitHub Action), que
+ *  es el único sitio del proyecto con permiso para llamar a TomTom.
+ *  La web solo lee data/historial.json (ver js/datos.js) — nunca hace
+ *  esta llamada ni pide ninguna clave a quien la visita.
+ *
  *  Si en el futuro quieres cambiar de proveedor (ej. HERE, Google),
- *  solo tienes que reescribir las funciones de este fichero;
- *  el resto de la aplicación no necesita cambiar.
+ *  solo tienes que reescribir las funciones de este fichero; el resto
+ *  del Action no necesita cambiar.
  * ============================================================
  */
 

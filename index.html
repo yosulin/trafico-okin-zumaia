@@ -32,7 +32,6 @@
       <span class="cabecera__actualizacion" id="ultima-actualizacion">Cargando datos de tráfico…</span>
       <button class="boton boton--primario boton-instalar" id="boton-instalar" type="button" hidden>📲 Instalar app</button>
       <button class="boton-ajustes" id="boton-tv" type="button" aria-label="Modo TV">📺</button>
-      <button class="boton-ajustes" id="boton-ajustes" type="button" aria-label="Configurar clave API">⚙️</button>
     </div>
   </header>
 
@@ -49,34 +48,9 @@
     Este panel es un indicador orientativo. Antes de salir, comprueba siempre la mejor ruta en tu navegador GPS.
   </footer>
 
-  <dialog id="modal-api-key" class="modal">
-    <form id="form-api-key" class="modal__form">
-      <h2 class="modal__titulo">Clave de la API de TomTom</h2>
-      <p class="modal__texto">
-        Introduce tu clave de <strong>TomTom Routing API</strong>. Se guarda únicamente en
-        este navegador (no se sube al repositorio ni a ningún servidor).
-      </p>
-      <input
-        type="text"
-        id="input-api-key"
-        class="modal__input"
-        placeholder="Pega aquí tu clave API"
-        autocomplete="off"
-        required
-      >
-      <div class="modal__acciones">
-        <button type="button" id="cerrar-modal" class="boton boton--secundario">Cancelar</button>
-        <button type="submit" class="boton boton--primario">Guardar</button>
-      </div>
-    </form>
-  </dialog>
-
   <script src="js/config.js"></script>
   <script src="js/estado.js"></script>
-  <script src="js/cache.js"></script>
-  <script src="js/historial.js"></script>
-  <script src="js/scheduler.js"></script>
-  <script src="js/api.js"></script>
+  <script src="js/datos.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

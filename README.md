@@ -15,6 +15,32 @@ Instalable como **PWA** y publicado con **GitHub Pages**.
 
 ---
 
+## 0. Cómo está pensada la arquitectura (léelo antes que nada)
+
+**El navegador de quien visita la web nunca llama a TomTom, y nunca se le pide
+ninguna clave de API.** Toda la información —tanto el estado "en vivo" de cada
+ruta como el histórico de las últimas horas— sale de un único fichero JSON
+(`data/historial.json`), que actualiza un **GitHub Action programado** cada
+pocos minutos usando una clave guardada como *secret* del repositorio.
+
+```
+GitHub Action (cron) ──consulta──> TomTom
+        │
+        └──escribe──> data/historial.json
+                              │
+                              └──lee──> la web (todos los visitantes)
+```
+
+Ventajas de este enfoque frente a que cada navegador llamase a TomTom
+directamente:
+- Nadie necesita tener ni pegar ninguna clave para poder ver el panel.
+- La clave de TomTom no viaja nunca por el navegador de nadie ni queda
+  visible en el código fuente de la página.
+- Un único sitio (el Action) consume la cuota gratuita de TomTom, en vez de
+  multiplicarse por cada persona que tenga la web abierta.
+
+---
+
 ## 1. Estructura del proyecto
 
 ```
@@ -24,22 +50,20 @@ traffic-dashboard-okin/
 ├── service-worker.js           → caché offline del "app shell"
 ├── .github/
 │   └── workflows/
-│       └── actualizar-historial.yml  → cron que recoge histórico 24h (ver punto 8)
+│       └── actualizar-historial.yml  → cron que consulta TomTom (única llamada de todo el proyecto)
 ├── scripts/
 │   └── actualizar-historial.mjs      → script que ejecuta ese cron (reutiliza js/config.js, estado.js, api.js)
 ├── data/
-│   └── historial.json          → histórico compartido; lo actualiza el Action, la web solo lo lee
+│   └── historial.json          → estado en vivo + histórico compartidos; los escribe el Action, la web solo los lee
 ├── css/
 │   └── styles.css              → todo el diseño visual
 ├── icons/                      → iconos de la PWA (192/512/maskable/apple/favicon)
 ├── js/
 │   ├── config.js                ← ÚNICO fichero que necesitas editar habitualmente
 │   ├── estado.js                → traduce minutos de retraso a color/índice de semáforo
-│   ├── api.js                   → llamadas a la API de TomTom (sin caché, sin DOM)
-│   ├── cache.js                 → guarda el último dato válido por ruta y decide qué mostrar
-│   ├── historial.js             → descarga data/historial.json y calcula los bloques a pintar
-│   ├── scheduler.js             → calcula cada cuánto tocar según la hora (config.horarios)
-│   └── app.js                   → orquesta todo lo anterior y pinta el DOM
+│   ├── api.js                   → llamadas a la API de TomTom — SOLO las usa el Action, no el navegador
+│   ├── datos.js                 → la web lee data/historial.json y expone estado en vivo + histórico
+│   └── app.js                   → construye el grid, pinta los datos, modo TV, instalación PWA
 └── README.md
 ```
 
@@ -47,79 +71,70 @@ Separación de responsabilidades:
 
 | Fichero                              | Qué contiene                                                        | Cuándo tocarlo |
 |----------------------------------------|-----------------------------------------------------------------------|----------------|
-| `js/config.js`                        | Origen, destinos, rutas, umbrales, horarios, caché, histórico          | Cada vez que cambie el contenido |
+| `js/config.js`                        | Origen, destinos, rutas, umbrales, refresco, histórico                 | Cada vez que cambie el contenido |
 | `js/estado.js`                        | Conversión retraso → tramo de color                                    | Casi nunca |
-| `js/api.js`                           | Cómo se llama a la API de tráfico                                      | Solo si cambias de proveedor |
-| `js/cache.js`                         | Qué hacer cuando una consulta falla (rutas en vivo)                    | Solo si cambias la política de caché |
-| `js/historial.js`                     | Cómo se lee y agrupa el histórico compartido                           | Solo si cambias el histórico |
-| `js/scheduler.js`                     | Cada cuánto se actualizan las tarjetas en vivo según la hora            | Solo si cambias la lógica de planificación |
-| `js/app.js`                           | Construcción del grid, pintado, modal de clave API, modo TV, instalación | Solo si cambias el comportamiento de la interfaz |
+| `js/api.js`                           | Cómo se llama a la API de tráfico (solo lo usa el Action)              | Solo si cambias de proveedor |
+| `js/datos.js`                         | Cómo lee la web el fichero compartido (en vivo + histórico)            | Casi nunca |
+| `js/app.js`                           | Construcción del grid, pintado, modo TV, instalación                   | Solo si cambias el comportamiento de la interfaz |
 | `css/styles.css`                      | Todo el aspecto visual                                                 | Solo si quieres cambiar el diseño |
 | `service-worker.js`                   | Qué ficheros quedan disponibles offline                                | Solo si añades/quitas ficheros del proyecto |
-| `scripts/actualizar-historial.mjs`    | Recogida de histórico 24h en segundo plano                             | Casi nunca (usa la misma config que el resto) |
+| `scripts/actualizar-historial.mjs`    | Única llamada a TomTom de todo el proyecto                             | Casi nunca (usa la misma config que el resto) |
 | `.github/workflows/actualizar-historial.yml` | Cuándo se ejecuta ese script                                    | Si quieres cambiar la frecuencia del cron |
-| `data/historial.json`                 | Datos del histórico (los escribe el Action, no se edita a mano)        | Nunca a mano |
+| `data/historial.json`                 | Datos compartidos (los escribe el Action, no se edita a mano)          | Nunca a mano |
 
 ---
 
-## 2. Configurar la API de TomTom
-
-**No hay ninguna clave API en el código ni en el repositorio.** La clave se
-introduce **una vez, desde la propia web**, y se guarda solo en el navegador de
-quien la usa (`localStorage`), nunca en el repositorio.
-
-1. Crea una cuenta gratuita en [developer.tomtom.com](https://developer.tomtom.com/) y genera una clave para la **Routing API**.
-2. **Restringe la clave por dominio/referrer** desde el panel de TomTom (ej. `https://yosulin.github.io/*`).
-3. Abre la web y pulsa el icono ⚙️ de la cabecera.
-4. Pega la clave y guarda.
-
----
-
-## 3. Publicar en GitHub Pages
+## 2. Publicar en GitHub Pages
 
 1. Sube el contenido de esta carpeta a la raíz de un repositorio de GitHub.
 2. **Settings → Pages** → Source: rama `main`, carpeta `/ (root)`.
 3. GitHub te da la URL (`https://tuusuario.github.io/tu-repo/`).
-4. Abre esa URL y configura la clave API (punto 2).
 
 Sin build step: es HTML/CSS/JS puro, incluido el Service Worker.
 
 ---
 
-## 4. Instalar como aplicación (PWA)
+## 3. Instalar como aplicación (PWA)
 
 Al abrir la web desde Chrome, Edge o Android, aparece un botón **📲 Instalar app**
 en la cabecera en cuanto el navegador confirma que la app cumple los requisitos
-de instalación (no hace falta buscar el icono discreto de la barra de
-direcciones). Se implementa capturando el evento `beforeinstallprompt` y
-mostrando nuestro propio botón — así la opción de instalar es visible y
-explícita, en vez de depender del aviso silencioso de cada navegador.
+de instalación. Se implementa capturando el evento `beforeinstallprompt` y
+mostrando nuestro propio botón, en vez de depender del aviso silencioso de cada
+navegador.
 
-**En iOS (Safari) no existe ese evento** — es una limitación de la propia
-plataforma, no de la app — así que en su lugar se muestra un aviso con las
-instrucciones manuales (Compartir → «Añadir a pantalla de inicio»), que el
-usuario puede cerrar y no vuelve a aparecer.
+**En iOS (Safari) no existe ese evento** — limitación de la propia plataforma —
+así que se muestra un aviso con las instrucciones manuales (Compartir →
+«Añadir a pantalla de inicio»), que se puede cerrar y no vuelve a aparecer.
 
-Una vez instalada:
-
-- Se abre en su propia ventana, sin barra de navegador.
-- Si no hay conexión, sigue mostrando el **último estado conocido** (guardado
-  automáticamente en el propio navegador), en vez de una pantalla en blanco.
-- El icono usa el color y el estilo del dashboard (semáforo sobre fondo azul acero).
-
-El Service Worker (`service-worker.js`) solo cachea los ficheros propios de la
-aplicación (HTML/CSS/JS/iconos) — **nunca** las respuestas de la API de TomTom,
-que siempre se piden frescas cuando hay red. El dato offline que se muestra viene
-de la caché inteligente de `cache.js` (ver punto 6), no de la caché del Service
-Worker.
-
-> Las notificaciones push no están implementadas todavía, pero el manifest y el
-> Service Worker ya están preparados para añadirlas más adelante sin tener que
-> rehacer la base de la PWA.
+Una vez instalada, si no hay conexión, la app sigue mostrando el **último
+estado conocido** (lo último que `datos.js` consiguió descargar de
+`data/historial.json`), en vez de una pantalla en blanco. El Service Worker
+solo cachea los ficheros propios de la aplicación (HTML/CSS/JS/iconos) — nunca
+el fichero de datos, que siempre se pide fresco a la red.
 
 Si cambias los ficheros del proyecto y quieres forzar que los usuarios con la
-app ya instalada descarguen la versión nueva, sube de versión la constante
-`CACHE_NAME` en `service-worker.js`.
+app ya instalada descarguen la versión nueva, sube el número de `CACHE_NAME`
+en `service-worker.js` (y, por coherencia, `CONFIG.pwa.cacheVersion`).
+
+---
+
+## 4. Puesta en marcha del Action (una sola vez)
+
+El Action es lo único que llama a TomTom en todo el proyecto. Para que
+funcione:
+
+1. **Settings → Secrets and variables → Actions → New repository secret**:
+   - Name: `TOMTOM_API_KEY`
+   - Value: tu clave de TomTom (Routing API)
+2. **Settings → Actions → General → Workflow permissions** → comprobar que
+   está en "Read and write permissions" (el Action necesita hacer `commit`
+   del fichero de datos actualizado).
+3. Opcional: en la pestaña **Actions**, puedes lanzar el workflow
+   "Actualizar historial de tráfico" a mano la primera vez (botón
+   "Run workflow") en vez de esperar a la siguiente ejecución programada.
+
+A partir de ahí funciona solo, sin que nadie tenga que configurar nada en su
+navegador.
 
 ---
 
@@ -131,8 +146,8 @@ Todo se hace en **`js/config.js`**, dentro del array `destinos`.
 
 ```js
 {
-  id: "azpeitia",              // identificador corto, sin espacios ni tildes
-  nombre: "Azpeitia",          // lo que se ve en pantalla
+  id: "azpeitia",
+  nombre: "Azpeitia",
   rutas: [
     {
       id: "n1",
@@ -145,7 +160,8 @@ Todo se hace en **`js/config.js`**, dentro del array `destinos`.
 
 Añádelo como un elemento más del array `destinos` y aparecerá automáticamente
 como una tarjeta nueva, con su propia línea de histórico — no hace falta tocar
-`index.html`, `app.js` ni el CSS.
+`index.html`, `app.js` ni el CSS. El Action recogerá datos para ese destino en
+su siguiente ejecución.
 
 ### Añadir una ruta nueva a un destino existente
 
@@ -164,7 +180,7 @@ como una tarjeta nueva, con su propia línea de histórico — no hace falta toc
   id: "n634",
   nombre: "N-634",
   destino: { lat: 43.3183, lon: -1.9812 },
-  via: [{ lat: 43.2831, lon: -2.1306 }]  // punto conocido de esa carretera
+  via: [{ lat: 43.2831, lon: -2.1306 }]
 }
 ```
 
@@ -173,125 +189,74 @@ aparecen listas para copiar.
 
 ### Cambiar los umbrales de color del semáforo
 
-Array `umbrales` en `config.js`: cada tramo tiene un límite en minutos (`hasta`)
-y un color/emoji. Cambia los números o añade/quita tramos.
+Array `umbrales` en `config.js`: cada tramo tiene un límite en minutos
+(`hasta`) y un color/emoji. Cambia los números o añade/quita tramos.
 
 ---
 
-## 6. Caché inteligente (evita parpadeos y "Sin datos" innecesarios)
+## 6. Cómo se mantiene fresco el dato "en vivo" (sin caché en el navegador)
 
-Cuando una consulta a la API falla puntualmente, la aplicación **no borra el
-último dato bueno**. El comportamiento es:
+Cada ruta, en `data/historial.json`, guarda su `estadoActual` con el último
+resultado bueno del Action. Si una consulta puntual del Action falla, ese dato
+se sigue publicando (con su marca de tiempo original) mientras no supere
+`CONFIG.datosCompartidos.maxAntiguedadEstadoActualMin` (90 minutos por
+defecto — ver el porqué de ese margen en el punto 9). Pasado ese tiempo sin
+ninguna respuesta válida, la ruta pasa a mostrarse como **"Sin datos"**.
 
-1. Cada ruta guarda su último resultado válido (tiempo, retraso, hora).
-2. Si la siguiente consulta falla, se sigue mostrando ese último dato.
-3. Mientras tenga menos de `CONFIG.cache.maxAntiguedadMin` minutos (10 por
-   defecto), se muestra con una marca discreta junto al nombre de la ruta
-   (ej. `· hace 4 min`) para dejar claro que no es un dato recién llegado.
-4. Solo cuando el último dato válido supera esa antigüedad, la ruta pasa a
-   mostrarse como **"Sin datos"**.
+La web, por su parte, no guarda ninguna caché propia: simplemente vuelve a
+descargar `data/historial.json` cada `CONFIG.datosCompartidos.refrescoMin`
+minutos (2 por defecto) para enterarse de lo último que haya dejado el Action.
+Como es un fichero estático (no una API con límite de peticiones), no hay
+ningún problema en refrescarlo con esa frecuencia.
 
-Esto es también lo que permite el funcionamiento offline básico de la PWA: al
-abrir la app sin conexión, se pinta directamente el último estado guardado.
-
-Configurable en `CONFIG.cache.maxAntiguedadMin`.
-
----
-
-## 7. Actualización atómica
-
-Cada ciclo de actualización sigue este orden estricto:
-
-1. Se lanzan **todas** las consultas de todas las rutas en paralelo.
-2. Se espera a que **todas** hayan terminado (con éxito o fallo).
-3. Se resuelve, para cada ruta, el dato a mostrar (fresco, en caché, o sin datos).
-4. Se registra la muestra de este ciclo en el histórico.
-5. **Solo entonces** se actualiza la pantalla entera, de una sola vez.
-
-Así la pantalla nunca queda a medio pintar ni mezcla datos de instantes
-distintos entre tarjetas.
+Si un dato tiene más de 20 minutos, se marca discretamente junto a la ruta
+(`· hace X min`) para dejar claro que puede haber cambiado desde entonces, sin
+llegar todavía a "Sin datos".
 
 ---
 
-## 8. Histórico visual (línea temporal tipo Uptime Kuma)
+## 7. Histórico visual (línea temporal tipo Uptime Kuma)
 
 Debajo de las rutas de cada destino aparece una tira de bloques de color, uno
 por intervalo de tiempo, con el **peor estado alcanzado por ese destino** en
-cada intervalo. Permite detectar de un vistazo una tendencia (un atasco puntual,
-una retención que se alarga, una mejora progresiva) sin tener que interpretar
-una gráfica.
+cada intervalo. Por defecto: 16 bloques × 30 minutos = últimas 8 horas,
+configurable en `CONFIG.historial`.
 
-Por defecto: 16 bloques × 30 minutos = últimas 8 horas. Ambos valores son
-configurables en `CONFIG.historial`:
-
-```js
-historial: {
-  bloques: 16,
-  minutosPorBloque: 30,
-  datosUrl: "data/historial.json"
-}
-```
-
-**Importante — de dónde salen estos datos:** la propia web (el navegador de
-quien la visita) **no** genera este histórico. Si dependiera de eso, cualquier
-hueco en el que nadie tuviera la página abierta (por ejemplo, toda la noche)
-aparecería en gris, aunque hubiera habido tráfico real durante esas horas.
-
-En su lugar, un **GitHub Action programado** (`.github/workflows/actualizar-historial.yml`)
-consulta TomTom cada 15 minutos, las 24 horas, funcione o no funcione nadie
-teniendo la web abierta, y deja el resultado en `data/historial.json`. La web
-simplemente descarga ese fichero (con un parámetro anti-caché) cada vez que
-actualiza las tarjetas, y lo usa para pintar la tira de bloques. Así el
-histórico queda completo independientemente de quién tenga o no la pantalla
-abierta.
-
-Puesto en marcha requiere dos pasos manuales, solo una vez (ver punto 4.1).
-
-Las muestras se purgan automáticamente pasadas 24h (algo más que la ventana de
-8h que se enseña, por margen), así que el fichero no crece sin límite.
-
-### 8.1. Puesta en marcha del histórico (una sola vez)
-
-1. **Settings → Secrets and variables → Actions → New repository secret**, con:
-   - Name: `TOMTOM_API_KEY`
-   - Value: tu misma clave de TomTom (la misma que usas en el icono ⚙️ de la web)
-2. **Settings → Actions → General → Workflow permissions**, comprobar que está
-   en "Read and write permissions" (necesario para que el Action pueda hacer
-   commit del fichero de histórico actualizado).
-3. Opcional: en la pestaña **Actions** del repositorio, puedes lanzar el
-   workflow "Actualizar historial de tráfico" manualmente la primera vez
-   (botón "Run workflow") en vez de esperar a la siguiente ejecución programada.
-
-A partir de ahí funciona solo. Si más adelante cambias de clave de TomTom,
-actualiza también este secret (además del valor guardado en el navegador).
-
-**Sobre el consumo de peticiones:** el Action añade unas 576 peticiones/día
-(6 rutas × 4 veces/hora × 24h) a lo que ya consuma cada navegador que tenga la
-web abierta según `CONFIG.horarios`. Con el plan gratuito habitual de TomTom
-(miles de peticiones/día) hay margen de sobra, pero si algún día tienes dudas,
-revisa tu consumo real en el panel de developer.tomtom.com.
+A diferencia del "en vivo" (punto 6), el histórico solo cuenta una muestra
+cuando el Action obtuvo un dato realmente fresco ese ciclo — nunca arrastra
+hacia atrás un dato viejo, para no dibujar una tendencia inventada.
 
 ---
 
-## 9. Planificador de actualizaciones (horarios configurables)
+## 8. Estado del destino
 
-Para no gastar peticiones fuera de las horas en que de verdad importa, la
-frecuencia de actualización cambia según la franja horaria, definida en
-`CONFIG.horarios`:
+Se mantiene la filosofía original: el estado general de un destino (el punto
+de color junto a su nombre) es siempre el peor estado entre todas sus rutas
+disponibles en ese momento.
 
-```js
-horarios: [
-  { inicio: "00:00", fin: "05:00", intervaloMin: 60 },
-  { inicio: "05:00", fin: "14:00", intervaloMin: 30 },
-  { inicio: "14:00", fin: "18:00", intervaloMin: 3 },
-  { inicio: "18:00", fin: "00:00", intervaloMin: 60 }
-]
-```
+---
 
-Añade, quita o cambia tramos libremente; solo asegúrate de que cubran las 24
-horas sin huecos. Un tramo que termina en `"00:00"` se entiende como "hasta
-medianoche". Si por lo que sea la hora actual no encaja en ningún tramo, se usa
-`CONFIG.intervaloPorDefectoMin` como red de seguridad.
+## 9. Sobre la fiabilidad del cron de GitHub Actions (importante)
+
+GitHub advierte explícitamente que los workflows programados con `schedule`
+son **"best effort"**, no una garantía: pueden retrasarse varios minutos, o
+incluso saltarse una ejecución si hay carga en sus servidores — esto es
+especialmente notorio con cron muy frecuentes (cada 5-15 min) en repositorios
+con poco tráfico. En la práctica, esto puede significar huecos ocasionales
+más largos de lo esperado entre actualizaciones.
+
+Por eso:
+- `CONFIG.datosCompartidos.maxAntiguedadEstadoActualMin` se deja generoso
+  (90 min) para no mostrar "Sin datos" solo porque el cron se haya retrasado.
+- Si en algún momento ves huecos largos en la línea temporal o datos "en
+  vivo" muy desactualizados de forma recurrente, la solución más fiable es
+  sustituir el disparador `schedule` por un servicio externo de cron
+  (ej. cron-job.org) que llame a la API de GitHub
+  (`POST /repos/{owner}/{repo}/actions/workflows/actualizar-historial.yml/dispatches`)
+  cada pocos minutos — los disparos manuales (`workflow_dispatch`) no sufren
+  este mismo retraso. Esto no está configurado por defecto para no añadir una
+  pieza más (y otro token) de la que depender, pero es la vía recomendada si
+  la precisión te importa más que la sencillez.
 
 ---
 
@@ -302,31 +267,26 @@ El diseño es responsive de forma automática: a partir de anchos típicos de
 progresivamente para poder leerse a distancia en una pantalla compartida de
 oficina.
 
-Si el navegador no ocupa toda la resolución real de la pantalla (por ejemplo,
-una ventana más pequeña sobre un televisor grande), el botón **📺** de la
-cabecera fuerza ese mismo aspecto "TV" independientemente del ancho de la
-ventana. La preferencia se recuerda entre sesiones.
-
-La actualización automática (punto 9) sigue funcionando igual en modo TV: no
-hace falta tocar nada más para dejar el panel en una pantalla compartida.
+Si el navegador no ocupa toda la resolución real de la pantalla, el botón
+**📺** de la cabecera fuerza ese mismo aspecto "TV" independientemente del
+ancho de la ventana. La preferencia se recuerda entre sesiones.
 
 ---
 
 ## 11. Cómo se calcula el retraso
 
-Para cada ruta se llama a `calculateRoute` de TomTom con `traffic=true`. La API
-devuelve `trafficDelayInSeconds` directamente, que es lo que se muestra como
-"+X min" y determina el color de esa ruta. El estado general de un destino
-sigue siendo siempre el peor estado entre todas sus rutas.
+El Action llama a `calculateRoute` de TomTom con `traffic=true` para cada
+ruta. La API devuelve `trafficDelayInSeconds` directamente, que es lo que se
+publica como "+X min" y determina el color de esa ruta.
 
 ---
 
 ## 12. Qué no se ha implementado (a propósito)
 
-Tal y como se pidió, de momento **no** hay usuarios, autenticación,
-notificaciones (push/email/Telegram/WhatsApp), panel de administración ni
-estadísticas avanzadas. El manifest y el Service Worker ya están preparados
-para añadir notificaciones push más adelante sin rehacer la base de la app.
+De momento **no** hay usuarios, autenticación, notificaciones
+(push/email/Telegram/WhatsApp), panel de administración ni estadísticas
+avanzadas. El manifest y el Service Worker ya están preparados para añadir
+notificaciones push más adelante sin rehacer la base de la app.
 
 ---
 
@@ -336,8 +296,8 @@ para añadir notificaciones push más adelante sin rehacer la base de la app.
   para funcionar igual de bien en escritorio, tablet y TV de oficina.
 - La franja de rayas discontinuas en la parte superior evoca la señalización
   vial, como único guiño decorativo al tema del panel.
-- Tipografía `Oswald` (condensada, de aire "señal de carretera") para títulos y
-  `Inter` para datos y texto, con números tabulares para que los tiempos no
+- Tipografía `Oswald` (condensada, de aire "señal de carretera") para títulos
+  y `Inter` para datos y texto, con números tabulares para que los tiempos no
   "bailen" al actualizarse.
 - El histórico usa el mismo lenguaje de color que el semáforo de las rutas,
   para no introducir una escala visual nueva.

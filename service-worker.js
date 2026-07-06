@@ -4,19 +4,22 @@
  * ============================================================
  *  Objetivo único: que la web (HTML/CSS/JS/iconos) cargue aunque
  *  no haya conexión, para que la app pueda abrirse y mostrar el
- *  último estado conocido (guardado en localStorage por cache.js).
+ *  último estado conocido (el que datos.js dejó en memoria la
+ *  última vez que se pudo descargar data/historial.json).
  *
- *  Deliberadamente NO intercepta las llamadas a la API de TomTom:
- *  esas siguen su curso normal y, si fallan por falta de red, es
- *  cache.js (a nivel de aplicación) quien decide qué mostrar.
+ *  El navegador nunca llama a TomTom directamente (eso lo hace un
+ *  GitHub Action con su propia clave, ver README punto 4), así que
+ *  este Service Worker no tiene ninguna API externa que gestionar:
+ *  solo cachea los ficheros propios de la aplicación.
  *
  *  Para forzar que los usuarios con la app instalada descarguen
- *  la versión nueva de los ficheros, cambia CONFIG.pwa.cacheVersion
- *  en config.js (y CACHE_NAME más abajo, que se lee de ahí).
+ *  la versión nueva de los ficheros, sube el número de aquí abajo
+ *  (CACHE_NAME) y, por coherencia documental, también
+ *  CONFIG.pwa.cacheVersion en config.js.
  * ============================================================
  */
 
-const CACHE_NAME = "okin-traffic-v1";
+const CACHE_NAME = "okin-traffic-v2";
 
 const FICHEROS_APP_SHELL = [
   "./",
@@ -25,10 +28,7 @@ const FICHEROS_APP_SHELL = [
   "./css/styles.css",
   "./js/config.js",
   "./js/estado.js",
-  "./js/cache.js",
-  "./js/historial.js",
-  "./js/scheduler.js",
-  "./js/api.js",
+  "./js/datos.js",
   "./js/app.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

@@ -298,65 +298,8 @@ html, body {
 }
 
 /* ============================================================
-   MODAL — clave API
+   BOTONES
    ============================================================ */
-
-.modal {
-  border: none;
-  border-radius: var(--radio);
-  padding: 0;
-  box-shadow: var(--sombra-card);
-  max-width: 420px;
-  width: calc(100% - 2rem);
-}
-
-.modal::backdrop {
-  background: rgba(43, 52, 64, 0.45);
-}
-
-.modal__form {
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.modal__titulo {
-  margin: 0;
-  font-family: var(--fuente-display);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-size: 1.25rem;
-}
-
-.modal__texto {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-tinta-suave);
-  line-height: 1.5;
-}
-
-.modal__input {
-  font-family: var(--fuente-texto);
-  font-size: 0.95rem;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-borde);
-  border-radius: 8px;
-  background: var(--color-fondo);
-  color: var(--color-tinta);
-}
-
-.modal__input:focus-visible {
-  outline: 2px solid var(--color-linea);
-  outline-offset: 1px;
-}
-
-.modal__acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 0.4rem;
-}
 
 .boton {
   font-family: var(--fuente-texto);
@@ -366,12 +309,6 @@ html, body {
   border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-}
-
-.boton--secundario {
-  background: transparent;
-  border-color: var(--color-borde);
-  color: var(--color-tinta-suave);
 }
 
 .boton--primario {
