@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-07-07T07:30:59.474Z",
+  "actualizado": "2026-07-07T07:45:35.163Z",
   "muestras": {
     "zarautz": [
       {
@@ -52,6 +52,10 @@
       },
       {
         "t": 1783409459474,
+        "i": 0
+      },
+      {
+        "t": 1783410335163,
         "i": 0
       }
     ],
@@ -107,6 +111,10 @@
       {
         "t": 1783409459474,
         "i": 0
+      },
+      {
+        "t": 1783410335163,
+        "i": 0
       }
     ],
     "irun": [
@@ -156,6 +164,10 @@
       },
       {
         "t": 1783408536095,
+        "i": 0
+      },
+      {
+        "t": 1783410335163,
         "i": 0
       }
     ],
@@ -211,53 +223,50 @@
       {
         "t": 1783409459474,
         "i": 0
-      }
-    ]
-  },
-  "ultimosFallos": {
-    "irun": [
+      },
       {
-        "ruta": "ap8",
-        "motivo": "HTTP 429 — {\"detailedError\":{\"code\":\"TooManyRequests\",\"message\":\"You have exceeded the permitted rate limit\"}}"
+        "t": 1783410335163,
+        "i": 0
       }
     ]
   },
+  "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 18,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783409459474
+      "timestamp": 1783410335163
     },
     "zarautz.meagas": {
       "travelTimeMin": 35,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783409459474
+      "timestamp": 1783410335163
     },
     "donostia.ap8": {
       "travelTimeMin": 30,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783409459474
+      "timestamp": 1783410335163
     },
     "donostia.n634": {
       "travelTimeMin": 49,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783409459474
+      "timestamp": 1783410335163
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783409459474
+      "timestamp": 1783410335163
     },
     "irun.ap8": {
-      "travelTimeMin": 42,
+      "travelTimeMin": 41,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783408536095
+      "timestamp": 1783410335163
     }
   }
 }
