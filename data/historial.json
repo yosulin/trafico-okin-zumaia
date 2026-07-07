@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-07-07T19:15:37.685Z",
+  "actualizado": "2026-07-07T19:31:08.212Z",
   "muestras": {
     "zarautz": [
       {
@@ -240,6 +240,10 @@
       },
       {
         "t": 1783451737685,
+        "i": 0
+      },
+      {
+        "t": 1783452668212,
         "i": 0
       }
     ],
@@ -483,6 +487,10 @@
       {
         "t": 1783451737685,
         "i": 0
+      },
+      {
+        "t": 1783452668212,
+        "i": 0
       }
     ],
     "irun": [
@@ -720,6 +728,10 @@
       },
       {
         "t": 1783451737685,
+        "i": 0
+      },
+      {
+        "t": 1783452668212,
         "i": 0
       }
     ],
@@ -963,46 +975,50 @@
       {
         "t": 1783451737685,
         "i": 0
+      },
+      {
+        "t": 1783452668212,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 18,
+      "travelTimeMin": 17,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     },
     "zarautz.meagas": {
-      "travelTimeMin": 35,
+      "travelTimeMin": 34,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     },
     "donostia.ap8": {
-      "travelTimeMin": 30,
+      "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     },
     "donostia.n634": {
-      "travelTimeMin": 48,
+      "travelTimeMin": 47,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 28,
+      "travelTimeMin": 27,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     },
     "irun.ap8": {
-      "travelTimeMin": 41,
+      "travelTimeMin": 40,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783451737685
+      "timestamp": 1783452668212
     }
   }
 }
