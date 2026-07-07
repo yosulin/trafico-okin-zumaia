@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-07-07T07:45:35.163Z",
+  "actualizado": "2026-07-07T08:01:09.545Z",
   "muestras": {
     "zarautz": [
       {
@@ -56,6 +56,10 @@
       },
       {
         "t": 1783410335163,
+        "i": 0
+      },
+      {
+        "t": 1783411269545,
         "i": 0
       }
     ],
@@ -115,6 +119,10 @@
       {
         "t": 1783410335163,
         "i": 0
+      },
+      {
+        "t": 1783411269545,
+        "i": 0
       }
     ],
     "irun": [
@@ -168,6 +176,10 @@
       },
       {
         "t": 1783410335163,
+        "i": 0
+      },
+      {
+        "t": 1783411269545,
         "i": 0
       }
     ],
@@ -227,46 +239,50 @@
       {
         "t": 1783410335163,
         "i": 0
+      },
+      {
+        "t": 1783411269545,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 18,
+      "travelTimeMin": 19,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     },
     "zarautz.meagas": {
-      "travelTimeMin": 35,
+      "travelTimeMin": 36,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     },
     "donostia.ap8": {
-      "travelTimeMin": 30,
+      "travelTimeMin": 31,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     },
     "donostia.n634": {
-      "travelTimeMin": 49,
+      "travelTimeMin": 50,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     },
     "irun.ap8": {
-      "travelTimeMin": 41,
+      "travelTimeMin": 42,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783410335163
+      "timestamp": 1783411269545
     }
   }
 }
