@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-07-08T06:31:09.476Z",
+  "actualizado": "2026-07-08T06:45:36.424Z",
   "muestras": {
     "zarautz": [
       {
@@ -424,6 +424,10 @@
       },
       {
         "t": 1783492269476,
+        "i": 0
+      },
+      {
+        "t": 1783493136424,
         "i": 0
       }
     ],
@@ -851,6 +855,10 @@
       {
         "t": 1783492269476,
         "i": 0
+      },
+      {
+        "t": 1783493136424,
+        "i": 0
       }
     ],
     "irun": [
@@ -1268,6 +1276,10 @@
       },
       {
         "t": 1783491337395,
+        "i": 0
+      },
+      {
+        "t": 1783493136424,
         "i": 0
       }
     ],
@@ -1695,53 +1707,50 @@
       {
         "t": 1783492269476,
         "i": 0
-      }
-    ]
-  },
-  "ultimosFallos": {
-    "irun": [
+      },
       {
-        "ruta": "ap8",
-        "motivo": "HTTP 429 — {\"detailedError\":{\"code\":\"TooManyRequests\",\"message\":\"You have exceeded the permitted rate limit\"}}"
+        "t": 1783493136424,
+        "i": 0
       }
     ]
   },
+  "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 18,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783492269476
+      "timestamp": 1783493136424
     },
     "zarautz.meagas": {
       "travelTimeMin": 35,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783492269476
+      "timestamp": 1783493136424
     },
     "donostia.ap8": {
       "travelTimeMin": 31,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783492269476
+      "timestamp": 1783493136424
     },
     "donostia.n634": {
       "travelTimeMin": 49,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783492269476
+      "timestamp": 1783493136424
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783492269476
+      "timestamp": 1783493136424
     },
     "irun.ap8": {
       "travelTimeMin": 41,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1783491337395
+      "timestamp": 1783493136424
     }
   }
 }
