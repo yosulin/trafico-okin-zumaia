@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-05T07:15:46.074Z",
+  "actualizado": "2026-08-05T07:30:56.607Z",
   "muestras": {
     "zarautz": [
       {
@@ -436,6 +436,10 @@
       },
       {
         "t": 1785914146074,
+        "i": 0
+      },
+      {
+        "t": 1785915056607,
         "i": 0
       }
     ],
@@ -874,6 +878,10 @@
       },
       {
         "t": 1785914146074,
+        "i": 0
+      },
+      {
+        "t": 1785915056607,
         "i": 0
       }
     ],
@@ -1747,40 +1755,51 @@
       {
         "t": 1785914146074,
         "i": 0
+      },
+      {
+        "t": 1785915056607,
+        "i": 0
       }
     ]
   },
-  "ultimosFallos": null,
+  "ultimosFallos": {
+    "irun": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 429 — {\"detailedError\":{\"code\":\"TooManyRequests\",\"message\":\"You have exceeded the permitted rate limit\"}}"
+      }
+    ]
+  },
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 18,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1785914146074
+      "timestamp": 1785915056607
     },
     "zarautz.meagas": {
       "travelTimeMin": 35,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1785914146074
+      "timestamp": 1785915056607
     },
     "donostia.ap8": {
       "travelTimeMin": 31,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1785914146074
+      "timestamp": 1785915056607
     },
     "donostia.n634": {
       "travelTimeMin": 50,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1785914146074
+      "timestamp": 1785915056607
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1785914146074
+      "timestamp": 1785915056607
     },
     "irun.ap8": {
       "travelTimeMin": 42,
