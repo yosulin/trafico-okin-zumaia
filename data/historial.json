@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-09T08:01:07.208Z",
+  "actualizado": "2026-08-09T08:15:40.517Z",
   "muestras": {
     "zarautz": [
       {
@@ -504,6 +504,10 @@
       },
       {
         "t": 1786262467208,
+        "i": 0
+      },
+      {
+        "t": 1786263340517,
         "i": 0
       }
     ],
@@ -1011,6 +1015,10 @@
       {
         "t": 1786262467208,
         "i": 0
+      },
+      {
+        "t": 1786263340517,
+        "i": 0
       }
     ],
     "irun": [
@@ -1508,6 +1516,10 @@
       },
       {
         "t": 1786262467208,
+        "i": 0
+      },
+      {
+        "t": 1786263340517,
         "i": 0
       }
     ],
@@ -2015,46 +2027,50 @@
       {
         "t": 1786262467208,
         "i": 0
+      },
+      {
+        "t": 1786263340517,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 19,
-      "delayMin": 1,
+      "travelTimeMin": 18,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     },
     "zarautz.meagas": {
       "travelTimeMin": 35,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     },
     "donostia.ap8": {
-      "travelTimeMin": 32,
-      "delayMin": 1,
+      "travelTimeMin": 30,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     },
     "donostia.n634": {
-      "travelTimeMin": 50,
-      "delayMin": 1,
+      "travelTimeMin": 49,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 29,
-      "delayMin": 1,
+      "travelTimeMin": 28,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     },
     "irun.ap8": {
-      "travelTimeMin": 42,
-      "delayMin": 1,
+      "travelTimeMin": 41,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786262467208
+      "timestamp": 1786263340517
     }
   }
 }
