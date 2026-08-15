@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15T15:45:40.305Z",
+  "actualizado": "2026-08-15T15:55:28.839Z",
   "muestras": {
     "zarautz": [
       {
@@ -544,6 +544,10 @@
       },
       {
         "t": 1786808740305,
+        "i": 0
+      },
+      {
+        "t": 1786809328839,
         "i": 0
       }
     ],
@@ -1091,6 +1095,10 @@
       {
         "t": 1786808740305,
         "i": 0
+      },
+      {
+        "t": 1786809328839,
+        "i": 0
       }
     ],
     "irun": [
@@ -1636,6 +1644,10 @@
       },
       {
         "t": 1786808740305,
+        "i": 0
+      },
+      {
+        "t": 1786809328839,
         "i": 0
       }
     ],
@@ -2183,46 +2195,50 @@
       {
         "t": 1786808740305,
         "i": 0
+      },
+      {
+        "t": 1786809328839,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 19,
+      "travelTimeMin": 20,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     },
     "zarautz.meagas": {
       "travelTimeMin": 37,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     },
     "donostia.ap8": {
-      "travelTimeMin": 32,
-      "delayMin": 0,
+      "travelTimeMin": 34,
+      "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     },
     "donostia.n634": {
-      "travelTimeMin": 50,
-      "delayMin": 0,
+      "travelTimeMin": 53,
+      "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     },
     "irun.ap8": {
-      "travelTimeMin": 42,
-      "delayMin": 0,
+      "travelTimeMin": 45,
+      "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786808740305
+      "timestamp": 1786809328839
     }
   }
 }
