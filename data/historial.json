@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15T17:36:51.309Z",
+  "actualizado": "2026-08-15T17:45:40.515Z",
   "muestras": {
     "zarautz": [
       {
@@ -556,6 +556,10 @@
       },
       {
         "t": 1786815411309,
+        "i": 0
+      },
+      {
+        "t": 1786815940515,
         "i": 0
       }
     ],
@@ -1115,6 +1119,10 @@
       {
         "t": 1786815411309,
         "i": 0
+      },
+      {
+        "t": 1786815940515,
+        "i": 0
       }
     ],
     "irun": [
@@ -1672,6 +1680,10 @@
       },
       {
         "t": 1786815411309,
+        "i": 0
+      },
+      {
+        "t": 1786815940515,
         "i": 0
       }
     ],
@@ -2231,46 +2243,50 @@
       {
         "t": 1786815411309,
         "i": 0
+      },
+      {
+        "t": 1786815940515,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 20,
-      "delayMin": 1,
+      "travelTimeMin": 19,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786815411309
+      "timestamp": 1786815940515
     },
     "zarautz.meagas": {
       "travelTimeMin": 36,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786815411309
+      "timestamp": 1786815940515
     },
     "donostia.ap8": {
-      "travelTimeMin": 36,
-      "delayMin": 5,
-      "estadoIndex": 0,
-      "timestamp": 1786815411309
-    },
-    "donostia.n634": {
-      "travelTimeMin": 52,
+      "travelTimeMin": 33,
       "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786815411309
+      "timestamp": 1786815940515
+    },
+    "donostia.n634": {
+      "travelTimeMin": 49,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1786815940515
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786815411309
+      "timestamp": 1786815940515
     },
     "irun.ap8": {
-      "travelTimeMin": 45,
-      "delayMin": 2,
+      "travelTimeMin": 42,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786815411309
+      "timestamp": 1786815940515
     }
   }
 }
