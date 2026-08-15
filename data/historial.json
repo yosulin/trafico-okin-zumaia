@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-15T09:45:43.899Z",
+  "actualizado": "2026-08-15T09:56:55.878Z",
   "muestras": {
     "zarautz": [
       {
@@ -516,6 +516,10 @@
       },
       {
         "t": 1786787143899,
+        "i": 0
+      },
+      {
+        "t": 1786787815878,
         "i": 0
       }
     ],
@@ -1035,6 +1039,10 @@
       {
         "t": 1786787143899,
         "i": 0
+      },
+      {
+        "t": 1786787815878,
+        "i": 0
       }
     ],
     "irun": [
@@ -1553,6 +1561,10 @@
       {
         "t": 1786787143899,
         "i": 1
+      },
+      {
+        "t": 1786787815878,
+        "i": 0
       }
     ],
     "eibar": [
@@ -2071,46 +2083,50 @@
       {
         "t": 1786787143899,
         "i": 0
+      },
+      {
+        "t": 1786787815878,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 20,
-      "delayMin": 1,
+      "travelTimeMin": 21,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786787143899
+      "timestamp": 1786787815878
     },
     "zarautz.meagas": {
       "travelTimeMin": 37,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786787143899
+      "timestamp": 1786787815878
     },
     "donostia.ap8": {
-      "travelTimeMin": 34,
+      "travelTimeMin": 35,
       "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786787143899
+      "timestamp": 1786787815878
     },
     "donostia.n634": {
-      "travelTimeMin": 53,
+      "travelTimeMin": 54,
       "delayMin": 2,
       "estadoIndex": 0,
-      "timestamp": 1786787143899
+      "timestamp": 1786787815878
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1786787143899
+      "timestamp": 1786787815878
     },
     "irun.ap8": {
-      "travelTimeMin": 49,
-      "delayMin": 6,
-      "estadoIndex": 1,
-      "timestamp": 1786787143899
+      "travelTimeMin": 51,
+      "delayMin": 2,
+      "estadoIndex": 0,
+      "timestamp": 1786787815878
     }
   }
 }
