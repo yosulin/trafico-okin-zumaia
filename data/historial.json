@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-24T14:45:42.929Z",
+  "actualizado": "2026-08-24T15:01:11.810Z",
   "muestras": {
     "zarautz": [
       {
@@ -2182,7 +2182,40 @@
       }
     ]
   },
-  "ultimosFallos": null,
+  "ultimosFallos": {
+    "zarautz": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      },
+      {
+        "ruta": "meagas",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      }
+    ],
+    "donostia": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      },
+      {
+        "ruta": "n634",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      }
+    ],
+    "eibar": [
+      {
+        "ruta": "ap8ap1",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      }
+    ],
+    "irun": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
+      }
+    ]
+  },
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 19,
