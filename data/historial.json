@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-08-24T10:01:10.855Z",
+  "actualizado": "2026-08-24T10:08:58.337Z",
   "muestras": {
     "zarautz": [
       {
@@ -548,6 +548,10 @@
       },
       {
         "t": 1787565670855,
+        "i": 0
+      },
+      {
+        "t": 1787566138337,
         "i": 0
       }
     ],
@@ -1099,6 +1103,10 @@
       {
         "t": 1787565670855,
         "i": 0
+      },
+      {
+        "t": 1787566138337,
+        "i": 0
       }
     ],
     "irun": [
@@ -1644,6 +1652,10 @@
       },
       {
         "t": 1787565670855,
+        "i": 0
+      },
+      {
+        "t": 1787566138337,
         "i": 0
       }
     ],
@@ -2195,46 +2207,50 @@
       {
         "t": 1787565670855,
         "i": 0
+      },
+      {
+        "t": 1787566138337,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 21,
-      "delayMin": 2,
+      "travelTimeMin": 20,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     },
     "zarautz.meagas": {
       "travelTimeMin": 38,
-      "delayMin": 2,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     },
     "donostia.ap8": {
       "travelTimeMin": 33,
-      "delayMin": 2,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     },
     "donostia.n634": {
       "travelTimeMin": 52,
-      "delayMin": 2,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 31,
-      "delayMin": 2,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     },
     "irun.ap8": {
       "travelTimeMin": 44,
-      "delayMin": 2,
+      "delayMin": 1,
       "estadoIndex": 0,
-      "timestamp": 1787565670855
+      "timestamp": 1787566138337
     }
   }
 }
