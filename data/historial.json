@@ -1,64 +1,68 @@
 {
-  "actualizado": "2026-08-31T23:45:43.927Z",
+  "actualizado": "2026-09-01T00:01:14.131Z",
   "muestras": {
     "zarautz": [
       {
-        "t": 1788032744514,
+        "t": 1788220874131,
         "i": 0
       }
     ],
     "donostia": [
       {
-        "t": 1788032744514,
+        "t": 1788220874131,
         "i": 0
       }
     ],
     "irun": [
       {
-        "t": 1788032744514,
+        "t": 1788220874131,
         "i": 0
       }
     ],
     "eibar": [
       {
-        "t": 1788032744514,
+        "t": 1788220874131,
         "i": 0
       }
     ]
   },
-  "ultimosFallos": {
-    "zarautz": [
-      {
-        "ruta": "ap8",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      },
-      {
-        "ruta": "meagas",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      }
-    ],
-    "donostia": [
-      {
-        "ruta": "ap8",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      },
-      {
-        "ruta": "n634",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      }
-    ],
-    "eibar": [
-      {
-        "ruta": "ap8ap1",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      }
-    ],
-    "irun": [
-      {
-        "ruta": "ap8",
-        "motivo": "HTTP 403 — {\"detailedError\":{\"code\":\"InsufficientFunds\",\"message\":\"You do not have enough credits to perform this action\"}}"
-      }
-    ]
-  },
-  "estadoActual": {}
+  "ultimosFallos": null,
+  "estadoActual": {
+    "zarautz.ap8": {
+      "travelTimeMin": 16,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    },
+    "zarautz.meagas": {
+      "travelTimeMin": 32,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    },
+    "donostia.ap8": {
+      "travelTimeMin": 29,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    },
+    "donostia.n634": {
+      "travelTimeMin": 48,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    },
+    "eibar.ap8ap1": {
+      "travelTimeMin": 27,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    },
+    "irun.ap8": {
+      "travelTimeMin": 41,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1788220874131
+    }
+  }
 }
