@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-03T14:15:49.926Z",
+  "actualizado": "2026-09-03T14:31:36.011Z",
   "muestras": {
     "zarautz": [
       {
@@ -1673,30 +1673,34 @@
   "ultimosFallos": {
     "zarautz": [
       {
+        "ruta": "ap8",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout"
+      },
+      {
         "ruta": "meagas",
-        "motivo": "HTTP 503 — no healthy upstream"
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout"
       }
     ],
     "donostia": [
       {
         "ruta": "ap8",
-        "motivo": "HTTP 503 — no healthy upstream"
+        "motivo": "HTTP 500 — {\"detailedError\":{\"code\":\"InternalServerError\",\"message\":\"The server was unable to complete your request\"}}"
       },
       {
         "ruta": "n634",
-        "motivo": "HTTP 503 — no healthy upstream"
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout"
       }
     ],
     "eibar": [
       {
         "ruta": "ap8ap1",
-        "motivo": "HTTP 503 — no healthy upstream"
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout"
       }
     ],
     "irun": [
       {
         "ruta": "ap8",
-        "motivo": "HTTP 503 — no healthy upstream"
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout"
       }
     ]
   },
