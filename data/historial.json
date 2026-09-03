@@ -1,15 +1,7 @@
 {
-  "actualizado": "2026-09-03T14:01:11.089Z",
+  "actualizado": "2026-09-03T14:15:49.926Z",
   "muestras": {
     "zarautz": [
-      {
-        "t": 1788357673227,
-        "i": 0
-      },
-      {
-        "t": 1788358547550,
-        "i": 0
-      },
       {
         "t": 1788359463915,
         "i": 0
@@ -416,6 +408,10 @@
       },
       {
         "t": 1788444071089,
+        "i": 0
+      },
+      {
+        "t": 1788444949926,
         "i": 0
       }
     ],
@@ -1674,13 +1670,42 @@
       }
     ]
   },
-  "ultimosFallos": null,
+  "ultimosFallos": {
+    "zarautz": [
+      {
+        "ruta": "meagas",
+        "motivo": "HTTP 503 — no healthy upstream"
+      }
+    ],
+    "donostia": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 503 — no healthy upstream"
+      },
+      {
+        "ruta": "n634",
+        "motivo": "HTTP 503 — no healthy upstream"
+      }
+    ],
+    "eibar": [
+      {
+        "ruta": "ap8ap1",
+        "motivo": "HTTP 503 — no healthy upstream"
+      }
+    ],
+    "irun": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 503 — no healthy upstream"
+      }
+    ]
+  },
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 19,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1788444071089
+      "timestamp": 1788444949926
     },
     "zarautz.meagas": {
       "travelTimeMin": 36,
