@@ -1,82 +1,129 @@
 /**
  * ============================================================
- *  PROGRESO — memoria local, deliberadamente simple
+ *  PROGRESO — por usuario, en Firestore
  * ============================================================
- *  Sin usuarios, sin backend y sin algoritmo de repaso espaciado.
- *  Solo guardamos, para cada tarjeta, uno de estos cuatro estados:
+ *      users/{uid}/progress/{cardId}
  *
- *      nueva     → todavía no la ha visto nunca
- *      vista     → la ha visto, sin decir si la sabía
- *      conocida  → pulsó "La sabía"
- *      repasar   → pulsó "Repasar"
+ *      { status, seenCount, knownCount, reviewCount, lastSeen, updatedAt }
  *
- *  Se guarda en localStorage. Si el navegador no deja escribir
- *  (modo privado, permisos), la app funciona igual: simplemente
- *  no recuerda nada entre sesiones.
+ *  Cuatro estados y nada más (todavía no hay SRS):
+ *
+ *      new       nunca abierta
+ *      learning  la ha visto, aún no dice saberla
+ *      known     pulsó "La sabía"
+ *      review    pulsó "Repasar"
+ *
+ *  Se escribe con setDoc(merge) + increment(): si no hay conexión,
+ *  Firestore encola la escritura y la envía sola al volver la red.
+ *  Por eso la app no lleva ninguna cola propia de pendientes.
+ *
+ *  Además guardamos una copia en memoria para que la interfaz responda
+ *  al instante sin esperar a la ida y vuelta al servidor.
  * ============================================================
  */
 
-const Progreso = (() => {
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+  increment,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-  const CLAVE = "vocabulario-okin-progreso-v1";
+import { db } from "./firebase.js";
 
-  const ESTADOS = {
-    NUEVA: "nueva",
-    VISTA: "vista",
-    CONOCIDA: "conocida",
-    REPASAR: "repasar"
-  };
+export const ESTADOS = {
+  NUEVA: "new",
+  APRENDIENDO: "learning",
+  CONOCIDA: "known",
+  REPASO: "review"
+};
 
-  let cache = leerDeDisco();
+let uidActual = null;
+let cache = {};
 
-  function leerDeDisco() {
-    try {
-      const crudo = window.localStorage.getItem(CLAVE);
-      const datos = crudo ? JSON.parse(crudo) : {};
-      return (datos && typeof datos === "object") ? datos : {};
-    } catch (error) {
-      return {};
-    }
-  }
+function coleccion() {
+  return collection(db, "users", uidActual, "progress");
+}
 
-  function guardarEnDisco() {
-    try {
-      window.localStorage.setItem(CLAVE, JSON.stringify(cache));
-    } catch (error) {
-      /* Sin almacenamiento: seguimos con la copia en memoria. */
-    }
-  }
+function documento(cardId) {
+  return doc(db, "users", uidActual, "progress", cardId);
+}
 
-  /** Estado guardado de una tarjeta ("nueva" si no hay nada). */
-  function estado(id) {
-    const registro = cache[id];
-    return (registro && registro.estado) || ESTADOS.NUEVA;
-  }
+/** Descarga el progreso del usuario que acaba de entrar. */
+export async function cargar(uid) {
+  uidActual = uid;
+  cache = {};
+  const respuesta = await getDocs(coleccion());
+  respuesta.docs.forEach((registro) => { cache[registro.id] = registro.data(); });
+  return cache;
+}
 
-  /** Marca una tarjeta con uno de los cuatro estados. */
-  function marcar(id, nuevoEstado) {
-    if (!id) return;
-    cache[id] = { estado: nuevoEstado, fecha: new Date().toISOString() };
-    guardarEnDisco();
-  }
+export function olvidar() {
+  uidActual = null;
+  cache = {};
+}
 
-  /** Marca como "vista" solo si nunca se había abierto (no pisa nada). */
-  function marcarVistaSiEsNueva(id) {
-    if (estado(id) === ESTADOS.NUEVA) marcar(id, ESTADOS.VISTA);
-  }
+export function estado(cardId) {
+  const registro = cache[cardId];
+  return (registro && registro.status) || ESTADOS.NUEVA;
+}
 
-  /** Recuento por estado sobre una lista de tarjetas. */
-  function resumen(tarjetas) {
-    const cuenta = { nueva: 0, vista: 0, conocida: 0, repasar: 0 };
-    tarjetas.forEach((tarjeta) => { cuenta[estado(tarjeta.id)] += 1; });
-    return cuenta;
-  }
+/** Recuento por estado sobre una lista de tarjetas. */
+export function resumen(tarjetas) {
+  const cuenta = { new: 0, learning: 0, known: 0, review: 0 };
+  tarjetas.forEach((tarjeta) => { cuenta[estado(tarjeta.id)] += 1; });
+  return cuenta;
+}
 
-  function reiniciar() {
-    cache = {};
-    try { window.localStorage.removeItem(CLAVE); } catch (error) { /* nada */ }
-  }
+/**
+ * Escribe en Firestore y actualiza la copia local.
+ * No esperamos a que termine: si falla o no hay red, la escritura queda
+ * encolada y la niña no ve ningún parón.
+ */
+function escribir(cardId, cambios, contadores) {
+  if (!uidActual) return;
 
-  return { ESTADOS, estado, marcar, marcarVistaSiEsNueva, resumen, reiniciar };
+  const anterior = cache[cardId] || { seenCount: 0, knownCount: 0, reviewCount: 0 };
+  cache[cardId] = Object.assign({}, anterior, cambios, {
+    seenCount: (anterior.seenCount || 0) + (contadores.seenCount || 0),
+    knownCount: (anterior.knownCount || 0) + (contadores.knownCount || 0),
+    reviewCount: (anterior.reviewCount || 0) + (contadores.reviewCount || 0)
+  });
 
-})();
+  const carga = Object.assign({}, cambios, { updatedAt: serverTimestamp() });
+  Object.keys(contadores).forEach((clave) => {
+    if (contadores[clave]) carga[clave] = increment(contadores[clave]);
+  });
+
+  setDoc(documento(cardId), carga, { merge: true })
+    .catch(() => { /* queda encolado por la caché persistente de Firestore */ });
+}
+
+/** Al abrir una tarjeta: cuenta la vista y, si era nueva, pasa a "learning". */
+export function marcarVista(cardId) {
+  const eraNueva = estado(cardId) === ESTADOS.NUEVA;
+  escribir(
+    cardId,
+    Object.assign({ lastSeen: serverTimestamp() }, eraNueva ? { status: ESTADOS.APRENDIENDO } : {}),
+    { seenCount: 1 }
+  );
+}
+
+/** "La sabía" / "Repasar". */
+export function marcar(cardId, nuevoEstado) {
+  const contadores = nuevoEstado === ESTADOS.CONOCIDA
+    ? { knownCount: 1 }
+    : { reviewCount: 1 };
+  escribir(cardId, { status: nuevoEstado }, contadores);
+}
+
+/** "Empezar de cero": borra el progreso del usuario, no el contenido. */
+export async function reiniciar() {
+  if (!uidActual) return;
+  const ids = Object.keys(cache);
+  cache = {};
+  await Promise.all(ids.map((cardId) => deleteDoc(documento(cardId)).catch(() => null)));
+}

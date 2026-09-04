@@ -1,94 +1,102 @@
 /**
  * ============================================================
- *  DATOS — carga y normalización del vocabulario
+ *  DATOS — las tarjetas viven en Firestore
  * ============================================================
- *  La interfaz nunca conoce ninguna palabra: todo sale de
- *  data/vocabulario.json. Para añadir contenido basta con añadir
- *  objetos a "tarjetas" en ese fichero (y su imagen en images/).
+ *  Colección "cards": un documento por tarjeta. La app solo lee, y
+ *  solo las activas (active == true); escribir tarjetas es cosa del
+ *  importador de tools/import/, que entra con credenciales de
+ *  administrador. Las reglas de Firestore lo imponen de verdad.
  *
- *  normalizarTarjeta() rellena lo que falte con valores por defecto
- *  y CONSERVA cualquier campo extra que traiga el JSON (unidad del
- *  libro, nivel CEFR, dificultad, edad...). Así se pueden añadir
- *  campos nuevos sin tocar este módulo ni la interfaz.
+ *  normalizar() rellena lo que falte y CONSERVA cualquier campo extra
+ *  del documento (source, book, unit, cefr, dificultad...), para que
+ *  añadir campos nuevos al contenido no obligue a tocar la app.
  * ============================================================
  */
 
-const Datos = (() => {
+import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { db } from "./firebase.js";
 
-  const RUTA = "data/vocabulario.json";
+/* Etiqueta que se ve sobre el dibujo. Si existe la colección "themes"
+   en Firestore, manda ella; esto es solo el respaldo por defecto. */
+const TEMAS_POR_DEFECTO = {
+  animals:  { es: "Animales",  eu: "Animaliak", emoji: "🐾" },
+  food:     { es: "Comida",    eu: "Janaria",   emoji: "🍎" },
+  school:   { es: "Colegio",   eu: "Eskola",    emoji: "🎒" },
+  family:   { es: "Familia",   eu: "Familia",   emoji: "👨‍👩‍👧" },
+  feelings: { es: "Emociones", eu: "Emozioak",  emoji: "😀" },
+  actions:  { es: "Acciones",  eu: "Ekintzak",  emoji: "⚽" },
+  colors:   { es: "Colores",   eu: "Koloreak",  emoji: "🎨" },
+  weather:  { es: "Tiempo",    eu: "Eguraldia", emoji: "🌦️" }
+};
 
-  function normalizarTarjeta(cruda) {
-    const ejemplo = cruda.example || {};
-    return Object.assign({}, cruda, {
-      id: cruda.id,
-      word: (cruda.word || "").trim(),
-      es: cruda.es || "",
-      eu: cruda.eu || "",
-      image: cruda.image || "",
-      wordAudio: cruda.wordAudio || "",
-      /* Respuestas alternativas aceptadas al escribir (opcional en el JSON). */
-      aceptar: Array.isArray(cruda.aceptar) ? cruda.aceptar : [],
-      example: {
-        en: ejemplo.en || "",
-        es: ejemplo.es || "",
-        eu: ejemplo.eu || "",
-        audio: ejemplo.audio || ""
-      },
-      theme: cruda.theme || "",
-      layer: typeof cruda.layer === "number" ? cruda.layer : 1,
-      type: cruda.type || "",
-      tags: Array.isArray(cruda.tags) ? cruda.tags : []
+function normalizar(id, datos) {
+  const ejemplo = datos.example || {};
+  return Object.assign({}, datos, {
+    id,
+    word: (datos.word || "").trim(),
+    es: datos.es || "",
+    eu: datos.eu || "",
+    imagePath: datos.imagePath || "",
+    wordAudioPath: datos.wordAudioPath || "",
+    /* Respuestas alternativas admitidas al escribir (opcional). */
+    aceptar: Array.isArray(datos.aceptar) ? datos.aceptar : [],
+    example: {
+      en: ejemplo.en || "",
+      es: ejemplo.es || "",
+      eu: ejemplo.eu || "",
+      audioPath: ejemplo.audioPath || ""
+    },
+    theme: datos.theme || "",
+    layer: typeof datos.layer === "number" ? datos.layer : 1,
+    type: datos.type || "",
+    tags: Array.isArray(datos.tags) ? datos.tags : [],
+    source: datos.source || { type: "general", book: null, unit: null }
+  });
+}
+
+/** Todas las tarjetas activas. Sin conexión salen de la caché de Firestore. */
+export async function cargarTarjetas() {
+  const consulta = query(collection(db, "cards"), where("active", "==", true));
+  const respuesta = await getDocs(consulta);
+  return respuesta.docs.map((documento) => normalizar(documento.id, documento.data()));
+}
+
+/** Etiquetas de tema. Si la colección no existe o no se puede leer, valen las de aquí. */
+export async function cargarTemas() {
+  const temas = Object.assign({}, TEMAS_POR_DEFECTO);
+  try {
+    const respuesta = await getDocs(collection(db, "themes"));
+    respuesta.docs.forEach((documento) => {
+      temas[documento.id] = Object.assign({}, temas[documento.id], documento.data());
     });
+  } catch (error) {
+    /* Colección opcional: seguimos con las etiquetas por defecto. */
   }
+  return temas;
+}
 
-  /** Descarga y valida el fichero de vocabulario. */
-  async function cargar() {
-    const respuesta = await fetch(RUTA, { cache: "no-cache" });
-    if (!respuesta.ok) throw new Error("No se ha podido cargar " + RUTA);
+/* ---------- orden del mazo ---------- */
 
-    const datos = await respuesta.json();
-    const tarjetas = (datos.tarjetas || [])
-      .filter((tarjeta) => tarjeta && tarjeta.id && tarjeta.word)
-      .map(normalizarTarjeta);
-
-    if (tarjetas.length === 0) throw new Error("El vocabulario está vacío");
-
-    const temas = {};
-    (datos.temas || []).forEach((tema) => { temas[tema.id] = tema; });
-
-    return { tarjetas, temas };
+export function barajar(lista) {
+  const copia = lista.slice();
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
   }
+  return copia;
+}
 
-  /* ---------- orden del mazo ---------- */
-
-  function barajar(lista) {
-    const copia = lista.slice();
-    for (let i = copia.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copia[i], copia[j]] = [copia[j], copia[i]];
-    }
-    return copia;
-  }
-
-  /**
-   * Orden de la sesión. No es un SRS: solo pone delante lo que hace
-   * falta repasar y lo que no se ha visto nunca, y deja para el final
-   * lo que ya se marcó como conocido.
-   */
-  function ordenarMazo(tarjetas) {
-    const prioridad = {
-      [Progreso.ESTADOS.REPASAR]: 0,
-      [Progreso.ESTADOS.NUEVA]: 1,
-      [Progreso.ESTADOS.VISTA]: 2,
-      [Progreso.ESTADOS.CONOCIDA]: 3
-    };
-    const grupos = [[], [], [], []];
-    barajar(tarjetas).forEach((tarjeta) => {
-      grupos[prioridad[Progreso.estado(tarjeta.id)]].push(tarjeta);
-    });
-    return grupos[0].concat(grupos[1], grupos[2], grupos[3]);
-  }
-
-  return { cargar, ordenarMazo, barajar };
-
-})();
+/**
+ * Orden de la sesión. Sigue sin ser un SRS: solo pone delante lo que
+ * hay que repasar y lo que no se ha visto nunca, y deja para el final
+ * lo que ya se sabe.
+ */
+export function ordenarMazo(tarjetas, estadoDe) {
+  const prioridad = { review: 0, new: 1, learning: 2, known: 3 };
+  const grupos = [[], [], [], []];
+  barajar(tarjetas).forEach((tarjeta) => {
+    const puesto = prioridad[estadoDe(tarjeta.id)];
+    grupos[puesto === undefined ? 1 : puesto].push(tarjeta);
+  });
+  return grupos[0].concat(grupos[1], grupos[2], grupos[3]);
+}

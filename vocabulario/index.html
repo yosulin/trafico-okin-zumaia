@@ -29,13 +29,36 @@
         <p class="cabecera__lema">Añade color a tu vida</p>
       </div>
     </div>
-    <button class="boton boton--fantasma boton--instalar" id="boton-instalar" type="button" hidden>📲 Instalar</button>
+
+    <div class="cabecera__sesion">
+      <button class="boton boton--fantasma boton--instalar" id="boton-instalar" type="button" hidden>📲 Instalar</button>
+      <div class="usuario" id="usuario" hidden>
+        <img class="usuario__foto" id="usuario-foto" alt="" width="32" height="32">
+        <span class="usuario__nombre" id="usuario-nombre"></span>
+        <button class="boton boton--fantasma boton--mini" id="boton-salir" type="button">Salir</button>
+      </div>
+    </div>
   </header>
 
   <main class="escenario">
 
-    <!-- ========== PANTALLA DE INICIO ========== -->
-    <section class="panel panel--inicio" id="pantalla-inicio">
+    <!-- ========== CARGANDO ========== -->
+    <section class="panel panel--inicio" id="pantalla-cargando">
+      <p class="cargando">Cargando…</p>
+    </section>
+
+    <!-- ========== LOGIN ========== -->
+    <section class="panel panel--inicio" id="pantalla-login" hidden>
+      <p class="login__lema">Añade color a tu vida.<br>Aprende un idioma nuevo.</p>
+      <p class="inicio__intro">Entra con tu cuenta de Google para que la app recuerde lo que ya sabes.</p>
+      <button class="boton boton--grande boton--google" id="boton-entrar" type="button">
+        <span class="boton__icono" aria-hidden="true">🔑</span> Entrar con Google
+      </button>
+      <p class="error" id="error-login" hidden></p>
+    </section>
+
+    <!-- ========== INICIO ========== -->
+    <section class="panel panel--inicio" id="pantalla-inicio" hidden>
       <p class="inicio__intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
       <ul class="marcador" id="marcador-inicio"></ul>
       <button class="boton boton--grande boton--principal" id="boton-empezar" type="button">Empezar</button>
@@ -86,7 +109,7 @@
           <li><span class="traducciones__idioma">Euskara</span><span class="traducciones__texto" id="palabra-eu"></span></li>
         </ul>
 
-        <div class="ejemplo">
+        <div class="ejemplo" id="ejemplo">
           <div class="ejemplo__linea">
             <p class="ejemplo__en" id="ejemplo-en"></p>
             <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" aria-label="Escuchar la frase">🔊</button>
@@ -114,11 +137,9 @@
     </section>
 
     <p class="error" id="error" hidden></p>
+    <p class="aviso-red" id="aviso-red" hidden>Sin conexión: sigues jugando y tu progreso se guardará al volver la red.</p>
   </main>
 
-  <script src="js/audio.js"></script>
-  <script src="js/progreso.js"></script>
-  <script src="js/datos.js"></script>
-  <script src="js/app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

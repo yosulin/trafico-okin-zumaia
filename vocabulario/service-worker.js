@@ -1,43 +1,49 @@
 /**
  * ============================================================
- *  SERVICE WORKER — vocabulario offline
+ *  SERVICE WORKER — offline razonable, sin complicaciones
  * ============================================================
- *  Esta app no llama a ninguna API: todo lo que necesita son sus
- *  propios ficheros (HTML, CSS, JS, el JSON de vocabulario y las
- *  ilustraciones). Con cachearlos todos, funciona sin conexión.
+ *  Tres cachés con reglas distintas, porque tres cosas distintas:
  *
- *  Estrategia:
- *   - Ficheros propios → caché primero, y se refresca en segundo
- *     plano para que la próxima apertura ya tenga lo nuevo.
- *   - Tipografías de Google → se guardan según se van pidiendo
- *     (así la app también se ve bien sin red la segunda vez).
+ *   1. SHELL (HTML, CSS, JS propios e iconos): se precachean en la
+ *      instalación y se sirven primero desde caché, refrescándose en
+ *      segundo plano. Es lo que hace que la app abra sin red.
  *
- *  Al publicar cambios, sube el número de CACHE_NAME.
+ *   2. VENDOR (SDK de Firebase y tipografías): se van guardando según
+ *      se piden. Van con versión fija en la URL, así que no caducan.
+ *
+ *   3. MEDIA (imágenes y audios servidos por Firebase Storage): se
+ *      guardan al usarlas, así que una tarjeta ya vista vuelve a
+ *      funcionar sin conexión.
+ *
+ *  Lo que NO se toca aquí: las llamadas a Firestore y a Identity
+ *  Toolkit (login). Firestore ya trae su propia persistencia y su
+ *  propia cola de escrituras pendientes; interceptarlas solo podría
+ *  romperlas.
+ *
+ *  Al publicar cambios, sube el número de VERSION.
  * ============================================================
  */
 
-const CACHE_NAME = "vocabulario-okin-v1";
+const VERSION = "v2";
+const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
+const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
+const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;
 
-const FICHEROS_APP = [
+const NUESTRAS_CACHES = [CACHE_SHELL, CACHE_VENDOR, CACHE_MEDIA];
+
+const FICHEROS_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./css/estilos.css",
-  "./js/audio.js",
-  "./js/progreso.js",
-  "./js/datos.js",
   "./js/app.js",
-  "./data/vocabulario.json",
-  "./images/animals_dog.svg",
-  "./images/animals_cat.svg",
-  "./images/food_apple.svg",
-  "./images/school_book.svg",
-  "./images/family_sister.svg",
-  "./images/school_teacher.svg",
-  "./images/feelings_happy.svg",
-  "./images/actions_play.svg",
-  "./images/colors_red.svg",
-  "./images/weather_rain.svg",
+  "./js/firebase.js",
+  "./js/firebase-config.js",
+  "./js/sesion.js",
+  "./js/datos.js",
+  "./js/progreso.js",
+  "./js/media.js",
+  "./js/audio.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png"
@@ -45,8 +51,12 @@ const FICHEROS_APP = [
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(FICHEROS_APP))
+    caches.open(CACHE_SHELL)
+      /* Uno a uno: si falta algún fichero, el resto se cachea igual
+         (addAll aborta entero al primer fallo). */
+      .then((cache) => Promise.all(
+        FICHEROS_SHELL.map((fichero) => cache.add(fichero).catch(() => null))
+      ))
       .then(() => self.skipWaiting())
   );
 });
@@ -56,35 +66,59 @@ self.addEventListener("activate", (evento) => {
     caches.keys()
       .then((nombres) => Promise.all(
         nombres
-          .filter((nombre) => nombre.startsWith("vocabulario-okin-") && nombre !== CACHE_NAME)
+          .filter((nombre) => nombre.startsWith("vocabulario-okin-") && !NUESTRAS_CACHES.includes(nombre))
           .map((nombre) => caches.delete(nombre))
       ))
       .then(() => self.clients.claim())
   );
 });
 
+/** Caché primero, y de paso se refresca para la próxima vez. */
+function cachePrimero(peticion, nombreCache) {
+  return caches.match(peticion).then((cacheada) => {
+    const desdeRed = fetch(peticion)
+      .then((respuesta) => {
+        if (respuesta && (respuesta.ok || respuesta.type === "opaque")) {
+          const copia = respuesta.clone();
+          caches.open(nombreCache).then((cache) => cache.put(peticion, copia));
+        }
+        return respuesta;
+      })
+      .catch(() => cacheada);
+
+    return cacheada || desdeRed;
+  });
+}
+
 self.addEventListener("fetch", (evento) => {
   if (evento.request.method !== "GET") return;
 
   const url = new URL(evento.request.url);
-  const esPropio = url.origin === self.location.origin;
-  const esTipografia = url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
 
-  if (!esPropio && !esTipografia) return;
+  if (url.origin === self.location.origin) {
+    evento.respondWith(cachePrimero(evento.request, CACHE_SHELL));
+    return;
+  }
 
-  evento.respondWith(
-    caches.match(evento.request).then((cacheada) => {
-      const desdeRed = fetch(evento.request)
-        .then((respuesta) => {
-          if (respuesta && (respuesta.ok || respuesta.type === "opaque")) {
-            const copia = respuesta.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(evento.request, copia));
-          }
-          return respuesta;
-        })
-        .catch(() => cacheada);
+  const esVendor =
+    url.hostname === "www.gstatic.com" ||
+    url.hostname === "fonts.googleapis.com" ||
+    url.hostname === "fonts.gstatic.com";
 
-      return cacheada || desdeRed;
-    })
-  );
+  if (esVendor) {
+    evento.respondWith(cachePrimero(evento.request, CACHE_VENDOR));
+    return;
+  }
+
+  /* Imágenes y audios de Firebase Storage. */
+  const esMedia =
+    url.hostname === "firebasestorage.googleapis.com" ||
+    url.hostname.endsWith(".firebasestorage.app");
+
+  if (esMedia) {
+    evento.respondWith(cachePrimero(evento.request, CACHE_MEDIA));
+    return;
+  }
+
+  /* Todo lo demás (Firestore, login de Google...) va directo a la red. */
 });

@@ -1,0 +1,324 @@
+{
+  "temas": [
+    {
+      "id": "animals",
+      "es": "Animales",
+      "eu": "Animaliak",
+      "emoji": "🐾"
+    },
+    {
+      "id": "food",
+      "es": "Comida",
+      "eu": "Janaria",
+      "emoji": "🍎"
+    },
+    {
+      "id": "school",
+      "es": "Colegio",
+      "eu": "Eskola",
+      "emoji": "🎒"
+    },
+    {
+      "id": "family",
+      "es": "Familia",
+      "eu": "Familia",
+      "emoji": "👨‍👩‍👧"
+    },
+    {
+      "id": "feelings",
+      "es": "Emociones",
+      "eu": "Emozioak",
+      "emoji": "😀"
+    },
+    {
+      "id": "actions",
+      "es": "Acciones",
+      "eu": "Ekintzak",
+      "emoji": "⚽"
+    },
+    {
+      "id": "colors",
+      "es": "Colores",
+      "eu": "Koloreak",
+      "emoji": "🎨"
+    },
+    {
+      "id": "weather",
+      "es": "Tiempo",
+      "eu": "Eguraldia",
+      "emoji": "🌦️"
+    }
+  ],
+  "tarjetas": [
+    {
+      "id": "animals_dog",
+      "word": "dog",
+      "es": "perro",
+      "eu": "txakurra",
+      "theme": "animals",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/animals/animals_dog.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "I play with my dog in the garden.",
+        "es": "Juego con mi perro en el jardín.",
+        "eu": "Nire txakurrarekin jolasten dut lorategian.",
+        "audioPath": ""
+      },
+      "tags": [
+        "animal",
+        "pet"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "animals_cat",
+      "word": "cat",
+      "es": "gato",
+      "eu": "katua",
+      "theme": "animals",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/animals/animals_cat.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "The cat is sleeping on the sofa.",
+        "es": "El gato está durmiendo en el sofá.",
+        "eu": "Katua sofan lo dago.",
+        "audioPath": ""
+      },
+      "tags": [
+        "animal",
+        "pet"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "food_apple",
+      "word": "apple",
+      "es": "manzana",
+      "eu": "sagarra",
+      "theme": "food",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/food/food_apple.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "I eat an apple every morning.",
+        "es": "Como una manzana cada mañana.",
+        "eu": "Sagar bat jaten dut goizero.",
+        "audioPath": ""
+      },
+      "tags": [
+        "food",
+        "fruit"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "school_book",
+      "word": "book",
+      "es": "libro",
+      "eu": "liburua",
+      "theme": "school",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/school/school_book.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "This book is very funny.",
+        "es": "Este libro es muy divertido.",
+        "eu": "Liburu hau oso dibertigarria da.",
+        "audioPath": ""
+      },
+      "tags": [
+        "school",
+        "object"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "family_sister",
+      "word": "sister",
+      "es": "hermana",
+      "eu": "ahizpa",
+      "theme": "family",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/family/family_sister.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "My sister is nine years old.",
+        "es": "Mi hermana tiene nueve años.",
+        "eu": "Nire ahizpak bederatzi urte ditu.",
+        "audioPath": ""
+      },
+      "tags": [
+        "family",
+        "person"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "school_teacher",
+      "word": "teacher",
+      "es": "profesor, profesora",
+      "eu": "irakaslea",
+      "theme": "school",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/school/school_teacher.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "Our teacher writes on the board.",
+        "es": "Nuestra profesora escribe en la pizarra.",
+        "eu": "Gure irakasleak arbelean idazten du.",
+        "audioPath": ""
+      },
+      "tags": [
+        "school",
+        "person",
+        "job"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "feelings_happy",
+      "word": "happy",
+      "es": "contento, feliz",
+      "eu": "pozik",
+      "theme": "feelings",
+      "layer": 1,
+      "type": "adjective",
+      "imagePath": "images/feelings/feelings_happy.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "I am happy today.",
+        "es": "Hoy estoy contenta.",
+        "eu": "Gaur pozik nago.",
+        "audioPath": ""
+      },
+      "tags": [
+        "feeling",
+        "emotion"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "actions_play",
+      "word": "play",
+      "es": "jugar",
+      "eu": "jolastu",
+      "theme": "actions",
+      "layer": 1,
+      "type": "verb",
+      "imagePath": "images/actions/actions_play.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "We play football after school.",
+        "es": "Jugamos al fútbol después del colegio.",
+        "eu": "Futbolean jolasten dugu eskola ondoren.",
+        "audioPath": ""
+      },
+      "tags": [
+        "action",
+        "game"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "colors_red",
+      "word": "red",
+      "es": "rojo",
+      "eu": "gorria",
+      "theme": "colors",
+      "layer": 1,
+      "type": "adjective",
+      "imagePath": "images/colors/colors_red.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "My balloon is red.",
+        "es": "Mi globo es rojo.",
+        "eu": "Nire puxika gorria da.",
+        "audioPath": ""
+      },
+      "tags": [
+        "colour"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    },
+    {
+      "id": "weather_rain",
+      "word": "rain",
+      "es": "lluvia",
+      "eu": "euria",
+      "theme": "weather",
+      "layer": 1,
+      "type": "noun",
+      "imagePath": "images/weather/weather_rain.svg",
+      "wordAudioPath": "",
+      "example": {
+        "en": "I like the rain on my umbrella.",
+        "es": "Me gusta la lluvia en mi paraguas.",
+        "eu": "Euria gustatzen zait nire aterkiaren gainean.",
+        "audioPath": ""
+      },
+      "tags": [
+        "weather",
+        "nature"
+      ],
+      "source": {
+        "type": "general",
+        "book": null,
+        "unit": null
+      },
+      "active": true
+    }
+  ]
+}

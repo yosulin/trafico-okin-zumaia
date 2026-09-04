@@ -84,6 +84,12 @@ html, body {
 
 .cabecera__lema { margin: 0; font-size: .82rem; color: var(--tinta-suave); }
 
+.cabecera__sesion { display: flex; align-items: center; gap: 8px; }
+
+.usuario { display: flex; align-items: center; gap: 8px; }
+.usuario__foto { width: 32px; height: 32px; border-radius: 50%; background: #EFF1F4; object-fit: cover; }
+.usuario__nombre { font-weight: 800; font-size: .9rem; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ============================================================
    ESTRUCTURA
    ============================================================ */
@@ -156,6 +162,14 @@ html, body {
   background: #EAF1FF;
 }
 
+.boton--google {
+  background: var(--superficie);
+  color: var(--tinta);
+  border: 2px solid var(--borde);
+  box-shadow: 0 4px 0 var(--borde);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+
 .boton--sonando { animation: latido .6s ease infinite; }
 @keyframes latido { 50% { transform: scale(1.06); } }
 
@@ -164,6 +178,14 @@ html, body {
    ============================================================ */
 
 .panel--inicio, .panel--final { text-align: center; }
+
+.login__lema {
+  font-family: var(--display);
+  font-size: 1.5rem; line-height: 1.25;
+  margin: 6px 0 10px;
+}
+
+.cargando { color: var(--tinta-suave); font-weight: 700; margin: 10px 0; }
 
 .inicio__intro { margin: 4px 0 18px; font-size: 1.05rem; color: var(--tinta-suave); }
 .panel--inicio .boton--texto { font-size: .88rem; }
@@ -295,6 +317,12 @@ html, body {
 .error {
   background: #FFECEC; color: #A32020; border-radius: var(--radio-chico);
   padding: 14px 16px; font-weight: 700; text-align: center;
+}
+
+.aviso-red {
+  background: #FFF3E0; color: #A96A00; border-radius: var(--radio-chico);
+  padding: 10px 14px; font-weight: 700; text-align: center; font-size: .88rem;
+  margin-top: 14px;
 }
 
 @media (max-width: 380px) {

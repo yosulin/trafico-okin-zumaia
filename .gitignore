@@ -1,1 +1,13 @@
 .DS_Store
+
+# Configuración local de Firebase (se genera con tools/generar-config.mjs)
+.env
+.firebaserc
+vocabulario/js/firebase-config.js
+
+# Claves de cuenta de servicio: nunca al repositorio
+*serviceaccount*.json
+*service-account*.json
+clave-*.json
+
+node_modules/

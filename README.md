@@ -17,12 +17,17 @@ Instalable como **PWA** y publicado con **GitHub Pages**.
 
 ## Otra app en este mismo repositorio
 
-Además del panel de tráfico, el repositorio publica una segunda aplicación
+Además del panel de tráfico, el repositorio contiene una segunda aplicación
 independiente en la subcarpeta [`vocabulario/`](vocabulario/): **Colores**, una
-PWA para aprender vocabulario en inglés con tarjetas ilustradas
-(https://yosulin.github.io/trafico-okin-zumaia/vocabulario/). No comparte
-código ni datos con el panel de tráfico; tiene su propio manifest, su propio
-service worker y su propio README.
+PWA para aprender vocabulario en inglés con tarjetas ilustradas.
+
+No comparte código ni datos con el panel de tráfico y **no** se publica en
+GitHub Pages: usa Firebase (Authentication con Google, Firestore, Storage) y se
+despliega con Firebase Hosting. Tiene su propio manifest, su propio service
+worker y su propio README; las reglas de seguridad (`firestore.rules`,
+`storage.rules`), la configuración de Firebase (`firebase.json`) y el importador
+de contenido ([`tools/`](tools/)) están en la raíz porque es donde los espera la
+CLI de Firebase.
 
 ---
 

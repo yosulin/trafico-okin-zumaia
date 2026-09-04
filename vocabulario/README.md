@@ -2,16 +2,37 @@
 
 > **Añade color a tu vida. Aprende un idioma nuevo.**
 
-Prototipo de PWA para reforzar y ampliar vocabulario en inglés. No sustituye al
-colegio ni a Duolingo: es una herramienta personal de refuerzo, pensada para
-alimentarla poco a poco con palabras de los libros del cole, de sus intereses y
-de conversaciones reales.
+PWA para reforzar y ampliar vocabulario en inglés. No sustituye al colegio ni a
+Duolingo: es una herramienta personal, pensada para alimentarla poco a poco con
+palabras de los libros del cole, de sus intereses y de conversaciones reales.
 
-Cada palabra se presenta con una **escena dibujada en gris**, donde **solo el
-concepto que hay que aprender aparece en color**. Vive dentro de este mismo
-repositorio, como subcarpeta independiente:
+Cada palabra se presenta con una **escena dibujada en gris** donde **solo el
+concepto que hay que aprender aparece en color**.
 
-**https://yosulin.github.io/trafico-okin-zumaia/vocabulario/**
+El contenido y el progreso viven en **Firebase**: Firestore es la fuente de
+verdad, Storage guarda imágenes y audios, y cada persona entra con su cuenta de
+Google para que la app recuerde lo que ya sabe.
+
+---
+
+## Arquitectura
+
+```
+Navegador (esta PWA, estática, sin build step)
+   │
+   ├── Firebase Authentication ── entrar con Google
+   │
+   ├── Firestore  cards/{cardId}                 ← contenido (solo lectura)
+   │              themes/{themeId}               ← etiquetas de tema (opcional)
+   │              users/{uid}/progress/{cardId}  ← progreso, privado
+   │
+   └── Storage    images/…  audio/words/…  audio/examples/…
+
+tools/import/  ← el ÚNICO sitio que escribe contenido (Admin SDK)
+```
+
+La app **nunca escribe en `cards`**: las reglas de Firestore no se lo permiten.
+El contenido entra por el importador, que usa una cuenta de servicio.
 
 ---
 
@@ -23,11 +44,88 @@ aparece.
 
 **Respuesta** → palabra en inglés en grande (con audio), traducción al
 castellano y al euskera, frase de ejemplo en inglés (con audio) y su traducción
-a los dos idiomas, opcional.
+a los dos idiomas, plegable.
 
-**Después** → «La sabía» o «Repasar». No hay repaso espaciado (SRS): solo se
-guarda el estado de cada palabra y, en la siguiente ronda, van primero las de
-«Repasar» y las nuevas.
+**Después** → «La sabía» o «Repasar», que escriben el progreso en Firestore. No
+hay repaso espaciado (SRS): en la ronda siguiente van primero las de «Repasar»
+y las nuevas.
+
+---
+
+## Puesta en marcha
+
+### 1. Crear el proyecto Firebase
+
+En [console.firebase.google.com](https://console.firebase.google.com):
+
+1. **Crear un proyecto** (puedes desactivar Google Analytics).
+2. **Authentication** → *Comenzar* → pestaña *Sign-in method* → habilitar
+   **Google** → guardar.
+   En *Settings → Authorized domains* añade el dominio desde el que vayas a
+   abrir la app (`localhost` ya viene; añade el de Hosting o el de GitHub Pages
+   si publicas ahí).
+3. **Firestore Database** → *Crear base de datos* → modo **producción** →
+   elige región (`eur3` o `europe-west1`).
+4. **Storage** → *Comenzar* → modo **producción** → la misma región.
+5. **Configuración del proyecto → Tus apps → Web (`</>`)** → registra la app y
+   copia el objeto de configuración.
+
+### 2. Configurar este repositorio
+
+```bash
+cp .env.example .env          # y rellenar con los valores del paso anterior
+node tools/generar-config.mjs # → vocabulario/js/firebase-config.js
+```
+
+(o, a mano: `cp vocabulario/js/firebase-config.example.js
+vocabulario/js/firebase-config.js` y editarlo)
+
+`vocabulario/js/firebase-config.js` está en `.gitignore`. Esos valores **no son
+secretos** —viajan en cualquier app web de Firebase—, pero así cada instalación
+apunta a su propio proyecto. Lo que protege los datos de verdad son las reglas.
+
+### 3. Publicar las reglas
+
+```bash
+npm install -g firebase-tools
+firebase login
+cp .firebaserc.example .firebaserc     # y poner el id del proyecto
+firebase deploy --only firestore:rules,storage:rules
+```
+
+### 4. Subir las 10 tarjetas de demostración
+
+```bash
+cd tools/import
+npm install
+export GOOGLE_APPLICATION_CREDENTIALS=/ruta/a/clave-cuenta-de-servicio.json
+npm run semilla-prueba   # ver qué haría
+npm run semilla          # subir ilustraciones a Storage y tarjetas a Firestore
+```
+
+Detalles y más orígenes (CSV escolar, mazos de Anki): **[tools/import/README.md](../tools/import/README.md)**.
+
+### 5. Probar en local
+
+Hace falta servirlo por HTTP (los módulos y el service worker no funcionan
+abriendo el fichero directamente):
+
+```bash
+cd vocabulario
+python3 -m http.server 8000
+# http://localhost:8000
+```
+
+### 6. Desplegar
+
+```bash
+firebase deploy --only hosting     # publica la carpeta vocabulario/
+```
+
+También sirve cualquier hosting estático (GitHub Pages incluido): la app solo
+son ficheros. En ese caso hay que **comitear** `js/firebase-config.js` (o
+generarlo en el despliegue) y añadir ese dominio a los *Authorized domains* de
+Authentication.
 
 ---
 
@@ -35,29 +133,25 @@ guarda el estado de cada palabra y, en la siguiente ronda, van primero las de
 
 ```
 vocabulario/
-├── index.html                → estructura de las tres pantallas
-├── manifest.webmanifest      → instalación como PWA
-├── service-worker.js         → caché offline (sube CACHE_NAME al publicar cambios)
-├── data/
-│   └── vocabulario.json      → TODO el contenido: temas y tarjetas
-├── images/                   → una escena SVG por tarjeta
-├── icons/                    → iconos de la PWA
+├── index.html                  → login, inicio, tarjeta y final
+├── manifest.webmanifest        → instalación como PWA
+├── service-worker.js           → cachés de shell, SDK y medios (sube VERSION al publicar)
 ├── css/estilos.css
+├── icons/
 └── js/
-    ├── audio.js              → Voz: única salida de audio (TTS hoy, MP3 mañana)
-    ├── progreso.js           → Progreso: nueva / vista / conocida / repasar
-    ├── datos.js              → Datos: carga, normaliza y ordena el mazo
-    └── app.js                → la interfaz de la tarjeta
+    ├── firebase.js             → inicialización única (Auth, Firestore, Storage)
+    ├── firebase-config.js      → generado, fuera del repositorio
+    ├── sesion.js               → entrar/salir con Google
+    ├── datos.js                → lee "cards" y "themes" de Firestore
+    ├── progreso.js             → users/{uid}/progress/{cardId}
+    ├── media.js                → rutas de Storage → URLs de descarga
+    ├── audio.js                → audio de Storage con respaldo de voz sintética
+    └── app.js                  → la interfaz de la tarjeta
 ```
 
 ---
 
-## Añadir palabras nuevas
-
-1. Añade un objeto a `tarjetas` en `data/vocabulario.json`.
-2. Guarda su ilustración en `images/` con el mismo nombre que el `id`.
-3. Añade el fichero nuevo a la lista `FICHEROS_APP` de `service-worker.js` y
-   sube el número de `CACHE_NAME`.
+## El esquema de una tarjeta
 
 ```json
 {
@@ -65,78 +159,109 @@ vocabulario/
   "word": "dog",
   "es": "perro",
   "eu": "txakurra",
-  "image": "images/animals_dog.svg",
-  "wordAudio": "",
-  "example": {
-    "en": "I play with my dog in the garden.",
-    "es": "Juego con mi perro en el jardín.",
-    "eu": "Nire txakurrarekin jolasten dut lorategian.",
-    "audio": ""
-  },
   "theme": "animals",
   "layer": 1,
   "type": "noun",
-  "tags": ["animal", "pet"]
+  "imagePath": "images/animals/animals_dog.svg",
+  "wordAudioPath": "audio/words/animals_dog.mp3",
+  "example": {
+    "en": "I play with my dog.",
+    "es": "Juego con mi perro.",
+    "eu": "Txakurrarekin jolasten dut.",
+    "audioPath": "audio/examples/animals_dog_example_01.mp3"
+  },
+  "tags": ["animal", "pet"],
+  "source": { "type": "general", "book": null, "unit": null },
+  "active": true
 }
 ```
 
-Campos opcionales que ya se admiten:
+En Firestore se guardan **rutas de Storage**, no URLs públicas: así el contenido
+no depende de tokens de descarga que pueden regenerarse, y cambiar de bucket no
+obliga a reescribir las tarjetas. `media.js` las resuelve y guarda la URL en
+`localStorage`.
 
-- `aceptar`: lista de respuestas alternativas válidas al escribir
-  (por ejemplo `["mum", "mom"]`).
-
-**Se pueden añadir campos nuevos sin tocar el código**: `unidad`, `libro`,
-`dificultad`, `edad`, `cefr`... `datos.js` conserva cualquier campo extra tal
-cual, así que estarán disponibles el día que se quieran usar para filtrar o
-para ordenar.
-
-Los temas (`temas`) solo sirven para la etiqueta que se ve sobre el dibujo.
+`datos.js` conserva cualquier **campo extra** del documento (nivel CEFR, edad,
+dificultad, procedencia...), así que ampliar el esquema no exige tocar la app.
+Solo `active: true` decide qué se ve.
 
 ---
 
-## Las ilustraciones
+## Progreso
 
-Son SVG de 400 × 300 hechos a mano, con una regla fija:
+`users/{uid}/progress/{cardId}`:
 
-- El escenario y los personajes que dan contexto van en **grises**
-  (`#F4F5F7`, `#E4E7EB`, `#CDD2D9`, `#AAB1BB`, `#7C848F`, `#4B525C`).
-- El concepto que hay que aprender va en **color**, con un halo pálido detrás
-  para que no haya ninguna duda de cuál es el elemento objetivo.
+```json
+{
+  "status": "known",
+  "seenCount": 8,
+  "knownCount": 6,
+  "reviewCount": 2,
+  "lastSeen": "timestamp",
+  "updatedAt": "timestamp"
+}
+```
 
-Son deliberadamente sustituibles: para cambiar una escena por una ilustración
-mejor (SVG, WebP o lo que sea) basta con dejar el fichero nuevo en `images/` y
-apuntar a él desde el campo `image` de la tarjeta.
+Cuatro estados: `new`, `learning`, `known`, `review`. Nada de estadísticas ni de
+SRS todavía. Se escribe con `setDoc(merge)` + `increment()`, así que **sin
+conexión Firestore encola la escritura y la envía sola al volver la red**: la app
+no lleva ninguna cola propia.
 
 ---
 
 ## El audio
 
-Hoy se sintetiza con la Web Speech API del navegador, pidiendo voz **inglesa
-británica** (`en-GB`) y, si no existe en el dispositivo, cualquier otra voz
-inglesa.
+Toda la app pide sonido por `js/audio.js`, con dos funciones:
 
-Todo el audio pasa por `js/audio.js`. Si una tarjeta trae `wordAudio` o
-`example.audio` con la ruta de un fichero, se reproduce ese fichero en lugar de
-la voz sintética. Por eso, sustituir el TTS por MP3 reales no exige tocar ni la
-interfaz ni la estructura de las tarjetas: solo rellenar esos dos campos.
-
----
-
-## El progreso
-
-Se guarda en `localStorage`, sin cuentas, sin backend y sin estadísticas: para
-cada palabra, uno de estos cuatro estados: `nueva`, `vista`, `conocida`,
-`repasar`. «Empezar de cero», en la pantalla de inicio, lo borra todo.
-
----
-
-## Probarlo en local
-
-Hace falta servirlo por HTTP (el service worker y `fetch` no funcionan abriendo
-el fichero directamente):
-
-```bash
-cd vocabulario
-python3 -m http.server 8000
-# y abrir http://localhost:8000
+```js
+playWordAudio(tarjeta)      // ¿wordAudioPath? → fichero de Storage; si no → voz sintética
+playExampleAudio(tarjeta)   // ídem con example.audioPath
 ```
+
+Hoy casi todo suena con la Web Speech API pidiendo voz **inglesa británica**
+(`en-GB`). Ir sustituyéndolo por MP3 reales no exige tocar ni la interfaz ni las
+tarjetas: basta con subir el audio y rellenar esas rutas (el importador de Anki
+ya lo hace solo).
+
+---
+
+## Offline
+
+- El **shell** (HTML, CSS, JS, iconos) se precachea: la app abre sin red.
+- El **SDK de Firebase** y las tipografías se guardan al usarlas.
+- Las **imágenes y audios** ya vistos se guardan al usarlos.
+- Las **tarjetas** salen de la caché persistente de Firestore.
+- El **progreso** hecho sin red se sincroniza solo al volver la conexión.
+
+Lo que no funciona sin red es **entrar por primera vez**: el login necesita
+conexión. Una vez dentro, la sesión se mantiene.
+
+---
+
+## Las ilustraciones
+
+SVG de 400 × 300 hechos a mano, con una regla fija:
+
+- El escenario y los personajes que dan contexto van en **grises**
+  (`#F4F5F7`, `#E4E7EB`, `#CDD2D9`, `#AAB1BB`, `#7C848F`, `#4B525C`).
+- El concepto que hay que aprender va en **color**, con un halo pálido detrás
+  para que no haya duda de cuál es el elemento objetivo.
+
+Los originales están en `tools/import/datos/media/images/` y se suben a Storage
+con la semilla. Cambiar una escena por una ilustración mejor (SVG, WebP...) es
+subir el fichero nuevo y apuntar `imagePath` a él.
+
+---
+
+## Seguridad
+
+`firestore.rules` y `storage.rules`, en la raíz del repositorio:
+
+- Solo quien ha entrado lee tarjetas, y solo las activas.
+- Escribir en `cards` está prohibido desde cualquier cliente: el contenido entra
+  por `tools/import/`, con Admin SDK, que no pasa por las reglas.
+- Cada persona solo lee y escribe **su** progreso.
+- Todo lo demás, denegado.
+
+La clave de la cuenta de servicio del importador nunca va al repositorio
+(`.gitignore` la cubre); se indica con `GOOGLE_APPLICATION_CREDENTIALS`.
