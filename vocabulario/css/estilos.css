@@ -1,0 +1,307 @@
+/* ============================================================
+   TOKENS — paleta alegre sobre fondo cálido
+   La idea visual de la app (dibujo en gris + concepto en color)
+   se traslada aquí: interfaz sobria y clara, color solo donde
+   hay algo que mirar o que pulsar.
+   ============================================================ */
+
+:root {
+  --crema: #FFF7EF;
+  --superficie: #FFFFFF;
+  --tinta: #2B3440;
+  --tinta-suave: #6B7683;
+  --borde: #ECE3D8;
+
+  --coral: #FF6B6B;
+  --coral-oscuro: #E24E4E;
+  --menta: #2A9D8F;
+  --menta-oscura: #1F7A70;
+  --sol: #F4B942;
+  --cielo: #3D7EE8;
+
+  --sombra: 0 2px 4px rgba(43, 52, 64, .05), 0 10px 30px rgba(43, 52, 64, .08);
+  --sombra-boton: 0 4px 0 rgba(0, 0, 0, .12);
+
+  --radio: 22px;
+  --radio-chico: 14px;
+
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --texto: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* Las reglas de layout de más abajo (display:flex, display:grid...) ganarían
+   al display:none que el navegador aplica a [hidden]; lo dejamos claro aquí
+   para que ocultar con el atributo hidden funcione siempre. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--crema);
+  color: var(--tinta);
+  font-family: var(--texto);
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   CABECERA
+   ============================================================ */
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px calc(14px + env(safe-area-inset-top, 0px));
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.cabecera__marca { display: flex; align-items: center; gap: 12px; }
+
+.cabecera__logo {
+  width: 38px; height: 38px; border-radius: 12px; flex: none;
+  background:
+    radial-gradient(circle at 30% 32%, var(--sol) 0 7px, transparent 8px),
+    radial-gradient(circle at 68% 34%, var(--menta) 0 7px, transparent 8px),
+    radial-gradient(circle at 50% 70%, var(--coral) 0 8px, transparent 9px),
+    #FFF;
+  border: 2px solid var(--borde);
+}
+
+.cabecera__titulo {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1.05;
+  letter-spacing: .01em;
+}
+
+.cabecera__lema { margin: 0; font-size: .82rem; color: var(--tinta-suave); }
+
+/* ============================================================
+   ESTRUCTURA
+   ============================================================ */
+
+.escenario {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 4px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+.panel {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 20px;
+  animation: aparecer .25s ease both;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+
+.boton {
+  font-family: var(--texto);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--tinta);
+  background: #F1F3F6;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: transform .08s ease, filter .15s ease;
+  min-height: 48px;
+}
+
+.boton:active { transform: translateY(2px); }
+.boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+.boton--grande { width: 100%; font-size: 1.15rem; padding: 16px 22px; min-height: 58px; }
+
+.boton--principal { background: var(--coral); color: #FFF; box-shadow: 0 4px 0 var(--coral-oscuro); }
+.boton--sabia     { background: var(--menta); color: #FFF; box-shadow: 0 4px 0 var(--menta-oscura); }
+.boton--repasar   { background: var(--sol);   color: #4A3200; box-shadow: 0 4px 0 #D0972B; }
+.boton--principal:active, .boton--sabia:active, .boton--repasar:active { box-shadow: none; }
+
+.boton--fantasma { background: transparent; border: 2px solid var(--borde); font-size: .9rem; padding: 8px 14px; min-height: 40px; }
+
+.boton--texto {
+  background: none; color: var(--tinta-suave); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 4px; padding: 10px;
+}
+
+.boton--mini { font-size: .88rem; min-height: 36px; padding: 6px 8px; }
+
+.boton--escuchar {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #EAF1FF; color: var(--cielo);
+}
+
+.boton--redondo {
+  flex: none;
+  width: 52px; height: 52px; padding: 0;
+  font-size: 1.4rem; line-height: 1;
+  background: #EAF1FF;
+}
+
+.boton--sonando { animation: latido .6s ease infinite; }
+@keyframes latido { 50% { transform: scale(1.06); } }
+
+/* ============================================================
+   INICIO Y FINAL
+   ============================================================ */
+
+.panel--inicio, .panel--final { text-align: center; }
+
+.inicio__intro { margin: 4px 0 18px; font-size: 1.05rem; color: var(--tinta-suave); }
+.panel--inicio .boton--texto { font-size: .88rem; }
+.inicio__aviso { margin: 14px 0 0; font-size: .85rem; color: var(--tinta-suave); }
+
+.marcador {
+  list-style: none; margin: 0 0 20px; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+
+.marcador li {
+  background: #F7F8FA; border-radius: var(--radio-chico); padding: 10px 4px;
+}
+
+.marcador b { display: block; font-family: var(--display); font-size: 1.5rem; line-height: 1; }
+.marcador span { font-size: .72rem; color: var(--tinta-suave); font-weight: 700; }
+
+.marcador li[data-estado="conocida"] b { color: var(--menta); }
+.marcador li[data-estado="repasar"] b  { color: #C98A0E; }
+.marcador li[data-estado="nueva"] b    { color: var(--coral); }
+
+.final__emoji { font-size: 3rem; margin: 4px 0 0; }
+.final__titulo { font-family: var(--display); margin: 4px 0 18px; font-size: 1.7rem; }
+
+/* ============================================================
+   PROGRESO DE LA RONDA
+   ============================================================ */
+
+.progreso { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.progreso__barra { flex: 1; height: 10px; border-radius: 999px; background: #EFF1F4; overflow: hidden; }
+.progreso__relleno { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--coral); transition: width .3s ease; }
+.progreso__texto { font-size: .82rem; font-weight: 800; color: var(--tinta-suave); }
+
+/* ============================================================
+   ESCENA (la ilustración)
+   ============================================================ */
+
+.escena { margin: 0 0 18px; position: relative; }
+
+.escena__img {
+  display: block; width: 100%; height: auto;
+  border-radius: var(--radio-chico);
+  background: #F4F5F7;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.escena__tema {
+  position: absolute; left: 10px; bottom: 10px;
+  background: rgba(255, 255, 255, .92);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: .78rem; font-weight: 800; color: var(--tinta-suave);
+}
+
+/* ============================================================
+   CARA A — PREGUNTA
+   ============================================================ */
+
+.cara { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+.cara--pregunta > .boton--escuchar { align-self: center; }
+
+.respuesta-form { display: flex; flex-direction: column; gap: 10px; }
+
+.respuesta-form__etiqueta { font-weight: 700; font-size: .92rem; color: var(--tinta-suave); text-align: center; }
+
+.respuesta-form__campo {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  text-align: center;
+  padding: 14px 16px;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-chico);
+  background: #FFFDFA;
+  color: var(--tinta);
+  width: 100%;
+}
+
+.respuesta-form__campo:focus { outline: none; border-color: var(--cielo); }
+.respuesta-form__campo.es-correcta { border-color: var(--menta); }
+.respuesta-form__campo.es-fallo { border-color: var(--coral); }
+
+/* ============================================================
+   CARA B — RESPUESTA
+   ============================================================ */
+
+.veredicto {
+  margin: 0; text-align: center; font-weight: 800;
+  border-radius: var(--radio-chico); padding: 10px;
+}
+
+.veredicto[data-tipo="bien"] { background: #E6F5F2; color: var(--menta-oscura); }
+.veredicto[data-tipo="casi"] { background: #FFF3E0; color: #A96A00; }
+
+.palabra { display: flex; align-items: center; justify-content: center; gap: 14px; }
+
+.palabra__en {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 12vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.traducciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.traducciones li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  background: #F7F8FA; border-radius: var(--radio-chico); padding: 10px 16px;
+}
+
+.traducciones__idioma { font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-suave); }
+.traducciones__texto { font-size: 1.15rem; font-weight: 700; text-align: right; }
+
+.ejemplo { background: #FFFBF3; border: 2px dashed #F0E2CB; border-radius: var(--radio-chico); padding: 14px; }
+.ejemplo__linea { display: flex; align-items: center; gap: 12px; }
+.ejemplo__en { margin: 0; flex: 1; font-size: 1.1rem; font-weight: 700; }
+
+.ejemplo__traducciones { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: .95rem; }
+.ejemplo__traducciones li { display: flex; gap: 10px; align-items: baseline; }
+.ejemplo__traducciones .traducciones__idioma { flex: none; min-width: 92px; }
+
+.decision { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.decision .boton { font-size: 1.05rem; white-space: nowrap; padding: 16px 10px; }
+
+/* ============================================================
+   VARIOS
+   ============================================================ */
+
+.error {
+  background: #FFECEC; color: #A32020; border-radius: var(--radio-chico);
+  padding: 14px 16px; font-weight: 700; text-align: center;
+}
+
+@media (max-width: 380px) {
+  .decision { grid-template-columns: 1fr; }
+  .marcador { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

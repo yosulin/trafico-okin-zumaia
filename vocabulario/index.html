@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Colores en inglés — vocabulario</title>
+  <meta name="description" content="Añade color a tu vida. Aprende un idioma nuevo. Tarjetas de vocabulario en inglés con imagen, audio y traducción al castellano y al euskera.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#FF6B6B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Colores">
+
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <header class="cabecera">
+    <div class="cabecera__marca">
+      <span class="cabecera__logo" aria-hidden="true"></span>
+      <div>
+        <h1 class="cabecera__titulo">Colores</h1>
+        <p class="cabecera__lema">Añade color a tu vida</p>
+      </div>
+    </div>
+    <button class="boton boton--fantasma boton--instalar" id="boton-instalar" type="button" hidden>📲 Instalar</button>
+  </header>
+
+  <main class="escenario">
+
+    <!-- ========== PANTALLA DE INICIO ========== -->
+    <section class="panel panel--inicio" id="pantalla-inicio">
+      <p class="inicio__intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
+      <ul class="marcador" id="marcador-inicio"></ul>
+      <button class="boton boton--grande boton--principal" id="boton-empezar" type="button">Empezar</button>
+      <button class="boton boton--texto" id="boton-reiniciar" type="button">Empezar de cero</button>
+      <p class="inicio__aviso" id="aviso-audio" hidden>Este navegador no puede leer las palabras en voz alta.</p>
+    </section>
+
+    <!-- ========== TARJETA ========== -->
+    <section class="panel panel--tarjeta" id="pantalla-tarjeta" hidden>
+
+      <div class="progreso">
+        <div class="progreso__barra"><span class="progreso__relleno" id="progreso-relleno"></span></div>
+        <span class="progreso__texto" id="progreso-texto"></span>
+      </div>
+
+      <figure class="escena">
+        <img class="escena__img" id="escena-img" src="" alt="">
+        <figcaption class="escena__tema" id="escena-tema"></figcaption>
+      </figure>
+
+      <!-- Cara A: la pregunta. La palabra en inglés no aparece. -->
+      <div class="cara cara--pregunta" id="cara-pregunta">
+        <button class="boton boton--escuchar" id="boton-escuchar-pregunta" type="button">
+          <span class="boton__icono" aria-hidden="true">🔊</span> Escuchar otra vez
+        </button>
+
+        <form class="respuesta-form" id="form-respuesta" autocomplete="off">
+          <label class="respuesta-form__etiqueta" for="campo-respuesta">Escríbelo en inglés</label>
+          <input class="respuesta-form__campo" id="campo-respuesta" type="text" inputmode="text"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…">
+          <button class="boton boton--grande boton--principal" type="submit">Comprobar</button>
+        </form>
+
+        <button class="boton boton--texto" id="boton-ver-respuesta" type="button">No lo sé, ver la respuesta</button>
+      </div>
+
+      <!-- Cara B: la respuesta. -->
+      <div class="cara cara--respuesta" id="cara-respuesta" hidden>
+        <p class="veredicto" id="veredicto" hidden></p>
+
+        <div class="palabra">
+          <h2 class="palabra__en" id="palabra-en"></h2>
+          <button class="boton boton--redondo" id="boton-escuchar-palabra" type="button" aria-label="Escuchar la palabra">🔊</button>
+        </div>
+
+        <ul class="traducciones">
+          <li><span class="traducciones__idioma">Castellano</span><span class="traducciones__texto" id="palabra-es"></span></li>
+          <li><span class="traducciones__idioma">Euskara</span><span class="traducciones__texto" id="palabra-eu"></span></li>
+        </ul>
+
+        <div class="ejemplo">
+          <div class="ejemplo__linea">
+            <p class="ejemplo__en" id="ejemplo-en"></p>
+            <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" aria-label="Escuchar la frase">🔊</button>
+          </div>
+          <button class="boton boton--texto boton--mini" id="boton-ver-traduccion" type="button" aria-expanded="false">Ver la traducción</button>
+          <ul class="ejemplo__traducciones" id="ejemplo-traducciones" hidden>
+            <li><span class="traducciones__idioma">Castellano</span><span id="ejemplo-es"></span></li>
+            <li><span class="traducciones__idioma">Euskara</span><span id="ejemplo-eu"></span></li>
+          </ul>
+        </div>
+
+        <div class="decision">
+          <button class="boton boton--grande boton--repasar" id="boton-repasar" type="button">🔁 Repasar</button>
+          <button class="boton boton--grande boton--sabia" id="boton-sabia" type="button">✅ La sabía</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FINAL DE SESIÓN ========== -->
+    <section class="panel panel--final" id="pantalla-final" hidden>
+      <p class="final__emoji" aria-hidden="true">🎉</p>
+      <h2 class="final__titulo">¡Ronda terminada!</h2>
+      <ul class="marcador" id="marcador-final"></ul>
+      <button class="boton boton--grande boton--principal" id="boton-otra-vuelta" type="button">Otra vuelta</button>
+    </section>
+
+    <p class="error" id="error" hidden></p>
+  </main>
+
+  <script src="js/audio.js"></script>
+  <script src="js/progreso.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

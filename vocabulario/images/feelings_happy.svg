@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Varios niños en gris; la niña contenta aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#FFF6DF}
+    .skin{fill:#F2C6A0}.top{fill:#F4B942}.top2{fill:#D89A22}.hair{fill:#8A5A2B}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <rect class="g1" y="248" width="400" height="52"/>
+  <g class="g2">
+    <rect x="20" y="132" width="70" height="116" rx="10"/><rect x="320" y="150" width="62" height="98" rx="10"/>
+    <circle cx="200" cy="46" r="22"/>
+  </g>
+  <g transform="translate(78,26)">
+    <path class="s4" d="M-20 168 l-22 24"/><path class="s4" d="M20 168 l22 24"/>
+    <circle class="g3" cx="0" cy="134" r="22"/>
+    <path class="g4" d="M-22 134 a22 22 0 0 1 44 0 q3 -26 -22 -24 q-25 2 -22 24 z"/>
+    <circle fill="#7C848F" cx="-8" cy="134" r="3"/><circle fill="#7C848F" cx="8" cy="134" r="3"/>
+    <path fill="none" stroke="#7C848F" stroke-width="3" stroke-linecap="round" d="M-7 146 h14"/>
+    <rect class="g4" x="-20" y="156" width="40" height="52" rx="16"/>
+    <rect class="g3" x="-16" y="204" width="13" height="20" rx="6"/><rect class="g3" x="3" y="204" width="13" height="20" rx="6"/>
+  </g>
+  <g transform="translate(322,34)">
+    <path class="s4" d="M-20 168 l-22 20"/><path class="s4" d="M20 168 l20 22"/>
+    <circle class="g3" cx="0" cy="134" r="22"/>
+    <path class="g4" d="M-23 136 q0 -26 23 -26 q23 0 23 26 q-5 -18 -23 -16 q-18 -2 -23 16 z"/>
+    <circle fill="#7C848F" cx="-8" cy="134" r="3"/><circle fill="#7C848F" cx="8" cy="134" r="3"/>
+    <path fill="none" stroke="#7C848F" stroke-width="3" stroke-linecap="round" d="M-7 146 h14"/>
+    <rect class="g4" x="-20" y="156" width="40" height="52" rx="16"/>
+    <rect class="g3" x="-16" y="204" width="13" height="20" rx="6"/><rect class="g3" x="3" y="204" width="13" height="20" rx="6"/>
+  </g>
+  <ellipse class="halo" cx="200" cy="160" rx="104" ry="120"/>
+  <g transform="translate(200,0)">
+    <path fill="none" stroke="#F4B942" stroke-width="8" stroke-linecap="round" d="M-28 156 l-32 -30"/>
+    <path fill="none" stroke="#F4B942" stroke-width="8" stroke-linecap="round" d="M28 156 l32 -30"/>
+    <path class="hair" d="M-30 122 q0 -34 30 -34 q30 0 30 34 q0 22 -8 32 q-4 -26 -22 -28 q-18 2 -22 28 q-8 -10 -8 -32 z"/>
+    <circle class="skin" cx="0" cy="126" r="30"/>
+    <path class="hair" d="M-30 120 q4 -28 30 -28 q26 0 30 28 q-16 -16 -30 -14 q-14 -2 -30 14 z"/>
+    <circle fill="#3A3226" cx="-11" cy="124" r="4"/><circle fill="#3A3226" cx="11" cy="124" r="4"/>
+    <path fill="#8A3B3B" d="M-14 138 q14 22 28 0 q-14 6 -28 0 z"/>
+    <circle fill="#F49AA6" cx="-22" cy="136" r="6" opacity=".8"/><circle fill="#F49AA6" cx="22" cy="136" r="6" opacity=".8"/>
+    <path class="top" d="M-24 156 h48 q12 4 12 18 v40 h-72 v-40 q0 -14 12 -18 z"/>
+    <path class="top2" d="M-36 214 h72 l4 34 h-80 z"/>
+    <rect class="skin" x="-20" y="248" width="15" height="10" rx="4"/><rect class="skin" x="5" y="248" width="15" height="10" rx="4"/>
+    <rect fill="#D89A22" x="-24" y="254" width="22" height="10" rx="5"/><rect fill="#D89A22" x="2" y="254" width="22" height="10" rx="5"/>
+    <g fill="#F4B942">
+      <path d="M-74 76 l6 -16 l6 16 l16 6 l-16 6 l-6 16 l-6 -16 l-16 -6 z"/>
+      <path d="M70 60 l5 -12 l5 12 l12 5 l-12 5 l-5 12 l-5 -12 l-12 -5 z"/>
+      <circle cx="-96" cy="130" r="6"/><circle cx="96" cy="118" r="7"/>
+    </g>
+  </g>
+</svg>
