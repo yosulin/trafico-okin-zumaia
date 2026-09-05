@@ -62,6 +62,22 @@ Las rutas son idénticas en los dos modos, así que no hay nada que migrar.
 
 ---
 
+## Quién puede entrar en la app
+
+La app es privada: las reglas de Firestore solo dejan leer a quien tenga su
+correo en la colección `allowed`, que no se puede tocar desde el navegador.
+
+```bash
+npm run permitidos                        # ver la lista
+npm run permitir -- alguien@gmail.com     # dar acceso
+npm run denegar  -- alguien@gmail.com     # quitarlo
+```
+
+Inmediato: no hay que desplegar nada. Quitar a alguien no borra su progreso, por
+si vuelve.
+
+---
+
 ## Opciones
 
 ```
@@ -182,6 +198,7 @@ lib/zip.mjs           lectura de zips sin dependencias
 lib/normalizar.mjs    de "lo que venga" al esquema de Firestore
 lib/firebase.mjs      Admin SDK: escribir en Firestore y subir a Storage
 comprobar.mjs         comprueba que todos los módulos cargan y exportan
+permitir.mjs          gestiona quién puede entrar en la app
 datos/                las 10 tarjetas de demostración
                       (sus ilustraciones están en vocabulario/media/)
 ```

@@ -35,6 +35,7 @@ const $ = (id) => document.getElementById(id);
 const pantallas = {
   cargando: $("pantalla-cargando"),
   login: $("pantalla-login"),
+  sinAcceso: $("pantalla-sin-acceso"),
   inicio: $("pantalla-inicio"),
   tarjeta: $("pantalla-tarjeta"),
   final: $("pantalla-final")
@@ -47,6 +48,8 @@ const el = {
   entrar: $("boton-entrar"),
   salir: $("boton-salir"),
   errorLogin: $("error-login"),
+  sinAccesoCorreo: $("sin-acceso-correo"),
+  salirSinAcceso: $("boton-salir-sin-acceso"),
 
   marcadorInicio: $("marcador-inicio"),
   marcadorFinal: $("marcador-final"),
@@ -272,6 +275,13 @@ async function prepararSesion(usuario) {
     el.avisoAudio.hidden = hayVozDelNavegador();
     mostrarPantalla("inicio");
   } catch (fallo) {
+    /* Las reglas de Firestore solo dejan leer a quien está en la lista
+       de invitadas: cualquiera puede entrar con Google, pero no ver nada. */
+    if (fallo.code === "permission-denied") {
+      el.sinAccesoCorreo.textContent = usuario.email || "esta cuenta";
+      mostrarPantalla("sinAcceso");
+      return;
+    }
     mostrarPantalla("inicio");
     mostrarError("No se han podido cargar las tarjetas: " + fallo.message);
   }
@@ -304,6 +314,7 @@ el.entrar.addEventListener("click", async () => {
 });
 
 el.salir.addEventListener("click", () => { parar(); salir(); });
+el.salirSinAcceso.addEventListener("click", () => salir());
 
 el.empezar.addEventListener("click", empezarRonda);
 el.otraVuelta.addEventListener("click", empezarRonda);

@@ -272,14 +272,35 @@ por una ilustración mejor (SVG, WebP...) es dejar el fichero nuevo ahí y apunt
 
 ---
 
+## Quién puede entrar
+
+La app es **privada**. Cualquiera puede pulsar «Entrar con Google» —eso no se
+puede impedir en el plan gratuito—, pero solo ve algo quien tenga su correo en
+la colección `allowed` de Firestore. Quien no esté se encuentra una pantalla que
+se lo dice, y ni una tarjeta.
+
+El filtro está en las **reglas**, no en la página: no se puede saltar desde el
+navegador. Y la lista solo se toca con la cuenta de servicio:
+
+```bash
+cd tools/import
+npm run permitidos                        # ver quién puede entrar
+npm run permitir -- alguien@gmail.com     # dar acceso
+npm run denegar  -- alguien@gmail.com     # quitarlo
+```
+
+Los cambios son inmediatos: no hay que desplegar ni volver a publicar nada.
+
+---
+
 ## Seguridad
 
 `firestore.rules` y `storage.rules`, en la raíz del repositorio:
 
-- Solo quien ha entrado lee tarjetas, y solo las activas.
+- Solo lee tarjetas quien ha entrado **y está en la lista**, y solo las activas.
 - Escribir en `cards` está prohibido desde cualquier cliente: el contenido entra
   por `tools/import/`, con Admin SDK, que no pasa por las reglas.
-- Cada persona solo lee y escribe **su** progreso.
+- Cada persona solo lee y escribe **su** progreso, y solo si está en la lista.
 - Todo lo demás, denegado.
 
 La clave de la cuenta de servicio del importador nunca va al repositorio

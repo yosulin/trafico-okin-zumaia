@@ -3,14 +3,23 @@ rules_version = '2';
 // ============================================================
 //  REGLAS DE FIRESTORE
 // ============================================================
-//  Dos ideas, nada más:
+//  Tres ideas:
 //
-//   1. El contenido (cards, themes) es de SOLO LECTURA para la app,
-//      y solo para quien ha entrado con su cuenta. Escribirlo es cosa
-//      del importador de tools/import/, que usa el Admin SDK y por
+//   1. La app es PRIVADA: solo entra quien esté en la colección
+//      "allowed". Cualquiera puede pulsar "Entrar con Google" (eso no
+//      se puede impedir), pero si su correo no está en la lista no lee
+//      ni una tarjeta ni escribe ningún progreso.
+//
+//      La lista se gestiona con tools/import:
+//          npm run permitidos
+//          npm run permitir -- alguien@gmail.com
+//          npm run denegar  -- alguien@gmail.com
+//
+//   2. El contenido (cards, themes) es de SOLO LECTURA para la app.
+//      Escribirlo es cosa del importador, que usa el Admin SDK y por
 //      tanto NO pasa por estas reglas.
 //
-//   2. El progreso es privado: cada persona solo llega al suyo.
+//   3. El progreso es privado: cada persona solo llega al suyo.
 //
 //  Nada de "allow read, write: if true".
 // ============================================================
@@ -18,20 +27,31 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function haEntrado() {
-      return request.auth != null;
+    // Está invitada: ha entrado Y su correo figura en "allowed".
+    function invitada() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && exists(/databases/$(database)/documents/allowed/$(request.auth.token.email.lower()));
+    }
+
+    // ---------- quién puede entrar ----------
+
+    match /allowed/{correo} {
+      // La lista solo la toca el importador. Nadie la lee desde el navegador:
+      // la app no necesita verla, le basta con que las reglas la consulten.
+      allow read, write: if false;
     }
 
     // ---------- contenido ----------
 
     match /cards/{cardId} {
       // Solo tarjetas activas, y solo lectura.
-      allow get, list: if haEntrado() && resource.data.active == true;
+      allow get, list: if invitada() && resource.data.active == true;
       allow create, update, delete: if false;
     }
 
     match /themes/{themeId} {
-      allow get, list: if haEntrado();
+      allow get, list: if invitada();
       allow create, update, delete: if false;
     }
 
@@ -40,11 +60,11 @@ service cloud.firestore {
     match /users/{uid} {
       // El documento del usuario en sí no se usa todavía; que no se pueda
       // escribir nada suelto ahí.
-      allow read: if haEntrado() && request.auth.uid == uid;
+      allow read: if invitada() && request.auth.uid == uid;
       allow write: if false;
 
       match /progress/{cardId} {
-        allow read, write: if haEntrado() && request.auth.uid == uid;
+        allow read, write: if invitada() && request.auth.uid == uid;
       }
     }
 
