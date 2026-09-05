@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Importador de contenido (JSON, CSV, mazos Anki .apkg) a Firestore y Firebase Storage. Herramienta de administración: no forma parte de la PWA.",
   "scripts": {
+    "comprobar": "node comprobar.mjs",
     "semilla": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media --sin-medios",
     "semilla-prueba": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media --sin-medios --dry-run",
     "semilla-storage": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media"

@@ -28,6 +28,13 @@ npm install          # firebase-admin (+ better-sqlite3, solo para Anki)
 export GOOGLE_APPLICATION_CREDENTIALS=/ruta/absoluta/a/clave.json
 ```
 
+Para comprobar que todas las piezas cargan (sin tocar Firebase ni necesitar
+credenciales):
+
+```bash
+npm run comprobar
+```
+
 `--dry-run` no necesita ni dependencias ni credenciales: enseña exactamente qué
 se subiría y qué documento quedaría en Firestore, sin tocar nada.
 
@@ -173,7 +180,8 @@ lib/origen-csv.mjs    lector CSV (con comillas y saltos de línea)
 lib/origen-anki.mjs   lector .apkg
 lib/zip.mjs           lectura de zips sin dependencias
 lib/normalizar.mjs    de "lo que venga" al esquema de Firestore
-lib/firebase.mjs      Admin SDK: subir a Storage y escribir en Firestore
+lib/firebase.mjs      Admin SDK: escribir en Firestore y subir a Storage
+comprobar.mjs         comprueba que todos los módulos cargan y exportan
 datos/                las 10 tarjetas de demostración
                       (sus ilustraciones están en vocabulario/media/)
 ```
