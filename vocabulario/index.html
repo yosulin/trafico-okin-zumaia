@@ -69,6 +69,50 @@
       </button>
     </section>
 
+    <!-- ========== ÍNDICE DE HERRAMIENTAS ========== -->
+    <section class="panel panel--inicio" id="pantalla-hub" hidden>
+      <p class="inicio__intro" id="hub-saludo">¿Qué quieres hacer?</p>
+      <ul class="herramientas">
+        <li>
+          <button class="herramienta" id="boton-ir-tarjetas" type="button">
+            <span class="herramienta__icono" aria-hidden="true">🃏</span>
+            <span class="herramienta__texto">
+              <b>Tarjetas</b>
+              <small>Escucha, mira el dibujo y escribe la palabra</small>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button class="herramienta" id="boton-ir-diccionario" type="button">
+            <span class="herramienta__icono" aria-hidden="true">📖</span>
+            <span class="herramienta__texto">
+              <b>Diccionario</b>
+              <small>Una palabra en un idioma, y te doy los otros dos</small>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ========== DICCIONARIO ========== -->
+    <section class="panel panel--diccionario" id="pantalla-diccionario" hidden>
+      <button class="boton boton--texto boton--volver" id="boton-volver-hub" type="button">← Volver</button>
+
+      <form class="buscador" id="form-buscar" autocomplete="off">
+        <label class="respuesta-form__etiqueta" for="campo-buscar">
+          Escribe una palabra en inglés, castellano o euskera
+        </label>
+        <div class="buscador__linea">
+          <input class="buscador__campo" id="campo-buscar" type="search" inputmode="search"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="dog, perro, txakurra…">
+          <button class="boton boton--principal buscador__boton" type="submit">Buscar</button>
+        </div>
+      </form>
+
+      <p class="buscador__estado" id="buscador-estado" hidden></p>
+      <div id="resultados"></div>
+    </section>
+
     <!-- ========== INICIO ========== -->
     <section class="panel panel--inicio" id="pantalla-inicio" hidden>
       <p class="inicio__intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
@@ -80,6 +124,8 @@
 
     <!-- ========== TARJETA ========== -->
     <section class="panel panel--tarjeta" id="pantalla-tarjeta" hidden>
+
+      <button class="boton boton--texto boton--volver" id="boton-volver-hub-tarjetas" type="button">← Volver</button>
 
       <div class="progreso">
         <div class="progreso__barra"><span class="progreso__relleno" id="progreso-relleno"></span></div>
@@ -146,6 +192,7 @@
       <h2 class="final__titulo">¡Ronda terminada!</h2>
       <ul class="marcador" id="marcador-final"></ul>
       <button class="boton boton--grande boton--principal" id="boton-otra-vuelta" type="button">Otra vuelta</button>
+      <button class="boton boton--texto" id="boton-volver-hub-final" type="button">Volver al menú</button>
     </section>
 
     <p class="error" id="error" hidden></p>

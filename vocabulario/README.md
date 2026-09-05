@@ -38,6 +38,29 @@ El contenido entra por el importador, que usa una cuenta de servicio.
 
 ---
 
+## Las herramientas
+
+Tras entrar aparece un **índice**, y de ahí se elige:
+
+- **Tarjetas** — el juego: dibujo, audio y escribir la palabra en inglés.
+- **Diccionario** — se escribe una palabra en **cualquiera de los tres idiomas**
+  y devuelve los otros dos, con su dibujo, su audio y su ejemplo si los tiene.
+
+Las dos leen la **misma** colección `cards`: una tarjeta ya es una entrada
+trilingüe, así que no hay dos contenidos que mantener. Lo que las separa es un
+campo:
+
+- `deck: true` → entra en el juego de tarjetas.
+- `active: true` → se puede buscar en el diccionario.
+
+Así se puede importar un léxico de miles de palabras (`--sin-mazo`) para el
+diccionario sin que el mazo de la niña se vuelva inmanejable.
+
+Añadir una herramienta nueva es añadir un botón al índice y una pantalla: el
+login, el audio, los datos y el progreso ya están hechos y se comparten.
+
+---
+
 ## Cómo funciona una tarjeta
 
 **Pregunta** → dibujo grande, audio automático de la palabra en inglés, botón
@@ -199,9 +222,14 @@ obliga a reescribir las tarjetas. `media.js` las resuelve según la opción
 `medios` de la configuración: `"hosting"` las convierte en `./media/…` y
 `"storage"` se las pide a Firebase Storage (y guarda la URL en `localStorage`).
 
+`search` lo calcula el importador: la palabra en los tres idiomas, en minúsculas
+y sin acentos. Es lo que permite que el diccionario encuentre la entrada se
+escriba `dog`, `Perro` o `txakurra`.
+
 `datos.js` conserva cualquier **campo extra** del documento (nivel CEFR, edad,
 dificultad, procedencia...), así que ampliar el esquema no exige tocar la app.
-Solo `active: true` decide qué se ve.
+De hecho el diccionario ya enseña `definition.es` / `.en` / `.eu` si algún día
+aparecen: no hay nada que cambiar para empezar a usarlas.
 
 ---
 

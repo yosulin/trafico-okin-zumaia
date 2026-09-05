@@ -13,7 +13,7 @@
  * ============================================================
  */
 
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { collection, getDocs, limit, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { db } from "./firebase.js";
 
 /* Etiqueta que se ve sobre el dibujo. Si existe la colección "themes"
@@ -54,11 +54,81 @@ function normalizar(id, datos) {
   });
 }
 
-/** Todas las tarjetas activas. Sin conexión salen de la caché de Firestore. */
+/**
+ * Las tarjetas del juego: activas y marcadas para el mazo.
+ * Sin conexión salen de la caché de Firestore.
+ */
 export async function cargarTarjetas() {
-  const consulta = query(collection(db, "cards"), where("active", "==", true));
+  const consulta = query(
+    collection(db, "cards"),
+    where("active", "==", true),
+    where("deck", "==", true)
+  );
   const respuesta = await getDocs(consulta);
   return respuesta.docs.map((documento) => normalizar(documento.id, documento.data()));
+}
+
+/* ---------- diccionario ---------- */
+
+const IDIOMAS = ["en", "es", "eu"];
+
+/** Igual que textoDeBusqueda() del importador: lo que se guarda en "search". */
+export function textoDeBusqueda(texto) {
+  return String(texto || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.,!?;:'"\u00bf\u00a1]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function unir(respuestas) {
+  const porId = new Map();
+  respuestas.forEach((respuesta) => {
+    respuesta.docs.forEach((documento) => {
+      if (!porId.has(documento.id)) {
+        porId.set(documento.id, normalizar(documento.id, documento.data()));
+      }
+    });
+  });
+  return [...porId.values()];
+}
+
+/**
+ * Busca una palabra en los tres idiomas a la vez: se escriba "dog",
+ * "perro" o "txakurra", sale la misma entrada.
+ *
+ * Primero la palabra exacta. Si no hay nada, prueba por principio de
+ * palabra ("txak" → "txakurra"), que necesita índices compuestos; si no
+ * están desplegados Firestore protesta y nos quedamos con lo exacto en
+ * lugar de romper.
+ */
+export async function buscar(termino) {
+  const texto = textoDeBusqueda(termino);
+  if (!texto) return [];
+
+  const exactas = await Promise.all(IDIOMAS.map((idioma) => getDocs(query(
+    collection(db, "cards"),
+    where("active", "==", true),
+    where("search." + idioma, "==", texto),
+    limit(10)
+  ))));
+
+  const encontradas = unir(exactas);
+  if (encontradas.length > 0) return encontradas;
+
+  try {
+    const porPrincipio = await Promise.all(IDIOMAS.map((idioma) => getDocs(query(
+      collection(db, "cards"),
+      where("active", "==", true),
+      where("search." + idioma, ">=", texto),
+      where("search." + idioma, "<", texto + "\uf8ff"),
+      limit(8)
+    ))));
+    return unir(porPrincipio);
+  } catch (error) {
+    return [];
+  }
 }
 
 /** Etiquetas de tema. Si la colección no existe o no se puede leer, valen las de aquí. */

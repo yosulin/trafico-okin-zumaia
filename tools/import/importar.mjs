@@ -69,6 +69,8 @@ Uso: node importar.mjs --origen <json|csv|anki> --fichero <ruta> [opciones]
   --sin-medios        no subir nada a Storage (los medios los sirve Hosting
                       desde vocabulario/media/, que es el modo del prototipo)
   --inactivas         crear las tarjetas con active:false (para revisarlas antes)
+  --sin-mazo          deck:false — entran en el diccionario pero no en el juego
+                      de tarjetas (para importaciones grandes tipo Oxford 3000)
 
   --tema <id>         tema por defecto (animals, food, school...)
   --capa <n>          capa por defecto (por defecto 1)
@@ -203,6 +205,7 @@ async function principal() {
   crudas.forEach((cruda) => {
     const tarjeta = normalizarTarjeta(cruda, comunes);
     if (opciones.inactivas) tarjeta.active = false;
+    if (opciones["sin-mazo"]) tarjeta.deck = false;
 
     const problemas = validar(tarjeta);
     if (problemas.length > 0) {

@@ -25,7 +25,7 @@
  * ============================================================
  */
 
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
 const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
 const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;

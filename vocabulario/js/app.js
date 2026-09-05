@@ -23,7 +23,7 @@
  */
 
 import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js";
-import { cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
+import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
@@ -36,7 +36,9 @@ const pantallas = {
   cargando: $("pantalla-cargando"),
   login: $("pantalla-login"),
   sinAcceso: $("pantalla-sin-acceso"),
+  hub: $("pantalla-hub"),
   inicio: $("pantalla-inicio"),
+  diccionario: $("pantalla-diccionario"),
   tarjeta: $("pantalla-tarjeta"),
   final: $("pantalla-final")
 };
@@ -50,6 +52,18 @@ const el = {
   errorLogin: $("error-login"),
   sinAccesoCorreo: $("sin-acceso-correo"),
   salirSinAcceso: $("boton-salir-sin-acceso"),
+
+  hubSaludo: $("hub-saludo"),
+  irTarjetas: $("boton-ir-tarjetas"),
+  irDiccionario: $("boton-ir-diccionario"),
+  volverHub: $("boton-volver-hub"),
+  volverHubTarjetas: $("boton-volver-hub-tarjetas"),
+  volverHubFinal: $("boton-volver-hub-final"),
+
+  formBuscar: $("form-buscar"),
+  campoBuscar: $("campo-buscar"),
+  buscadorEstado: $("buscador-estado"),
+  resultados: $("resultados"),
 
   marcadorInicio: $("marcador-inicio"),
   marcadorFinal: $("marcador-final"),
@@ -247,6 +261,116 @@ function empezarRonda() {
   mostrarPregunta();
 }
 
+/* ---------- diccionario ---------- */
+
+/**
+ * Pinta una entrada encontrada. Enseña lo que la tarjeta tenga: si no
+ * hay dibujo, ejemplo o definición, esa parte simplemente no aparece.
+ * Así el mismo trozo sirve para las 10 tarjetas ilustradas de ahora y
+ * para un léxico importado que solo traiga palabra y traducción.
+ */
+function pintarEntrada(tarjeta) {
+  const seccion = document.createElement("article");
+  seccion.className = "entrada";
+
+  const tema = temas[tarjeta.theme];
+
+  seccion.innerHTML = `
+    <div class="entrada__cabecera">
+      <h3 class="entrada__palabra"></h3>
+      <button class="boton boton--redondo" type="button" aria-label="Escuchar la palabra">🔊</button>
+    </div>
+    <ul class="traducciones">
+      <li><span class="traducciones__idioma">Castellano</span><span class="traducciones__texto"></span></li>
+      <li><span class="traducciones__idioma">Euskara</span><span class="traducciones__texto"></span></li>
+    </ul>`;
+
+  seccion.querySelector(".entrada__palabra").textContent = tarjeta.word;
+  const traducciones = seccion.querySelectorAll(".traducciones__texto");
+  traducciones[0].textContent = tarjeta.es || "—";
+  traducciones[1].textContent = tarjeta.eu || "—";
+
+  const botonPalabra = seccion.querySelector(".boton--redondo");
+  botonPalabra.addEventListener("click", () => sonar(botonPalabra, playWordAudio, tarjeta));
+
+  if (tema) {
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "entrada__tipo";
+    etiqueta.textContent = ((tema.emoji || "") + " " + (tema.es || "")).trim();
+    seccion.querySelector(".entrada__cabecera").insertBefore(etiqueta, botonPalabra);
+  }
+
+  /* La definición aún no existe en ninguna tarjeta, pero si algún día se
+     añade (definition.es / .en / .eu), aparece aquí sin tocar nada. */
+  const definicion = tarjeta.definition && (tarjeta.definition.es || tarjeta.definition.en || tarjeta.definition.eu);
+  if (definicion) {
+    const parrafo = document.createElement("p");
+    parrafo.className = "entrada__definicion";
+    parrafo.textContent = definicion;
+    seccion.insertBefore(parrafo, seccion.querySelector(".traducciones"));
+  }
+
+  if (tarjeta.imagePath) {
+    const imagen = document.createElement("img");
+    imagen.className = "entrada__dibujo";
+    imagen.alt = "";
+    urlDe(tarjeta.imagePath).then((url) => { if (url) imagen.src = url; });
+    seccion.insertBefore(imagen, seccion.querySelector(".traducciones"));
+  }
+
+  if (tarjeta.example.en) {
+    const ejemplo = document.createElement("div");
+    ejemplo.className = "ejemplo";
+    ejemplo.innerHTML = `
+      <div class="ejemplo__linea">
+        <p class="ejemplo__en"></p>
+        <button class="boton boton--redondo" type="button" aria-label="Escuchar la frase">🔊</button>
+      </div>`;
+    ejemplo.querySelector(".ejemplo__en").textContent = tarjeta.example.en;
+
+    if (tarjeta.example.es || tarjeta.example.eu) {
+      const lista = document.createElement("ul");
+      lista.className = "ejemplo__traducciones";
+      lista.innerHTML = `
+        <li><span class="traducciones__idioma">Castellano</span><span></span></li>
+        <li><span class="traducciones__idioma">Euskara</span><span></span></li>`;
+      const celdas = lista.querySelectorAll("li span:last-child");
+      celdas[0].textContent = tarjeta.example.es;
+      celdas[1].textContent = tarjeta.example.eu;
+      ejemplo.appendChild(lista);
+    }
+
+    const botonEjemplo = ejemplo.querySelector(".boton--redondo");
+    botonEjemplo.addEventListener("click", () => sonar(botonEjemplo, playExampleAudio, tarjeta));
+    seccion.appendChild(ejemplo);
+  }
+
+  return seccion;
+}
+
+async function buscarPalabra(termino) {
+  el.resultados.innerHTML = "";
+  el.buscadorEstado.hidden = false;
+  el.buscadorEstado.textContent = "Buscando…";
+
+  try {
+    const encontradas = await buscar(termino);
+
+    if (encontradas.length === 0) {
+      el.buscadorEstado.textContent = "No tengo esa palabra todavía.";
+      return;
+    }
+
+    el.buscadorEstado.hidden = true;
+    encontradas.forEach((tarjeta) => el.resultados.appendChild(pintarEntrada(tarjeta)));
+
+    /* Si solo hay una, se dice sola: es lo que se viene a oír. */
+    if (encontradas.length === 1) playWordAudio(encontradas[0]);
+  } catch (fallo) {
+    el.buscadorEstado.textContent = "No se ha podido buscar: " + fallo.message;
+  }
+}
+
 /* ---------- entrada y salida ---------- */
 
 async function prepararSesion(usuario) {
@@ -273,7 +397,9 @@ async function prepararSesion(usuario) {
     el.error.hidden = true;
     pintarMarcador(el.marcadorInicio);
     el.avisoAudio.hidden = hayVozDelNavegador();
-    mostrarPantalla("inicio");
+    const nombre = (usuario.displayName || "").split(" ")[0];
+    el.hubSaludo.textContent = nombre ? ("Hola, " + nombre + ". ¿Qué quieres hacer?") : "¿Qué quieres hacer?";
+    mostrarPantalla("hub");
   } catch (fallo) {
     /* Las reglas de Firestore solo dejan leer a quien está en la lista
        de invitadas: cualquiera puede entrar con Google, pero no ver nada. */
@@ -282,7 +408,7 @@ async function prepararSesion(usuario) {
       mostrarPantalla("sinAcceso");
       return;
     }
-    mostrarPantalla("inicio");
+    mostrarPantalla("hub");
     mostrarError("No se han podido cargar las tarjetas: " + fallo.message);
   }
 }
@@ -315,6 +441,32 @@ el.entrar.addEventListener("click", async () => {
 
 el.salir.addEventListener("click", () => { parar(); salir(); });
 el.salirSinAcceso.addEventListener("click", () => salir());
+
+function irAlHub() {
+  parar();
+  pintarMarcador(el.marcadorInicio);
+  mostrarPantalla("hub");
+}
+
+el.irTarjetas.addEventListener("click", () => {
+  pintarMarcador(el.marcadorInicio);
+  mostrarPantalla("inicio");
+});
+
+el.irDiccionario.addEventListener("click", () => {
+  mostrarPantalla("diccionario");
+  el.campoBuscar.focus();
+});
+
+el.volverHub.addEventListener("click", irAlHub);
+el.volverHubTarjetas.addEventListener("click", irAlHub);
+el.volverHubFinal.addEventListener("click", irAlHub);
+
+el.formBuscar.addEventListener("submit", (evento) => {
+  evento.preventDefault();
+  desbloquear();
+  buscarPalabra(el.campoBuscar.value);
+});
 
 el.empezar.addEventListener("click", empezarRonda);
 el.otraVuelta.addEventListener("click", empezarRonda);

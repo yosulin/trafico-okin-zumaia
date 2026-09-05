@@ -41,6 +41,20 @@ function capaDe(valor, porDefecto) {
   return porDefecto || CAMPOS_VACIOS.layer;
 }
 
+/**
+ * Texto tal y como se busca: sin mayúsculas, sin acentos y sin artículos
+ * sueltos alrededor. Es lo que se guarda en "search" para que el
+ * diccionario pueda encontrar la palabra se escriba como se escriba.
+ */
+export function textoDeBusqueda(texto) {
+  return limpiar(texto)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.,!?;:'"¿¡]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function idDesde(palabra, tema) {
   const base = limpiar(palabra)
     .toLowerCase()
@@ -95,7 +109,20 @@ export function normalizarTarjeta(cruda, opciones = {}) {
       unit: (cruda.source && cruda.source.unit) || opciones.unidad || null
     },
 
+    /* Entra en el juego de tarjetas. El diccionario, en cambio, busca
+       en todo lo activo: así se puede tener un léxico enorme sin que el
+       mazo de la niña se vuelva inmanejable. */
+    deck: cruda.deck === undefined ? true : Boolean(cruda.deck),
+
     active: cruda.active === undefined ? true : Boolean(cruda.active)
+  };
+
+  /* Índice de búsqueda: la misma palabra en los tres idiomas, normalizada.
+     Lo calcula el importador para que la app no tenga que hacerlo al vuelo. */
+  tarjeta.search = {
+    en: textoDeBusqueda(tarjeta.word),
+    es: textoDeBusqueda(tarjeta.es),
+    eu: textoDeBusqueda(tarjeta.eu)
   };
 
   /* Campos extra del origen que no están en el esquema base: se
