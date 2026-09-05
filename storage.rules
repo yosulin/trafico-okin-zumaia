@@ -3,6 +3,15 @@ rules_version = '2';
 // ============================================================
 //  REGLAS DE FIREBASE STORAGE
 // ============================================================
+//  TODAVÍA NO SE USAN: Firebase Storage exige plan Blaze, así que el
+//  prototipo sirve las imágenes desde Hosting (vocabulario/media/). Por
+//  eso "storage" no aparece en firebase.json: un "firebase deploy"
+//  completo fallaría al no existir el bucket.
+//
+//  El día que se active Blaze, añade esto a firebase.json:
+//
+//      "storage": { "rules": "storage.rules" }
+//
 //  Imágenes y audios: los lee quien ha entrado en la app; los sube
 //  el importador con credenciales de administrador (que no pasan por
 //  estas reglas). Desde el navegador no se puede escribir nada.
