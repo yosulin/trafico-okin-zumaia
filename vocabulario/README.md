@@ -81,13 +81,20 @@ En [console.firebase.google.com](https://console.firebase.google.com):
 
 ### 2. Configurar este repositorio
 
+Lo más seguro es no copiar la configuración a mano: con `firebase login` hecho,
+la CLI se la pide al propio proyecto.
+
 ```bash
-cp .env.example .env          # y rellenar con los valores del paso anterior
-node tools/generar-config.mjs # → vocabulario/js/firebase-config.js
+node tools/config-desde-firebase.mjs   # → vocabulario/js/firebase-config.js
 ```
 
-(o, a mano: `cp vocabulario/js/firebase-config.example.js
-vocabulario/js/firebase-config.js` y editarlo)
+(Copiar la `apiKey` a mano funciona, pero un carácter de más —o un editor que
+guarde algo raro— produce un `auth/api-key-not-valid` que no dice por qué.)
+
+Alternativas, si prefieres no depender de la CLI: rellenar `.env` a partir de
+`.env.example` y ejecutar `node tools/generar-config.mjs`, o copiar
+`vocabulario/js/firebase-config.example.js` a `vocabulario/js/firebase-config.js`
+y editarlo.
 
 `vocabulario/js/firebase-config.js` está en `.gitignore`. Esos valores **no son
 secretos** —viajan en cualquier app web de Firebase—, pero así cada instalación
