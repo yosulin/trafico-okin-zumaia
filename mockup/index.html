@@ -1,0 +1,675 @@
+<title>Ayuda de Sofía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     El interior del "teléfono" usa los mismos tokens que la app
+     real (vocabulario/css/estilos.css): mismo crema, mismos
+     colores, mismas tipografías. Lo que cambia es que aquí no hay
+     Firebase: todo son datos de pega para poder discutir el diseño.
+     ============================================================ */
+  :root {
+    --crema: #FFF7EF;
+    --superficie: #FFFFFF;
+    --tinta: #2B3440;
+    --tinta-suave: #6B7683;
+    --borde: #ECE3D8;
+
+    --coral: #FF6B6B;
+    --coral-oscuro: #E24E4E;
+    --menta: #2A9D8F;
+    --menta-oscura: #1F7A70;
+    --sol: #F4B942;
+    --cielo: #3D7EE8;
+    --cielo-oscuro: #2A5FBF;
+
+    --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+    --texto: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --radio: 22px;
+    --radio-chico: 14px;
+    --sombra: 0 2px 4px rgba(43, 52, 64, .05), 0 10px 30px rgba(43, 52, 64, .08);
+
+    /* El marco de la página (fuera del teléfono) sí se adapta al tema. */
+    --fondo-pagina: #EFEAE3;
+    --marco: #FFFFFF;
+    --marco-borde: #DED6CC;
+    --marco-tinta: #3A4450;
+    --marco-tinta-suave: #6E7986;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo-pagina: #1B1E23;
+      --marco: #23272E;
+      --marco-borde: #333942;
+      --marco-tinta: #E8EAED;
+      --marco-tinta-suave: #9AA3AE;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --fondo-pagina: #1B1E23;
+    --marco: #23272E;
+    --marco-borde: #333942;
+    --marco-tinta: #E8EAED;
+    --marco-tinta-suave: #9AA3AE;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    background: var(--fondo-pagina);
+    color: var(--marco-tinta);
+    font-family: var(--texto);
+    margin: 0;
+    padding: 24px 16px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* ---------- barra de revisión (no es parte de la app) ---------- */
+
+  .revision {
+    width: 100%; max-width: 900px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+
+  .revision__titulo {
+    font-family: var(--display); font-size: 1.15rem; margin: 0 auto 0 0;
+    color: var(--marco-tinta);
+  }
+
+  .revision__nota {
+    font-size: .78rem; color: var(--marco-tinta-suave); font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+
+  .pestanas { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .pestana {
+    font-family: var(--texto); font-weight: 700; font-size: .85rem;
+    color: var(--marco-tinta); background: var(--marco);
+    border: 1px solid var(--marco-borde); border-radius: 999px;
+    padding: 7px 14px; cursor: pointer;
+  }
+
+  .pestana[aria-selected="true"] { background: var(--tinta); color: #FFF; border-color: var(--tinta); }
+  .pestana:focus-visible { outline: 3px solid var(--cielo); outline-offset: 2px; }
+
+  /* ---------- el teléfono ---------- */
+
+  .telefono {
+    width: 100%; max-width: 400px;
+    background: var(--crema);
+    color: var(--tinta);
+    border: 10px solid #2B3440;
+    border-radius: 34px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.22);
+  }
+
+  .pantalla { padding: 16px 16px 28px; min-height: 620px; display: flex; flex-direction: column; }
+
+  /* ---------- cabecera de la app ---------- */
+
+  .cabecera { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+  .cabecera__marca { display: flex; align-items: center; gap: 10px; }
+
+  .logo {
+    width: 36px; height: 36px; border-radius: 11px; flex: none;
+    background:
+      radial-gradient(circle at 30% 32%, var(--sol) 0 7px, transparent 8px),
+      radial-gradient(circle at 68% 34%, var(--menta) 0 7px, transparent 8px),
+      radial-gradient(circle at 50% 70%, var(--coral) 0 8px, transparent 9px),
+      #FFF;
+    border: 2px solid var(--borde);
+  }
+
+  .cabecera__nombre { font-family: var(--display); font-size: 1.2rem; margin: 0; line-height: 1.05; }
+  .cabecera__lema { margin: 0; font-size: .74rem; color: var(--tinta-suave); }
+
+  .usuario { display: flex; align-items: center; gap: 6px; }
+  .usuario__avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--menta); color: #FFF;
+    display: grid; place-items: center; font-weight: 800; font-size: .8rem;
+  }
+  .usuario__salir {
+    background: none; border: 2px solid var(--borde); border-radius: 999px;
+    padding: 4px 10px; font-family: var(--texto); font-weight: 800; font-size: .75rem;
+    color: var(--tinta-suave); cursor: pointer;
+  }
+
+  /* ---------- piezas comunes ---------- */
+
+  .tarjeta-panel {
+    background: var(--superficie); border-radius: var(--radio);
+    box-shadow: var(--sombra); padding: 18px;
+  }
+
+  .boton {
+    font-family: var(--texto); font-weight: 800; font-size: 1rem;
+    border: none; border-radius: 999px; padding: 14px 20px;
+    cursor: pointer; color: #FFF; background: var(--coral);
+    box-shadow: 0 4px 0 var(--coral-oscuro);
+  }
+
+  .boton--ancho { width: 100%; }
+  .boton--cielo { background: var(--cielo); box-shadow: 0 4px 0 var(--cielo-oscuro); }
+  .boton--menta { background: var(--menta); box-shadow: 0 4px 0 var(--menta-oscura); }
+  .boton--sol { background: var(--sol); color: #4A3200; box-shadow: 0 4px 0 #D0972B; }
+  .boton:active { transform: translateY(2px); box-shadow: none; }
+  .boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+  .boton-texto {
+    background: none; border: none; color: var(--tinta-suave);
+    font-family: var(--texto); font-weight: 700; font-size: .9rem;
+    padding: 8px 0; cursor: pointer; text-align: left;
+  }
+
+  .redondo {
+    width: 46px; height: 46px; border-radius: 50%; flex: none;
+    border: none; background: #EAF1FF; font-size: 1.2rem; cursor: pointer;
+  }
+
+  /* ============================================================
+     LOGIN
+     ============================================================ */
+
+  .login { text-align: center; display: grid; gap: 14px; margin-top: 40px; }
+  .login__lema { font-family: var(--display); font-size: 1.5rem; line-height: 1.25; margin: 0; }
+  .login__texto { margin: 0; color: var(--tinta-suave); }
+
+  .boton--google {
+    background: var(--superficie); color: var(--tinta);
+    border: 2px solid var(--borde); box-shadow: 0 4px 0 var(--borde);
+  }
+
+  /* ============================================================
+     ÍNDICE DE MÓDULOS  ← la pantalla nueva
+     ============================================================ */
+
+  .saludo { margin: 0 0 4px; font-family: var(--display); font-size: 1.6rem; }
+  .saludo-sub { margin: 0 0 16px; color: var(--tinta-suave); font-size: .95rem; }
+
+  .modulos {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+
+  .modulo {
+    width: 100%; height: 100%;
+    display: grid; gap: 6px; align-content: start;
+    background: var(--superficie);
+    border: 2px solid var(--borde);
+    border-top: 6px solid var(--color-modulo, var(--coral));
+    border-radius: var(--radio);
+    padding: 14px;
+    text-align: left; cursor: pointer;
+    font-family: var(--texto);
+    color: var(--tinta);
+    box-shadow: var(--sombra);
+  }
+
+  .modulo:active { transform: translateY(2px); }
+  .modulo:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 3px; }
+
+  .modulo__icono {
+    width: 44px; height: 44px; border-radius: 13px;
+    display: grid; place-items: center; font-size: 1.5rem;
+    background: color-mix(in srgb, var(--color-modulo) 14%, #FFF);
+  }
+
+  .modulo__nombre { font-family: var(--display); font-size: 1.15rem; line-height: 1.1; }
+  .modulo__que { font-size: .78rem; color: var(--tinta-suave); font-weight: 600; line-height: 1.35; }
+
+  .modulo__estado {
+    justify-self: start; margin-top: 4px;
+    font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px;
+    background: color-mix(in srgb, var(--color-modulo) 16%, #FFF);
+    color: var(--color-modulo);
+  }
+
+  .modulo--pronto { opacity: .72; border-style: dashed; border-top-style: solid; }
+  .modulo--pronto .modulo__estado { background: #F1F3F6; color: var(--tinta-suave); }
+
+  .racha {
+    display: flex; align-items: center; gap: 10px;
+    background: #FFFBF3; border: 2px dashed #F0E2CB; border-radius: var(--radio-chico);
+    padding: 10px 14px; margin-top: 14px; font-size: .85rem; font-weight: 700;
+  }
+  .racha b { font-family: var(--display); font-size: 1.3rem; }
+
+  /* ============================================================
+     CABECERA DE MÓDULO
+     ============================================================ */
+
+  .modulo-cabecera {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+
+  .modulo-cabecera__volver {
+    background: none; border: none; cursor: pointer; font-size: 1.3rem;
+    color: var(--color-modulo); padding: 4px 6px 4px 0;
+  }
+
+  .modulo-cabecera__nombre {
+    font-family: var(--display); font-size: 1.3rem; margin: 0; flex: 1;
+  }
+
+  .modulo-cabecera__punto {
+    width: 12px; height: 12px; border-radius: 50%; background: var(--color-modulo);
+  }
+
+  /* ============================================================
+     DICCIONARIO
+     ============================================================ */
+
+  .buscador { display: flex; gap: 8px; margin-bottom: 14px; }
+
+  .buscador__campo {
+    flex: 1; min-width: 0;
+    font-family: var(--display); font-size: 1.2rem;
+    padding: 11px 14px; border: 3px solid var(--borde);
+    border-radius: var(--radio-chico); background: #FFFDFA; color: var(--tinta);
+  }
+
+  .idiomas { display: flex; gap: 6px; margin-bottom: 14px; }
+  .idioma {
+    font-size: .7rem; font-weight: 800; letter-spacing: .05em;
+    padding: 4px 10px; border-radius: 999px;
+    background: #EAF1FF; color: var(--cielo-oscuro);
+  }
+
+  .entrada { border: 2px solid var(--borde); border-radius: var(--radio); padding: 14px; }
+  .entrada__alto { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .entrada__palabra { font-family: var(--display); font-size: 1.9rem; margin: 0; flex: 1; }
+  .entrada__dibujo {
+    width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+    border-radius: var(--radio-chico); background: #F4F5F7; margin-bottom: 10px;
+  }
+
+  .traducciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .traducciones li {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+    background: #F7F8FA; border-radius: var(--radio-chico); padding: 9px 14px;
+  }
+  .traducciones dt, .idioma-etiqueta {
+    font-size: .68rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--tinta-suave);
+  }
+  .traducciones strong { font-size: 1.05rem; }
+
+  .ejemplo {
+    background: #FFFBF3; border: 2px dashed #F0E2CB;
+    border-radius: var(--radio-chico); padding: 12px; margin-top: 12px;
+  }
+  .ejemplo__linea { display: flex; align-items: center; gap: 10px; }
+  .ejemplo p { margin: 0; font-weight: 700; flex: 1; }
+
+  /* ============================================================
+     TARJETAS
+     ============================================================ */
+
+  .progreso { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .progreso__barra { flex: 1; height: 9px; border-radius: 999px; background: #EFF1F4; overflow: hidden; }
+  .progreso__relleno { display: block; height: 100%; background: var(--coral); border-radius: 999px; }
+  .progreso__texto { font-size: .78rem; font-weight: 800; color: var(--tinta-suave); }
+
+  .escena {
+    width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+    border-radius: var(--radio-chico); background: #F4F5F7; margin-bottom: 14px;
+  }
+
+  .escuchar {
+    display: inline-flex; align-items: center; gap: 8px; align-self: center;
+    background: #EAF1FF; color: var(--cielo); border: none; border-radius: 999px;
+    padding: 11px 18px; font-family: var(--texto); font-weight: 800; cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  .campo-respuesta {
+    width: 100%; font-family: var(--display); font-size: 1.5rem; text-align: center;
+    padding: 12px; border: 3px solid var(--borde); border-radius: var(--radio-chico);
+    background: #FFFDFA; color: var(--tinta); margin-bottom: 10px;
+  }
+
+  .etiqueta-campo {
+    display: block; text-align: center; font-weight: 700; font-size: .88rem;
+    color: var(--tinta-suave); margin-bottom: 8px;
+  }
+
+  .palabra-grande {
+    font-family: var(--display); font-size: 2.8rem; margin: 0; line-height: 1;
+  }
+
+  .decision { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .decision .boton { padding: 14px 8px; white-space: nowrap; }
+
+  /* ============================================================
+     MATEMAGIA (boceto)
+     ============================================================ */
+
+  .operacion {
+    font-family: var(--display); font-size: 3rem; text-align: center;
+    margin: 18px 0; letter-spacing: .04em;
+  }
+
+  .teclado {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px;
+  }
+
+  .tecla {
+    font-family: var(--display); font-size: 1.5rem;
+    background: var(--superficie); border: 2px solid var(--borde);
+    border-radius: var(--radio-chico); padding: 14px 0; cursor: pointer;
+    color: var(--tinta);
+  }
+
+  .tecla:active { transform: translateY(2px); }
+
+  .boceto {
+    background: #F1F3F6; border-radius: var(--radio-chico);
+    padding: 10px 12px; font-size: .78rem; color: var(--tinta-suave);
+    font-weight: 700; margin-bottom: 12px;
+  }
+
+  /* ---------- notas de diseño, fuera del teléfono ---------- */
+
+  .notas {
+    width: 100%; max-width: 400px;
+    background: var(--marco); border: 1px solid var(--marco-borde);
+    border-radius: 16px; padding: 16px 18px;
+    color: var(--marco-tinta);
+  }
+
+  .notas h2 {
+    font-family: var(--display); font-size: 1.05rem; margin: 0 0 8px;
+  }
+
+  .notas ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .notas li { font-size: .88rem; line-height: 1.45; color: var(--marco-tinta-suave); }
+  .notas b { color: var(--marco-tinta); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="revision">
+  <h1 class="revision__titulo">Ayuda de Sofía</h1>
+  <span class="revision__nota">Mockup · datos de pega</span>
+</div>
+
+<div class="revision">
+  <div class="pestanas" role="tablist" id="pestanas">
+    <button class="pestana" role="tab" data-pantalla="login">1 · Entrar</button>
+    <button class="pestana" role="tab" data-pantalla="hub" aria-selected="true">2 · Módulos</button>
+    <button class="pestana" role="tab" data-pantalla="diccionario">3 · Diccionario</button>
+    <button class="pestana" role="tab" data-pantalla="tarjeta">4 · Tarjeta</button>
+    <button class="pestana" role="tab" data-pantalla="respuesta">5 · Respuesta</button>
+    <button class="pestana" role="tab" data-pantalla="mates">6 · Matemagia</button>
+  </div>
+</div>
+
+<div class="telefono">
+
+  <!-- ========================= 1 · ENTRAR ========================= -->
+  <section class="pantalla" id="p-login" hidden>
+    <div class="cabecera">
+      <div class="cabecera__marca">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <p class="cabecera__nombre">Ayuda de Sofía</p>
+          <p class="cabecera__lema">Tus herramientas</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tarjeta-panel login">
+      <p class="login__lema">Añade color a tu vida.<br>Aprende algo nuevo.</p>
+      <p class="login__texto">Entra con tu cuenta para que recuerde lo que ya sabes.</p>
+      <button class="boton boton--google boton--ancho">🔑 Entrar con Google</button>
+    </div>
+  </section>
+
+  <!-- ========================= 2 · MÓDULOS ========================= -->
+  <section class="pantalla" id="p-hub">
+    <div class="cabecera">
+      <div class="cabecera__marca">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <p class="cabecera__nombre">Ayuda de Sofía</p>
+          <p class="cabecera__lema">Tus herramientas</p>
+        </div>
+      </div>
+      <div class="usuario">
+        <span class="usuario__avatar">S</span>
+        <button class="usuario__salir">Salir</button>
+      </div>
+    </div>
+
+    <h2 class="saludo">Hola, Sofía</h2>
+    <p class="saludo-sub">¿Qué quieres hacer hoy?</p>
+
+    <ul class="modulos">
+      <li>
+        <button class="modulo" style="--color-modulo: var(--coral)" data-ir="tarjeta">
+          <span class="modulo__icono" aria-hidden="true">🃏</span>
+          <span class="modulo__nombre">Tarjetas</span>
+          <span class="modulo__que">Escucha, mira el dibujo y escribe la palabra en inglés</span>
+          <span class="modulo__estado">10 palabras</span>
+        </button>
+      </li>
+      <li>
+        <button class="modulo" style="--color-modulo: var(--cielo)" data-ir="diccionario">
+          <span class="modulo__icono" aria-hidden="true">📖</span>
+          <span class="modulo__nombre">Diccionario</span>
+          <span class="modulo__que">Una palabra en un idioma y te doy los otros dos</span>
+          <span class="modulo__estado">3 idiomas</span>
+        </button>
+      </li>
+      <li>
+        <button class="modulo modulo--pronto" style="--color-modulo: var(--menta)" data-ir="mates">
+          <span class="modulo__icono" aria-hidden="true">✨</span>
+          <span class="modulo__nombre">Matemagia</span>
+          <span class="modulo__que">Sumas, restas y trucos para calcular rápido</span>
+          <span class="modulo__estado">Pronto</span>
+        </button>
+      </li>
+      <li>
+        <button class="modulo modulo--pronto" style="--color-modulo: var(--sol)">
+          <span class="modulo__icono" aria-hidden="true">➕</span>
+          <span class="modulo__nombre">Lo que venga</span>
+          <span class="modulo__que">Aquí irá la siguiente herramienta que hagamos</span>
+          <span class="modulo__estado">Libre</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="racha">
+      <b>4</b>
+      <span>días seguidos aprendiendo. ¡Sigue así!</span>
+    </div>
+  </section>
+
+  <!-- ========================= 3 · DICCIONARIO ========================= -->
+  <section class="pantalla" id="p-diccionario" hidden style="--color-modulo: var(--cielo)">
+    <div class="modulo-cabecera">
+      <button class="modulo-cabecera__volver" data-ir="hub" aria-label="Volver">←</button>
+      <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+      <h2 class="modulo-cabecera__nombre">Diccionario</h2>
+    </div>
+
+    <label class="etiqueta-campo" for="q">Escribe una palabra en cualquier idioma</label>
+    <div class="buscador">
+      <input class="buscador__campo" id="q" value="txakurra" readonly>
+      <button class="boton boton--cielo">Buscar</button>
+    </div>
+
+    <div class="idiomas">
+      <span class="idioma">ENGLISH</span>
+      <span class="idioma">CASTELLANO</span>
+      <span class="idioma">EUSKARA</span>
+    </div>
+
+    <article class="entrada">
+      <div class="entrada__alto">
+        <h3 class="entrada__palabra">dog</h3>
+        <span class="idioma-etiqueta">🐾 Animales</span>
+        <button class="redondo" aria-label="Escuchar">🔊</button>
+      </div>
+
+      <img class="entrada__dibujo" alt="Escena en gris con el perro en color"
+           src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlVuIG5pw7FvIGVuIHVuIGphcmTDrW47IGVsIHBlcnJvIGFwYXJlY2UgZW4gY29sb3IiPgogIDxzdHlsZT4KICAgIC5nMHtmaWxsOiNGNEY1Rjd9Lmcxe2ZpbGw6I0U0RTdFQn0uZzJ7ZmlsbDojQ0REMkQ5fS5nM3tmaWxsOiNBQUIxQkJ9Lmc0e2ZpbGw6IzdDODQ4Rn0uZzV7ZmlsbDojNEI1MjVDfQogICAgLnM0e2ZpbGw6bm9uZTtzdHJva2U6IzdDODQ4RjtzdHJva2Utd2lkdGg6NTtzdHJva2UtbGluZWNhcDpyb3VuZH0KICAgIC5oYWxve2ZpbGw6I0ZGRjFEQ30KICAgIC5mdXJ7ZmlsbDojRDA4QjQ1fS5mdXIye2ZpbGw6I0E5NkEyQ30uY29sbGFye2ZpbGw6I0U0NTcyRX0uZGFya3tmaWxsOiMzQTMyMjZ9LnRvbmd1ZXtmaWxsOiNGMjc4OUZ9CiAgPC9zdHlsZT4KICA8cmVjdCBjbGFzcz0iZzAiIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIi8+CiAgPGNpcmNsZSBjbGFzcz0iZzEiIGN4PSIzMzAiIGN5PSI2MCIgcj0iMzQiLz48Y2lyY2xlIGNsYXNzPSJnMSIgY3g9IjM2MCIgY3k9IjcwIiByPSIyNiIvPjxjaXJjbGUgY2xhc3M9ImcxIiBjeD0iMzAwIiBjeT0iNzIiIHI9IjI0Ii8+CiAgPHBhdGggY2xhc3M9ImcxIiBkPSJNMCAyMTggUTEyMCAyMDAgMjMwIDIxNiBUNDAwIDIwOCBMNDAwIDMwMCBMMCAzMDAgWiIvPgogIDxnIGNsYXNzPSJnMiI+CiAgICA8cmVjdCB4PSI4IiB5PSIxNTAiIHdpZHRoPSIxMSIgaGVpZ2h0PSI3MiIgcng9IjUiLz48cmVjdCB4PSIzNCIgeT0iMTUwIiB3aWR0aD0iMTEiIGhlaWdodD0iNzIiIHJ4PSI1Ii8+CiAgICA8cmVjdCB4PSI2MCIgeT0iMTUwIiB3aWR0aD0iMTEiIGhlaWdodD0iNzIiIHJ4PSI1Ii8+PHJlY3QgeD0iMCIgeT0iMTY2IiB3aWR0aD0iNzgiIGhlaWdodD0iOSIgcng9IjQiLz4KICAgIDxyZWN0IHg9IjAiIHk9IjE5MiIgd2lkdGg9Ijc4IiBoZWlnaHQ9IjkiIHJ4PSI0Ii8+CiAgPC9nPgogIDxyZWN0IGNsYXNzPSJnNCIgeD0iMTEyIiB5PSIxNTAiIHdpZHRoPSIxNiIgaGVpZ2h0PSI3MiIgcng9IjYiLz4KICA8Y2lyY2xlIGNsYXNzPSJnMiIgY3g9IjEyMCIgY3k9IjEyNiIgcj0iNDAiLz48Y2lyY2xlIGNsYXNzPSJnMiIgY3g9IjkwIiBjeT0iMTUwIiByPSIyNyIvPjxjaXJjbGUgY2xhc3M9ImcyIiBjeD0iMTUyIiBjeT0iMTQ4IiByPSIyNyIvPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MCwwKSI+CiAgICA8cGF0aCBjbGFzcz0iczQiIGQ9Ik0tMTcgMTYyIGwtMTUgMjQiLz48cGF0aCBjbGFzcz0iczQiIGQ9Ik0xNyAxNjIgbDE2IDIwIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJnMyIgY3g9IjAiIGN5PSIxMzIiIHI9IjIxIi8+CiAgICA8cGF0aCBjbGFzcz0iZzQiIGQ9Ik0tMjEgMTMxIGEyMSAyMSAwIDAgMSA0MiAwIHEtOSAtMTUgLTIxIC0xMyBxLTEzIDIgLTIxIDEzIHoiLz4KICAgIDxyZWN0IGNsYXNzPSJnNCIgeD0iLTE3IiB5PSIxNTIiIHdpZHRoPSIzNCIgaGVpZ2h0PSI0OCIgcng9IjE1Ii8+CiAgICA8cmVjdCBjbGFzcz0iZzMiIHg9Ii0xNSIgeT0iMTk4IiB3aWR0aD0iMTEiIGhlaWdodD0iMzIiIHJ4PSI1Ii8+PHJlY3QgY2xhc3M9ImczIiB4PSI0IiB5PSIxOTgiIHdpZHRoPSIxMSIgaGVpZ2h0PSIzMiIgcng9IjUiLz4KICAgIDxyZWN0IGNsYXNzPSJnNSIgeD0iLTE4IiB5PSIyMjYiIHdpZHRoPSIxNiIgaGVpZ2h0PSI5IiByeD0iNCIvPjxyZWN0IGNsYXNzPSJnNSIgeD0iMiIgeT0iMjI2IiB3aWR0aD0iMTYiIGhlaWdodD0iOSIgcng9IjQiLz4KICA8L2c+CiAgPGVsbGlwc2UgY2xhc3M9ImhhbG8iIGN4PSIyOTgiIGN5PSIxOTYiIHJ4PSI4NiIgcnk9IjY2Ii8+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iZnVyMiIgZD0iTTI1NiAxOTAgcS0yMiAtNiAtMjggLTMwIHExNCA0IDIyIDE0IHoiLz4KICAgIDxlbGxpcHNlIGNsYXNzPSJmdXIiIGN4PSIyOTIiIGN5PSIxOTYiIHJ4PSI0NiIgcnk9IjI5Ii8+CiAgICA8cmVjdCBjbGFzcz0iZnVyMiIgeD0iMjYyIiB5PSIyMTIiIHdpZHRoPSIxMyIgaGVpZ2h0PSIzMCIgcng9IjYiLz48cmVjdCBjbGFzcz0iZnVyMiIgeD0iMzA2IiB5PSIyMTIiIHdpZHRoPSIxMyIgaGVpZ2h0PSIzMCIgcng9IjYiLz4KICAgIDxjaXJjbGUgY2xhc3M9ImZ1ciIgY3g9IjMzNiIgY3k9IjE2NCIgcj0iMjciLz4KICAgIDxwYXRoIGNsYXNzPSJmdXIyIiBkPSJNMzE2IDE0MiBxLTggLTE4IDYgLTIyIHExMCA4IDEwIDIwIHoiLz48cGF0aCBjbGFzcz0iZnVyMiIgZD0iTTM1NiAxNDIgcTggLTE4IC02IC0yMiBxLTEwIDggLTEwIDIwIHoiLz4KICAgIDxlbGxpcHNlIGNsYXNzPSJmdXIiIGN4PSIzNDgiIGN5PSIxNzYiIHJ4PSIxOCIgcnk9IjEzIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJkYXJrIiBjeD0iMzYwIiBjeT0iMTcyIiByPSI2Ii8+CiAgICA8cGF0aCBjbGFzcz0idG9uZ3VlIiBkPSJNMzQ2IDE4NiBxNiAxMiAxMiAyIHoiLz4KICAgIDxjaXJjbGUgY2xhc3M9ImRhcmsiIGN4PSIzMzAiIGN5PSIxNTgiIHI9IjQiLz48Y2lyY2xlIGNsYXNzPSJkYXJrIiBjeD0iMzQ2IiBjeT0iMTU3IiByPSI0Ii8+CiAgICA8cmVjdCBjbGFzcz0iY29sbGFyIiB4PSIzMDgiIHk9IjE4MiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI2IiByeD0iNyIgdHJhbnNmb3JtPSJyb3RhdGUoLTE4IDMxNiAxOTUpIi8+CiAgPC9nPgo8L3N2Zz4K">
+
+      <ul class="traducciones">
+        <li><span class="idioma-etiqueta">Castellano</span><strong>perro</strong></li>
+        <li><span class="idioma-etiqueta">Euskara</span><strong>txakurra</strong></li>
+      </ul>
+
+      <div class="ejemplo">
+        <div class="ejemplo__linea">
+          <p>I play with my dog in the garden.</p>
+          <button class="redondo" aria-label="Escuchar la frase">🔊</button>
+        </div>
+        <button class="boton-texto">Ver la traducción</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- ========================= 4 · TARJETA (pregunta) ========================= -->
+  <section class="pantalla" id="p-tarjeta" hidden style="--color-modulo: var(--coral)">
+    <div class="modulo-cabecera">
+      <button class="modulo-cabecera__volver" data-ir="hub" aria-label="Volver">←</button>
+      <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+      <h2 class="modulo-cabecera__nombre">Tarjetas</h2>
+    </div>
+
+    <div class="progreso">
+      <div class="progreso__barra"><span class="progreso__relleno" style="width: 30%"></span></div>
+      <span class="progreso__texto">3 / 10</span>
+    </div>
+
+    <img class="escena" alt="Escena en gris con la manzana en color"
+         src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlVuYSBjb2NpbmEgZW4gZ3JpczsgbGEgbWFuemFuYSBhcGFyZWNlIGVuIGNvbG9yIHJvam8iPgogIDxzdHlsZT4KICAgIC5nMHtmaWxsOiNGNEY1Rjd9Lmcxe2ZpbGw6I0U0RTdFQn0uZzJ7ZmlsbDojQ0REMkQ5fS5nM3tmaWxsOiNBQUIxQkJ9Lmc0e2ZpbGw6IzdDODQ4Rn0uZzV7ZmlsbDojNEI1MjVDfQogICAgLnM0e2ZpbGw6bm9uZTtzdHJva2U6IzdDODQ4RjtzdHJva2Utd2lkdGg6NTtzdHJva2UtbGluZWNhcDpyb3VuZH0KICAgIC5oYWxve2ZpbGw6I0ZGRUNFQ30KICAgIC5hcHBsZXtmaWxsOiNFMjNCM0J9CiAgPC9zdHlsZT4KICA8cmVjdCBjbGFzcz0iZzAiIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIi8+CiAgPGcgY2xhc3M9ImcxIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOCIvPgogICAgPHBhdGggZD0iTTAgNDAgaDQwMCBNMCA4MCBoNDAwIE0wIDEyMCBoNDAwIiBzdHJva2U9IiNFNEU3RUIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8ZyBjbGFzcz0iZzIiPgogICAgPHJlY3QgeD0iMjAiIHk9IjM0IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjU4IiByeD0iOCIvPjxyZWN0IHg9IjE0NiIgeT0iMzQiIHdpZHRoPSI4NiIgaGVpZ2h0PSI1OCIgcng9IjgiLz4KICAgIDxyZWN0IGNsYXNzPSJnMyIgeD0iNjYiIHk9Ijg2IiB3aWR0aD0iMjgiIGhlaWdodD0iOCIgcng9IjQiLz48cmVjdCBjbGFzcz0iZzMiIHg9IjE3NiIgeT0iODYiIHdpZHRoPSIyOCIgaGVpZ2h0PSI4IiByeD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxyZWN0IGNsYXNzPSJnMiIgeD0iMjkwIiB5PSI2MCIgd2lkdGg9Ijc2IiBoZWlnaHQ9IjYwIiByeD0iMTAiLz4KICAgIDxyZWN0IGNsYXNzPSJnMyIgeD0iMzAwIiB5PSI3MCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjE2IiByeD0iNSIvPgogICAgPGNpcmNsZSBjbGFzcz0iZzMiIGN4PSIzMTIiIGN5PSIxMDQiIHI9IjciLz48Y2lyY2xlIGNsYXNzPSJnMyIgY3g9IjMzNCIgY3k9IjEwNCIgcj0iNyIvPgogIDwvZz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5NiwwKSI+CiAgICA8cGF0aCBjbGFzcz0iczQiIGQ9Ik0tMTggMTY4IGwtMTYgMjYiLz48cGF0aCBjbGFzcz0iczQiIGQ9Ik0xOCAxNjggbDIyIDIyIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJnMyIgY3g9IjAiIGN5PSIxMzYiIHI9IjIyIi8+CiAgICA8cGF0aCBjbGFzcz0iZzQiIGQ9Ik0tMjIgMTM2IGEyMiAyMiAwIDAgMSA0NCAwIHEyIC0yNiAtMjIgLTI0IHEtMjQgMiAtMjIgMjQgeiIvPgogICAgPHBhdGggY2xhc3M9Imc0IiBkPSJNLTI0IDE0MCBxLTggMjIgMiAzNCBxNiAtMjAgNCAtMzQgeiIvPgogICAgPHJlY3QgY2xhc3M9Imc0IiB4PSItMTgiIHk9IjE1OCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjUyIiByeD0iMTYiLz4KICA8L2c+CiAgPHJlY3QgY2xhc3M9ImczIiB4PSIyMCIgeT0iMjA2IiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjE2IiByeD0iOCIvPgogIDxyZWN0IGNsYXNzPSJnMiIgeD0iMzQiIHk9IjIyMiIgd2lkdGg9IjMzMiIgaGVpZ2h0PSI3OCIgcng9IjEwIi8+CiAgPGcgY2xhc3M9Imc0Ij4KICAgIDxyZWN0IHg9IjU2IiB5PSIyNDAiIHdpZHRoPSI3MCIgaGVpZ2h0PSI0NiIgcng9IjgiLz48Y2lyY2xlIGN4PSIxMTgiIGN5PSIyNjMiIHI9IjQiLz4KICAgIDxyZWN0IHg9IjE0MCIgeT0iMjQwIiB3aWR0aD0iNzAiIGhlaWdodD0iNDYiIHJ4PSI4Ii8+PGNpcmNsZSBjeD0iMjAyIiBjeT0iMjYzIiByPSI0Ii8+CiAgPC9nPgogIDxlbGxpcHNlIGNsYXNzPSJoYWxvIiBjeD0iMjc4IiBjeT0iMTYwIiByeD0iNzYiIHJ5PSI2MiIvPgogIDxnPgogICAgPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNkI0QTJBIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZD0iTTI3OCAxMzIgcTQgLTIwIDE2IC0yOCIvPgogICAgPHBhdGggZmlsbD0iIzRDQTM1QSIgZD0iTTI4OCAxMjIgcTI2IC0yMCA0MCAtNiBxLTE2IDIwIC00MCA2IHoiLz4KICAgIDxwYXRoIGZpbGw9IiNFMjNCM0IiIGQ9Ik0yNzggMTQwIHEyNiAtMTYgNDQgOCBxMTYgMjQgMiA0OCBxLTE0IDI0IC0zMiAxNCBxLTE0IC04IC0yOCAwIHEtMTggMTAgLTMyIC0xNCBxLTE0IC0yNCAyIC00OCBxMTggLTI0IDQ0IC04IHoiLz4KICAgIDxwYXRoIGZpbGw9IiNGMjZBNkEiIGQ9Ik0yNTYgMTU2IHEtMTIgMTIgLTEyIDI4IHEwIC0yMiAxMiAtMjggeiIvPgogIDwvZz4KPC9zdmc+Cg==">
+
+    <button class="escuchar">🔊 Escuchar otra vez</button>
+
+    <label class="etiqueta-campo" for="r">Escríbelo en inglés</label>
+    <input class="campo-respuesta" id="r" value="" placeholder="…" readonly>
+    <button class="boton boton--ancho">Comprobar</button>
+    <button class="boton-texto" style="text-align:center" data-ir="respuesta">No lo sé, ver la respuesta</button>
+  </section>
+
+  <!-- ========================= 5 · RESPUESTA ========================= -->
+  <section class="pantalla" id="p-respuesta" hidden style="--color-modulo: var(--coral)">
+    <div class="modulo-cabecera">
+      <button class="modulo-cabecera__volver" data-ir="hub" aria-label="Volver">←</button>
+      <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+      <h2 class="modulo-cabecera__nombre">Tarjetas</h2>
+    </div>
+
+    <div class="progreso">
+      <div class="progreso__barra"><span class="progreso__relleno" style="width: 30%"></span></div>
+      <span class="progreso__texto">3 / 10</span>
+    </div>
+
+    <img class="escena" alt="Escena en gris con la manzana en color"
+         src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlVuYSBjb2NpbmEgZW4gZ3JpczsgbGEgbWFuemFuYSBhcGFyZWNlIGVuIGNvbG9yIHJvam8iPgogIDxzdHlsZT4KICAgIC5nMHtmaWxsOiNGNEY1Rjd9Lmcxe2ZpbGw6I0U0RTdFQn0uZzJ7ZmlsbDojQ0REMkQ5fS5nM3tmaWxsOiNBQUIxQkJ9Lmc0e2ZpbGw6IzdDODQ4Rn0uZzV7ZmlsbDojNEI1MjVDfQogICAgLnM0e2ZpbGw6bm9uZTtzdHJva2U6IzdDODQ4RjtzdHJva2Utd2lkdGg6NTtzdHJva2UtbGluZWNhcDpyb3VuZH0KICAgIC5oYWxve2ZpbGw6I0ZGRUNFQ30KICAgIC5hcHBsZXtmaWxsOiNFMjNCM0J9CiAgPC9zdHlsZT4KICA8cmVjdCBjbGFzcz0iZzAiIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIi8+CiAgPGcgY2xhc3M9ImcxIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOCIvPgogICAgPHBhdGggZD0iTTAgNDAgaDQwMCBNMCA4MCBoNDAwIE0wIDEyMCBoNDAwIiBzdHJva2U9IiNFNEU3RUIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8ZyBjbGFzcz0iZzIiPgogICAgPHJlY3QgeD0iMjAiIHk9IjM0IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjU4IiByeD0iOCIvPjxyZWN0IHg9IjE0NiIgeT0iMzQiIHdpZHRoPSI4NiIgaGVpZ2h0PSI1OCIgcng9IjgiLz4KICAgIDxyZWN0IGNsYXNzPSJnMyIgeD0iNjYiIHk9Ijg2IiB3aWR0aD0iMjgiIGhlaWdodD0iOCIgcng9IjQiLz48cmVjdCBjbGFzcz0iZzMiIHg9IjE3NiIgeT0iODYiIHdpZHRoPSIyOCIgaGVpZ2h0PSI4IiByeD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxyZWN0IGNsYXNzPSJnMiIgeD0iMjkwIiB5PSI2MCIgd2lkdGg9Ijc2IiBoZWlnaHQ9IjYwIiByeD0iMTAiLz4KICAgIDxyZWN0IGNsYXNzPSJnMyIgeD0iMzAwIiB5PSI3MCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjE2IiByeD0iNSIvPgogICAgPGNpcmNsZSBjbGFzcz0iZzMiIGN4PSIzMTIiIGN5PSIxMDQiIHI9IjciLz48Y2lyY2xlIGNsYXNzPSJnMyIgY3g9IjMzNCIgY3k9IjEwNCIgcj0iNyIvPgogIDwvZz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5NiwwKSI+CiAgICA8cGF0aCBjbGFzcz0iczQiIGQ9Ik0tMTggMTY4IGwtMTYgMjYiLz48cGF0aCBjbGFzcz0iczQiIGQ9Ik0xOCAxNjggbDIyIDIyIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJnMyIgY3g9IjAiIGN5PSIxMzYiIHI9IjIyIi8+CiAgICA8cGF0aCBjbGFzcz0iZzQiIGQ9Ik0tMjIgMTM2IGEyMiAyMiAwIDAgMSA0NCAwIHEyIC0yNiAtMjIgLTI0IHEtMjQgMiAtMjIgMjQgeiIvPgogICAgPHBhdGggY2xhc3M9Imc0IiBkPSJNLTI0IDE0MCBxLTggMjIgMiAzNCBxNiAtMjAgNCAtMzQgeiIvPgogICAgPHJlY3QgY2xhc3M9Imc0IiB4PSItMTgiIHk9IjE1OCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjUyIiByeD0iMTYiLz4KICA8L2c+CiAgPHJlY3QgY2xhc3M9ImczIiB4PSIyMCIgeT0iMjA2IiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjE2IiByeD0iOCIvPgogIDxyZWN0IGNsYXNzPSJnMiIgeD0iMzQiIHk9IjIyMiIgd2lkdGg9IjMzMiIgaGVpZ2h0PSI3OCIgcng9IjEwIi8+CiAgPGcgY2xhc3M9Imc0Ij4KICAgIDxyZWN0IHg9IjU2IiB5PSIyNDAiIHdpZHRoPSI3MCIgaGVpZ2h0PSI0NiIgcng9IjgiLz48Y2lyY2xlIGN4PSIxMTgiIGN5PSIyNjMiIHI9IjQiLz4KICAgIDxyZWN0IHg9IjE0MCIgeT0iMjQwIiB3aWR0aD0iNzAiIGhlaWdodD0iNDYiIHJ4PSI4Ii8+PGNpcmNsZSBjeD0iMjAyIiBjeT0iMjYzIiByPSI0Ii8+CiAgPC9nPgogIDxlbGxpcHNlIGNsYXNzPSJoYWxvIiBjeD0iMjc4IiBjeT0iMTYwIiByeD0iNzYiIHJ5PSI2MiIvPgogIDxnPgogICAgPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNkI0QTJBIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZD0iTTI3OCAxMzIgcTQgLTIwIDE2IC0yOCIvPgogICAgPHBhdGggZmlsbD0iIzRDQTM1QSIgZD0iTTI4OCAxMjIgcTI2IC0yMCA0MCAtNiBxLTE2IDIwIC00MCA2IHoiLz4KICAgIDxwYXRoIGZpbGw9IiNFMjNCM0IiIGQ9Ik0yNzggMTQwIHEyNiAtMTYgNDQgOCBxMTYgMjQgMiA0OCBxLTE0IDI0IC0zMiAxNCBxLTE0IC04IC0yOCAwIHEtMTggMTAgLTMyIC0xNCBxLTE0IC0yNCAyIC00OCBxMTggLTI0IDQ0IC04IHoiLz4KICAgIDxwYXRoIGZpbGw9IiNGMjZBNkEiIGQ9Ik0yNTYgMTU2IHEtMTIgMTIgLTEyIDI4IHEwIC0yMiAxMiAtMjggeiIvPgogIDwvZz4KPC9zdmc+Cg==">
+
+    <div class="entrada__alto">
+      <h3 class="palabra-grande">apple</h3>
+      <button class="redondo" aria-label="Escuchar">🔊</button>
+    </div>
+
+    <ul class="traducciones" style="margin-top:12px">
+      <li><span class="idioma-etiqueta">Castellano</span><strong>manzana</strong></li>
+      <li><span class="idioma-etiqueta">Euskara</span><strong>sagarra</strong></li>
+    </ul>
+
+    <div class="ejemplo">
+      <div class="ejemplo__linea">
+        <p>I eat an apple every morning.</p>
+        <button class="redondo" aria-label="Escuchar la frase">🔊</button>
+      </div>
+      <button class="boton-texto">Ver la traducción</button>
+    </div>
+
+    <div class="decision">
+      <button class="boton boton--sol">🔁 Repasar</button>
+      <button class="boton boton--menta">✅ La sabía</button>
+    </div>
+  </section>
+
+  <!-- ========================= 6 · MATEMAGIA (boceto) ========================= -->
+  <section class="pantalla" id="p-mates" hidden style="--color-modulo: var(--menta)">
+    <div class="modulo-cabecera">
+      <button class="modulo-cabecera__volver" data-ir="hub" aria-label="Volver">←</button>
+      <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+      <h2 class="modulo-cabecera__nombre">Matemagia</h2>
+    </div>
+
+    <p class="boceto">Boceto: sirve para ver que un módulo nuevo encaja sin rediseñar nada. Los ejercicios los decidimos luego.</p>
+
+    <div class="progreso">
+      <div class="progreso__barra"><span class="progreso__relleno" style="width: 60%; background: var(--menta)"></span></div>
+      <span class="progreso__texto">6 / 10</span>
+    </div>
+
+    <p class="operacion">37 + 8 = ?</p>
+
+    <input class="campo-respuesta" value="45" readonly aria-label="Tu respuesta">
+
+    <div class="teclado">
+      <button class="tecla">1</button><button class="tecla">2</button><button class="tecla">3</button>
+      <button class="tecla">4</button><button class="tecla">5</button><button class="tecla">6</button>
+      <button class="tecla">7</button><button class="tecla">8</button><button class="tecla">9</button>
+      <button class="tecla">←</button><button class="tecla">0</button><button class="tecla">✓</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="notas">
+  <h2>Lo que propone este mockup</h2>
+  <ul>
+    <li><b>Un color por módulo.</b> Coral las tarjetas, azul el diccionario, verde matemagia. El color viaja a la cabecera y a los botones de dentro, así siempre se sabe en qué herramienta se está.</li>
+    <li><b>El índice es la casa.</b> Se vuelve a él con la flecha de arriba a la izquierda, siempre en el mismo sitio.</li>
+    <li><b>Cada módulo enseña su estado</b> en la tarjeta del índice («10 palabras», «Pronto»), para que se vea qué hay nuevo sin entrar.</li>
+    <li><b>La casilla vacía es a propósito:</b> el índice tiene que verse bien con 2 módulos y con 8.</li>
+    <li><b>La racha</b> es lo único que mezcla módulos. Está por decidir si la queremos: engancha, pero también presiona.</li>
+  </ul>
+</div>
+
+<script>
+  const pestanas = document.querySelectorAll(".pestana");
+  const pantallas = {
+    login: document.getElementById("p-login"),
+    hub: document.getElementById("p-hub"),
+    diccionario: document.getElementById("p-diccionario"),
+    tarjeta: document.getElementById("p-tarjeta"),
+    respuesta: document.getElementById("p-respuesta"),
+    mates: document.getElementById("p-mates")
+  };
+
+  function mostrar(nombre) {
+    Object.entries(pantallas).forEach(([clave, seccion]) => { seccion.hidden = clave !== nombre; });
+    pestanas.forEach((pestana) => {
+      pestana.setAttribute("aria-selected", String(pestana.dataset.pantalla === nombre));
+    });
+  }
+
+  pestanas.forEach((pestana) => {
+    pestana.addEventListener("click", () => mostrar(pestana.dataset.pantalla));
+  });
+
+  document.querySelectorAll("[data-ir]").forEach((boton) => {
+    boton.addEventListener("click", () => mostrar(boton.dataset.ir));
+  });
+</script>
