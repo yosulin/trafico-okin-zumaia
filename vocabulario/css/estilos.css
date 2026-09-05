@@ -77,7 +77,8 @@ html, body {
 .cabecera__titulo {
   margin: 0;
   font-family: var(--display);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  white-space: nowrap;
   line-height: 1.05;
   letter-spacing: .01em;
 }
@@ -211,33 +212,96 @@ html, body {
 .final__titulo { font-family: var(--display); margin: 4px 0 18px; font-size: 1.7rem; }
 
 /* ============================================================
-   ÍNDICE DE HERRAMIENTAS
+   ÍNDICE DE MÓDULOS
+   Cada herramienta tiene su color, y ese color viaja con ella:
+   la barra de la tarjeta, la cabecera de dentro y sus botones.
+   Así se sabe en qué módulo se está sin leer nada.
    ============================================================ */
 
-.herramientas { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+/* El índice se alinea a la izquierda aunque el panel esté centrado:
+   es una lista que se recorre, no un mensaje. */
+#pantalla-hub { text-align: left; }
 
-.herramienta {
-  width: 100%;
-  display: flex; align-items: center; gap: 14px; text-align: left;
-  background: #F7F8FA; border: 2px solid var(--borde); border-radius: var(--radio);
-  padding: 16px; cursor: pointer; font-family: var(--texto);
+.saludo { margin: 0 0 4px; font-family: var(--display); font-size: 1.6rem; }
+.saludo-sub { margin: 0 0 16px; color: var(--tinta-suave); font-size: .95rem; }
+
+.modulos {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+
+.modulo {
+  width: 100%; height: 100%;
+  display: grid; gap: 6px; align-content: start;
+  background: var(--superficie);
+  border: 2px solid var(--borde);
+  border-top: 6px solid var(--color-modulo, var(--coral));
+  border-radius: var(--radio);
+  padding: 14px;
+  text-align: left; cursor: pointer;
+  font-family: var(--texto); color: var(--tinta);
+  box-shadow: var(--sombra);
   transition: transform .08s ease, border-color .15s ease;
 }
 
-.herramienta:hover { border-color: var(--coral); }
-.herramienta:active { transform: translateY(2px); }
-.herramienta:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+.modulo:hover { border-color: var(--color-modulo); border-top-color: var(--color-modulo); }
+.modulo:active { transform: translateY(2px); }
+.modulo:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 3px; }
 
-.herramienta__icono { font-size: 2rem; line-height: 1; flex: none; }
-.herramienta__texto { display: grid; gap: 2px; }
-.herramienta__texto b { font-family: var(--display); font-size: 1.35rem; line-height: 1.1; }
-.herramienta__texto small { color: var(--tinta-suave); font-size: .85rem; font-weight: 600; }
+.modulo__icono {
+  width: 44px; height: 44px; border-radius: 13px;
+  display: grid; place-items: center; font-size: 1.5rem;
+  background: color-mix(in srgb, var(--color-modulo) 14%, #FFF);
+}
+
+.modulo__nombre { font-family: var(--display); font-size: 1.15rem; line-height: 1.1; }
+.modulo__que { font-size: .78rem; color: var(--tinta-suave); font-weight: 600; line-height: 1.35; }
+
+.modulo__estado {
+  justify-self: start; margin-top: 4px;
+  font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--color-modulo) 16%, #FFF);
+  color: var(--color-modulo);
+}
+
+/* Un módulo que todavía no existe se ve, pero no se puede pulsar:
+   sirve para que se note que esto va a crecer. */
+.modulo--pronto { opacity: .72; border-style: dashed; border-top-style: solid; cursor: default; }
+.modulo--pronto:hover { border-color: var(--borde); }
+.modulo--pronto .modulo__estado { background: #F1F3F6; color: var(--tinta-suave); }
+
+/* ============================================================
+   CABECERA DE MÓDULO
+   ============================================================ */
+
+.modulo-cabecera { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+.modulo-cabecera__volver {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.5rem; line-height: 1;
+  color: var(--color-modulo); padding: 4px 8px 4px 0;
+}
+
+.modulo-cabecera__volver:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+
+.modulo-cabecera__punto {
+  width: 12px; height: 12px; border-radius: 50%; flex: none;
+  background: var(--color-modulo);
+}
+
+.modulo-cabecera__nombre { font-family: var(--display); font-size: 1.3rem; margin: 0; flex: 1; }
+
+/* Botón teñido con el color del módulo en el que estamos. */
+.boton--modulo {
+  background: var(--color-modulo); color: #FFF;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--color-modulo) 75%, #000);
+}
+.boton--modulo:active { box-shadow: none; }
 
 /* ============================================================
    DICCIONARIO
    ============================================================ */
-
-.boton--volver { align-self: flex-start; padding: 4px 0 12px; text-decoration: none; }
 
 .buscador { display: grid; gap: 10px; margin-bottom: 16px; }
 .buscador__linea { display: flex; gap: 10px; }

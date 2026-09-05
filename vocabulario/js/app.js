@@ -24,6 +24,7 @@
 
 import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js";
 import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
+import { pintarModulos } from "./modulos.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
@@ -54,9 +55,9 @@ const el = {
   salirSinAcceso: $("boton-salir-sin-acceso"),
 
   hubSaludo: $("hub-saludo"),
-  irTarjetas: $("boton-ir-tarjetas"),
-  irDiccionario: $("boton-ir-diccionario"),
+  modulos: $("modulos"),
   volverHub: $("boton-volver-hub"),
+  volverHubInicio: $("boton-volver-hub-inicio"),
   volverHubTarjetas: $("boton-volver-hub-tarjetas"),
   volverHubFinal: $("boton-volver-hub-final"),
 
@@ -398,7 +399,8 @@ async function prepararSesion(usuario) {
     pintarMarcador(el.marcadorInicio);
     el.avisoAudio.hidden = hayVozDelNavegador();
     const nombre = (usuario.displayName || "").split(" ")[0];
-    el.hubSaludo.textContent = nombre ? ("Hola, " + nombre + ". ¿Qué quieres hacer?") : "¿Qué quieres hacer?";
+    el.hubSaludo.textContent = nombre ? ("Hola, " + nombre) : "Hola";
+    pintarIndice();
     mostrarPantalla("hub");
   } catch (fallo) {
     /* Las reglas de Firestore solo dejan leer a quien está en la lista
@@ -444,21 +446,24 @@ el.salirSinAcceso.addEventListener("click", () => salir());
 
 function irAlHub() {
   parar();
-  pintarMarcador(el.marcadorInicio);
+  pintarIndice();
   mostrarPantalla("hub");
 }
 
-el.irTarjetas.addEventListener("click", () => {
-  pintarMarcador(el.marcadorInicio);
-  mostrarPantalla("inicio");
-});
-
-el.irDiccionario.addEventListener("click", () => {
-  mostrarPantalla("diccionario");
-  el.campoBuscar.focus();
-});
+/** Dibuja el índice y conecta cada módulo con su pantalla. */
+function pintarIndice() {
+  const activos = pintarModulos(el.modulos, { tarjetas: tarjetas.length });
+  activos.forEach(({ modulo, boton }) => {
+    boton.addEventListener("click", () => {
+      if (modulo.pantalla === "inicio") pintarMarcador(el.marcadorInicio);
+      mostrarPantalla(modulo.pantalla);
+      if (modulo.pantalla === "diccionario") el.campoBuscar.focus();
+    });
+  });
+}
 
 el.volverHub.addEventListener("click", irAlHub);
+el.volverHubInicio.addEventListener("click", irAlHub);
 el.volverHubTarjetas.addEventListener("click", irAlHub);
 el.volverHubFinal.addEventListener("click", irAlHub);
 
