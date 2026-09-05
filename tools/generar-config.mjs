@@ -57,8 +57,13 @@ if (faltan.length > 0) {
   process.exit(1);
 }
 
+const medios = env.MEDIA_SOURCE === "storage" ? "storage" : "hosting";
+
 const contenido = `/* Generado por tools/generar-config.mjs — no lo edites a mano. */
 export const firebaseConfig = ${JSON.stringify(config, null, 2)};
+
+/* De dónde salen imágenes y audios: "hosting" (./media/) o "storage". */
+export const opciones = ${JSON.stringify({ medios }, null, 2)};
 `;
 
 writeFileSync(destino, contenido, "utf8");

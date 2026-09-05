@@ -10,8 +10,10 @@ Cada palabra se presenta con una **escena dibujada en gris** donde **solo el
 concepto que hay que aprender aparece en color**.
 
 El contenido y el progreso viven en **Firebase**: Firestore es la fuente de
-verdad, Storage guarda imágenes y audios, y cada persona entra con su cuenta de
-Google para que la app recuerde lo que ya sabe.
+verdad y cada persona entra con su cuenta de Google para que la app recuerde lo
+que ya sabe. Las imágenes y los audios se sirven **con la propia app** (carpeta
+`media/`), y el día que haga falta se pasan a Firebase Storage cambiando una
+palabra en la configuración.
 
 ---
 
@@ -26,7 +28,7 @@ Navegador (esta PWA, estática, sin build step)
    │              themes/{themeId}               ← etiquetas de tema (opcional)
    │              users/{uid}/progress/{cardId}  ← progreso, privado
    │
-   └── Storage    images/…  audio/words/…  audio/examples/…
+   └── medios     ./media/images/… (Hosting)  ó  Firebase Storage
 
 tools/import/  ← el ÚNICO sitio que escribe contenido (Admin SDK)
 ```
@@ -66,9 +68,16 @@ En [console.firebase.google.com](https://console.firebase.google.com):
    si publicas ahí).
 3. **Firestore Database** → *Crear base de datos* → modo **producción** →
    elige región (`eur3` o `europe-west1`).
-4. **Storage** → *Comenzar* → modo **producción** → la misma región.
-5. **Configuración del proyecto → Tus apps → Web (`</>`)** → registra la app y
+4. **Configuración del proyecto → Tus apps → Web (`</>`)** → registra la app y
    copia el objeto de configuración.
+
+> **Storage no hace falta.** Desde finales de 2024 exige el plan Blaze (de pago).
+> El prototipo sirve imágenes y audios desde `vocabulario/media/`, con la propia
+> app. Cuando quieras dar el salto: activa Blaze, crea el bucket, pon
+> `MEDIA_SOURCE=storage` en `.env`, vuelve a generar la configuración y sube los
+> ficheros con `npm run semilla-storage`. Las rutas guardadas en Firestore
+> (`images/animals/animals_dog.svg`) son las mismas en los dos sitios, así que no
+> hay que tocar ni una tarjeta.
 
 ### 2. Configurar este repositorio
 
@@ -90,7 +99,7 @@ apunta a su propio proyecto. Lo que protege los datos de verdad son las reglas.
 npm install -g firebase-tools
 firebase login
 cp .firebaserc.example .firebaserc     # y poner el id del proyecto
-firebase deploy --only firestore:rules,storage:rules
+firebase deploy --only firestore:rules
 ```
 
 ### 4. Subir las 10 tarjetas de demostración
@@ -100,7 +109,7 @@ cd tools/import
 npm install
 export GOOGLE_APPLICATION_CREDENTIALS=/ruta/a/clave-cuenta-de-servicio.json
 npm run semilla-prueba   # ver qué haría
-npm run semilla          # subir ilustraciones a Storage y tarjetas a Firestore
+npm run semilla          # crear las 10 tarjetas en Firestore
 ```
 
 Detalles y más orígenes (CSV escolar, mazos de Anki): **[tools/import/README.md](../tools/import/README.md)**.
@@ -138,14 +147,15 @@ vocabulario/
 ├── service-worker.js           → cachés de shell, SDK y medios (sube VERSION al publicar)
 ├── css/estilos.css
 ├── icons/
+├── media/images/…              → las ilustraciones (las sirve Hosting)
 └── js/
-    ├── firebase.js             → inicialización única (Auth, Firestore, Storage)
+    ├── firebase.js             → inicialización única (Auth y Firestore)
     ├── firebase-config.js      → generado, fuera del repositorio
     ├── sesion.js               → entrar/salir con Google
     ├── datos.js                → lee "cards" y "themes" de Firestore
     ├── progreso.js             → users/{uid}/progress/{cardId}
-    ├── media.js                → rutas de Storage → URLs de descarga
-    ├── audio.js                → audio de Storage con respaldo de voz sintética
+    ├── media.js                → rutas → URLs (Hosting o Storage)
+    ├── audio.js                → audio grabado con respaldo de voz sintética
     └── app.js                  → la interfaz de la tarjeta
 ```
 
@@ -176,10 +186,11 @@ vocabulario/
 }
 ```
 
-En Firestore se guardan **rutas de Storage**, no URLs públicas: así el contenido
-no depende de tokens de descarga que pueden regenerarse, y cambiar de bucket no
-obliga a reescribir las tarjetas. `media.js` las resuelve y guarda la URL en
-`localStorage`.
+En Firestore se guardan **rutas**, no URLs: así el contenido no depende de
+tokens de descarga que pueden regenerarse, y cambiar de sitio los ficheros no
+obliga a reescribir las tarjetas. `media.js` las resuelve según la opción
+`medios` de la configuración: `"hosting"` las convierte en `./media/…` y
+`"storage"` se las pide a Firebase Storage (y guarda la URL en `localStorage`).
 
 `datos.js` conserva cualquier **campo extra** del documento (nivel CEFR, edad,
 dificultad, procedencia...), así que ampliar el esquema no exige tocar la app.
@@ -227,7 +238,8 @@ ya lo hace solo).
 
 ## Offline
 
-- El **shell** (HTML, CSS, JS, iconos) se precachea: la app abre sin red.
+- El **shell** (HTML, CSS, JS, iconos e ilustraciones) se precachea: la app abre
+  sin red.
 - El **SDK de Firebase** y las tipografías se guardan al usarlas.
 - Las **imágenes y audios** ya vistos se guardan al usarlos.
 - Las **tarjetas** salen de la caché persistente de Firestore.
@@ -247,9 +259,9 @@ SVG de 400 × 300 hechos a mano, con una regla fija:
 - El concepto que hay que aprender va en **color**, con un halo pálido detrás
   para que no haya duda de cuál es el elemento objetivo.
 
-Los originales están en `tools/import/datos/media/images/` y se suben a Storage
-con la semilla. Cambiar una escena por una ilustración mejor (SVG, WebP...) es
-subir el fichero nuevo y apuntar `imagePath` a él.
+Están en `vocabulario/media/images/`, organizadas por tema. Cambiar una escena
+por una ilustración mejor (SVG, WebP...) es dejar el fichero nuevo ahí y apuntar
+`imagePath` a él.
 
 ---
 

@@ -11,9 +11,10 @@
  *   2. VENDOR (SDK de Firebase y tipografías): se van guardando según
  *      se piden. Van con versión fija en la URL, así que no caducan.
  *
- *   3. MEDIA (imágenes y audios servidos por Firebase Storage): se
- *      guardan al usarlas, así que una tarjeta ya vista vuelve a
- *      funcionar sin conexión.
+ *   3. MEDIA (imágenes y audios): en el modo "hosting" son ficheros
+ *      propios y van con el shell; en el modo "storage" los sirve
+ *      Firebase Storage y se guardan según se usan, así que una
+ *      tarjeta ya vista vuelve a funcionar sin conexión.
  *
  *  Lo que NO se toca aquí: las llamadas a Firestore y a Identity
  *  Toolkit (login). Firestore ya trae su propia persistencia y su
@@ -24,7 +25,7 @@
  * ============================================================
  */
 
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
 const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
 const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;
@@ -44,6 +45,16 @@ const FICHEROS_SHELL = [
   "./js/progreso.js",
   "./js/media.js",
   "./js/audio.js",
+  "./media/images/animals/animals_dog.svg",
+  "./media/images/animals/animals_cat.svg",
+  "./media/images/food/food_apple.svg",
+  "./media/images/school/school_book.svg",
+  "./media/images/school/school_teacher.svg",
+  "./media/images/family/family_sister.svg",
+  "./media/images/feelings/feelings_happy.svg",
+  "./media/images/actions/actions_play.svg",
+  "./media/images/colors/colors_red.svg",
+  "./media/images/weather/weather_rain.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png"

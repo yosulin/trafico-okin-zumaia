@@ -22,7 +22,6 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 /* La configuración vive fuera del repositorio: ver firebase-config.example.js */
 let firebaseConfig;
@@ -43,4 +42,5 @@ export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 
-export const storage = getStorage(app);
+/* Storage se carga solo si hace falta: en el modo "hosting" de media.js
+   no se usa, y así la app no descarga ese trozo del SDK para nada. */

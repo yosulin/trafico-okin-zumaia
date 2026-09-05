@@ -14,12 +14,10 @@
  *  Ejemplos:
  *
  *    # ver qué haría, sin tocar nada ni necesitar credenciales
- *    node importar.mjs --origen json --fichero datos/tarjetas-demo.json \
- *         --media datos/media --dry-run
+ *    npm run semilla-prueba
  *
  *    # las 10 tarjetas de demostración, de verdad
- *    node importar.mjs --origen json --fichero datos/tarjetas-demo.json \
- *         --media datos/media
+ *    npm run semilla
  *
  *    # un CSV de vocabulario escolar
  *    node importar.mjs --origen csv --fichero unidad3.csv \
@@ -68,6 +66,8 @@ Uso: node importar.mjs --origen <json|csv|anki> --fichero <ruta> [opciones]
   --dry-run           no sube ni escribe nada: solo enseña el resultado
   --limite <n>        importar como mucho n tarjetas
   --forzar            volver a subir medios que ya estén en Storage
+  --sin-medios        no subir nada a Storage (los medios los sirve Hosting
+                      desde vocabulario/media/, que es el modo del prototipo)
   --inactivas         crear las tarjetas con active:false (para revisarlas antes)
 
   --tema <id>         tema por defecto (animals, food, school...)
@@ -85,6 +85,7 @@ Uso: node importar.mjs --origen <json|csv|anki> --fichero <ruta> [opciones]
 }
 
 const pruebaEnSeco = Boolean(opciones["dry-run"]);
+const sinMedios = Boolean(opciones["sin-medios"]);
 const ficheroEntrada = resolve(opciones.fichero);
 
 if (!existsSync(ficheroEntrada)) {
@@ -222,7 +223,9 @@ async function principal() {
 
   console.log(`\nOrigen: ${opciones.origen}  →  ${basename(ficheroEntrada)}`);
   console.log(`Tarjetas listas: ${tarjetas.length}`);
-  console.log(`Medios a subir:  ${medios.length}`);
+  console.log(sinMedios
+    ? `Medios:          ${medios.length} (no se suben: los sirve Hosting)`
+    : `Medios a subir:  ${medios.length}`);
   if (origen.temas && origen.temas.length) console.log(`Temas:           ${origen.temas.length}`);
   if (descartadas.length > 0) {
     console.log(`\nDescartadas (${descartadas.length}):`);
@@ -244,17 +247,18 @@ async function principal() {
   const { subirMedia, escribirTarjetas, escribirTemas } = await import("./lib/firebase.mjs");
 
   let subidos = 0;
-  for (const medio of medios) {
+  for (const medio of (sinMedios ? [] : medios)) {
     const resultado = await subirMedia(medio.rutaLocal, medio.rutaStorage, { forzar: Boolean(opciones.forzar) });
     if (resultado.subido) subidos++;
     process.stdout.write(`\rSubiendo medios: ${subidos}/${medios.length}   `);
   }
-  if (medios.length > 0) process.stdout.write("\n");
+  if (!sinMedios && medios.length > 0) process.stdout.write("\n");
 
   const escritas = await escribirTarjetas(tarjetas);
   const temas = await escribirTemas(origen.temas);
 
-  console.log(`\nListo: ${escritas} tarjetas en Firestore, ${subidos} medios nuevos en Storage` +
+  console.log(`\nListo: ${escritas} tarjetas en Firestore` +
+    (sinMedios ? "" : `, ${subidos} medios nuevos en Storage`) +
     (temas ? `, ${temas} temas` : "") + ".\n");
 }
 

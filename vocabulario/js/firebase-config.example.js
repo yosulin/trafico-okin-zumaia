@@ -33,3 +33,19 @@ export const firebaseConfig = {
   messagingSenderId: "000000000000",
   appId: "1:000000000000:web:0000000000000000000000"
 };
+
+/**
+ * De dónde salen las imágenes y los audios:
+ *
+ *   "hosting"  →  de ./media/, servidos con la propia app.
+ *                 Firebase Storage exige plan Blaze (de pago), así que
+ *                 este es el modo del prototipo.
+ *   "storage"  →  de Firebase Storage.
+ *
+ * Cambiar esta palabra es todo lo que hace falta para pasar de uno a
+ * otro: las tarjetas guardan rutas ("images/animals/animals_dog.svg"),
+ * no URLs, y esas rutas son las mismas en los dos sitios.
+ */
+export const opciones = {
+  medios: "hosting"
+};

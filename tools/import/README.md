@@ -36,16 +36,22 @@ se subiría y qué documento quedaría en Firestore, sin tocar nada.
 ## Las 10 tarjetas de demostración
 
 ```bash
-# ver qué haría
-npm run semilla-prueba
-
-# hacerlo de verdad: sube las 10 ilustraciones a Storage
-# y crea las 10 tarjetas en Firestore
-npm run semilla
+npm run semilla-prueba   # ver qué haría, sin tocar nada
+npm run semilla          # crear las 10 tarjetas en Firestore
 ```
 
-Es el equivalente a `node importar.mjs --origen json
---fichero datos/tarjetas-demo.json --media datos/media`.
+Las ilustraciones **no se suben**: viven en `vocabulario/media/` y las sirve
+Hosting con la propia app (Firebase Storage exige plan de pago). Por eso la
+semilla lleva `--sin-medios`.
+
+El día que actives Blaze y quieras usar Storage:
+
+```bash
+npm run semilla-storage   # sube las ilustraciones y reescribe las tarjetas
+```
+
+y pon `MEDIA_SOURCE=storage` en `.env` antes de regenerar la configuración web.
+Las rutas son idénticas en los dos modos, así que no hay nada que migrar.
 
 ---
 
@@ -58,6 +64,7 @@ Es el equivalente a `node importar.mjs --origen json
 --dry-run                  no sube ni escribe nada
 --limite <n>               importar como mucho n tarjetas
 --forzar                   volver a subir medios que ya están en Storage
+--sin-medios               no subir nada a Storage (los sirve Hosting)
 --inactivas                crear con active:false, para revisarlas antes de publicarlas
 
 --tema <id>                tema por defecto (animals, food, school...)
@@ -167,7 +174,8 @@ lib/origen-anki.mjs   lector .apkg
 lib/zip.mjs           lectura de zips sin dependencias
 lib/normalizar.mjs    de "lo que venga" al esquema de Firestore
 lib/firebase.mjs      Admin SDK: subir a Storage y escribir en Firestore
-datos/                las 10 tarjetas de demostración y sus ilustraciones
+datos/                las 10 tarjetas de demostración
+                      (sus ilustraciones están en vocabulario/media/)
 ```
 
 Añadir un origen nuevo es escribir un lector que devuelva objetos sueltos con
