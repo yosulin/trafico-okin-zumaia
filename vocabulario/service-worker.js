@@ -25,7 +25,7 @@
  * ============================================================
  */
 
-const VERSION = "v6";
+const VERSION = "v7";
 const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
 const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
 const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;
@@ -39,6 +39,7 @@ const FICHEROS_SHELL = [
   "./css/estilos.css",
   "./js/app.js",
   "./js/modulos.js",
+  "./js/matemagia.js",
   "./js/firebase.js",
   "./js/firebase-config.js",
   "./js/sesion.js",

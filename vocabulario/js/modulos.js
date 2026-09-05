@@ -46,9 +46,9 @@ export const MODULOS = [
     nombre: "Matemagia",
     icono: "✨",
     color: "var(--menta)",
-    que: "Tablas de multiplicar, sumas y trucos para calcular rápido",
-    pantalla: null,
-    estado: () => "Pronto"
+    que: "Tablas, sumas y restas con el método ABN",
+    pantalla: "matemagia",
+    estado: () => "3 retos"
   },
   {
     id: "libre",

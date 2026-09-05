@@ -300,6 +300,122 @@ html, body {
 .boton--modulo:active { box-shadow: none; }
 
 /* ============================================================
+   MATEMAGIA
+   ============================================================ */
+
+.retos { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+
+.reto {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px; text-align: left;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio); padding: 14px;
+  font-family: var(--texto); color: var(--tinta); cursor: pointer;
+}
+
+.reto:hover { border-color: var(--color-modulo); }
+.reto:active { transform: translateY(2px); }
+.reto:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 3px; }
+
+.reto__icono { font-size: 1.6rem; flex: none; }
+.reto__texto { display: grid; gap: 2px; }
+.reto__texto b { font-family: var(--display); font-size: 1.2rem; line-height: 1.1; }
+.reto__texto small { color: var(--tinta-suave); font-size: .82rem; font-weight: 600; }
+
+.tablas__titulo { margin: 0 0 8px; font-weight: 800; color: var(--tinta-suave); font-size: .9rem; }
+
+.tablas__rejilla { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+
+.tabla-boton {
+  font-family: var(--display); font-size: 1.25rem;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio-chico); padding: 12px 0; cursor: pointer;
+  color: var(--tinta);
+}
+
+.tabla-boton:active { transform: translateY(2px); }
+.tabla-boton:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+.tabla-boton[data-nivel="verde"] { border-color: var(--menta); background: #E6F5F2; }
+.tabla-boton[data-nivel="media"] { border-color: var(--sol); background: #FFF7E8; }
+.tabla-boton--mezcla { grid-column: span 5; font-size: 1.05rem; font-family: var(--texto); font-weight: 800; }
+
+.tablas__leyenda {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 12px 0 0; font-size: .78rem; color: var(--tinta-suave); font-weight: 700;
+}
+
+.punto {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--borde); background: var(--superficie);
+  display: inline-block; margin-left: 8px;
+}
+.punto--verde { border-color: var(--menta); background: #E6F5F2; }
+.punto--media { border-color: var(--sol); background: #FFF7E8; }
+
+/* Doble clase a propósito: la regla base de .progreso__relleno vive más
+   abajo y, a igual especificidad, ganaría ella. */
+.progreso__relleno.progreso__relleno--modulo { background: var(--color-modulo); }
+
+.operacion {
+  font-family: var(--display); font-size: 2.6rem; text-align: center;
+  margin: 10px 0 6px; letter-spacing: .03em;
+}
+
+/* La recta ABN: los saltos se van rellenando según responde. */
+.saltos {
+  list-style: none; margin: 0 0 14px; padding: 0;
+  display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+}
+
+.salto {
+  min-width: 54px; padding: 8px 10px;
+  font-family: var(--display); font-size: 1.2rem; text-align: center;
+  border: 2px dashed var(--borde); border-radius: var(--radio-chico);
+  color: var(--tinta-suave);
+}
+
+.salto[data-hecho="si"] {
+  border-style: solid; border-color: var(--color-modulo);
+  background: color-mix(in srgb, var(--color-modulo) 12%, #FFF);
+  color: var(--tinta);
+}
+
+.salto-flecha { color: var(--tinta-suave); font-weight: 800; }
+
+.mates-pregunta {
+  margin: 0 0 4px; text-align: center; font-weight: 800; font-size: 1.1rem;
+}
+
+.mates-ayuda {
+  margin: 0 0 12px; text-align: center; color: var(--tinta-suave); font-size: .88rem;
+  min-height: 1.2em;
+}
+
+.mates-respuesta {
+  display: block; margin: 0 auto 14px; min-width: 120px; padding: 12px;
+  font-family: var(--display); font-size: 2rem; text-align: center;
+  border: 3px solid var(--borde); border-radius: var(--radio-chico);
+  background: #FFFDFA; min-height: 62px;
+}
+
+.mates-respuesta[data-estado="bien"] { border-color: var(--menta); background: #E6F5F2; }
+.mates-respuesta[data-estado="mal"] { border-color: var(--coral); background: #FFECEC; }
+
+.teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+.tecla {
+  font-family: var(--display); font-size: 1.5rem;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio-chico); padding: 14px 0; cursor: pointer;
+  color: var(--tinta);
+}
+
+.tecla:active { transform: translateY(2px); }
+.tecla:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+.tecla--ok { background: var(--menta); color: #FFF; border-color: var(--menta-oscura); }
+.tecla--borrar { color: var(--tinta-suave); }
+
+/* ============================================================
    DICCIONARIO
    ============================================================ */
 

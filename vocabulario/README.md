@@ -45,6 +45,8 @@ Tras entrar aparece un **índice**, y de ahí se elige:
 - **Tarjetas** — el juego: dibujo, audio y escribir la palabra en inglés.
 - **Diccionario** — se escribe una palabra en **cualquiera de los tres idiomas**
   y devuelve los otros dos, con su dibujo, su audio y su ejemplo si los tiene.
+- **Matemagia** — cálculo con **método ABN**: tablas del 1 al 10, sumas y restas
+  que cruzan la decena. Ver más abajo.
 
 Las dos leen la **misma** colección `cards`: una tarjeta ya es una entrada
 trilingüe, así que no hay dos contenidos que mantener. Lo que las separa es un
@@ -74,6 +76,34 @@ a los dos idiomas, plegable.
 **Después** → «La sabía» o «Repasar», que escriben el progreso en Firestore. No
 hay repaso espaciado (SRS): en la ronda siguiente van primero las de «Repasar»
 y las nuevas.
+
+---
+
+## Matemagia
+
+Tres retos, al nivel de 4º de primaria (`js/matemagia.js`):
+
+| Reto | Qué pregunta |
+|---|---|
+| **Tablas** | `7 × 6` del 1 al 10. Guarda aciertos y fallos **por tabla**, y el menú las pinta en verde, ámbar o gris para ver de un vistazo cuál cojea. |
+| **Sumas ABN** | `85 + 8` → *¿cuánto le falta a 85 para llegar a 90?* → *¿cuánto te queda por sumar?* → `90 + 3`. |
+| **Restas ABN** | `52 − 7` → *¿cuánto le quitas para bajar a 50?* → *¿cuánto queda por quitar?* → `50 − 5`. |
+
+La diferencia con un ejercicio corriente está en **qué se pregunta**. En ABN no
+se pide el resultado y ya: se pide cada salto, que es donde está el
+razonamiento. La pantalla enseña la recta (`85 → 90 → 93`) y las casillas se van
+rellenando según responde.
+
+Fallar un paso intermedio no cuenta como fallo del ejercicio: se enseña la
+respuesta, se sigue, y solo se anota mal si falló en algún salto. La idea es que
+pensar en voz alta no se castigue.
+
+Los generadores garantizan que la suma **siempre cruza la decena** (si no, el
+método no se practica) y que ningún paso da negativo.
+
+Progreso en `users/{uid}/mates/{reto}`, separado del de las tarjetas.
+
+**Todavía no**: multiplicación por descomposición, divisiones y problemas.
 
 ---
 

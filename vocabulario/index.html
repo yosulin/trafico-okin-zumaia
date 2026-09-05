@@ -114,6 +114,61 @@
       <p class="inicio__aviso" id="aviso-audio" hidden>Este navegador no puede leer las palabras en voz alta.</p>
     </section>
 
+    <!-- ========== MATEMAGIA: elegir reto ========== -->
+    <section class="panel panel--inicio" id="pantalla-matemagia" hidden style="--color-modulo: var(--menta)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-mates" type="button" aria-label="Volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre">Matemagia</h2>
+      </div>
+
+      <ul class="retos" id="retos"></ul>
+
+      <div class="tablas" id="tablas-panel">
+        <p class="tablas__titulo">O elige una tabla</p>
+        <div class="tablas__rejilla" id="tablas-rejilla"></div>
+        <p class="tablas__leyenda">
+          <span class="punto punto--verde"></span> te la sabes
+          <span class="punto punto--media"></span> a medias
+          <span class="punto"></span> sin practicar
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== MATEMAGIA: la ronda ========== -->
+    <section class="panel panel--tarjeta" id="pantalla-mates-reto" hidden style="--color-modulo: var(--menta)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-mates" type="button" aria-label="Volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre" id="mates-titulo">Matemagia</h2>
+      </div>
+
+      <div class="progreso">
+        <div class="progreso__barra"><span class="progreso__relleno progreso__relleno--modulo" id="mates-progreso"></span></div>
+        <span class="progreso__texto" id="mates-progreso-texto"></span>
+      </div>
+
+      <p class="operacion" id="mates-enunciado"></p>
+
+      <ol class="saltos" id="mates-saltos" hidden></ol>
+
+      <p class="mates-pregunta" id="mates-pregunta"></p>
+      <p class="mates-ayuda" id="mates-ayuda"></p>
+
+      <output class="mates-respuesta" id="mates-respuesta" aria-live="polite"></output>
+
+      <div class="teclado" id="mates-teclado"></div>
+    </section>
+
+    <!-- ========== MATEMAGIA: final de ronda ========== -->
+    <section class="panel panel--final" id="pantalla-mates-final" hidden style="--color-modulo: var(--menta)">
+      <p class="final__emoji" id="mates-final-emoji" aria-hidden="true">🎉</p>
+      <h2 class="final__titulo" id="mates-final-titulo">¡Ronda terminada!</h2>
+      <ul class="marcador" id="mates-marcador"></ul>
+      <button class="boton boton--grande boton--modulo" id="boton-mates-otra" type="button">Otra ronda</button>
+      <button class="boton boton--texto" id="boton-mates-menu" type="button">Elegir otro reto</button>
+    </section>
+
     <!-- ========== TARJETA ========== -->
     <section class="panel panel--tarjeta" id="pantalla-tarjeta" hidden>
 

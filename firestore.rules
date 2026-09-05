@@ -66,6 +66,11 @@ service cloud.firestore {
       match /progress/{cardId} {
         allow read, write: if invitada() && request.auth.uid == uid;
       }
+
+      // Progreso de Matemagia: un documento por reto (tablas, sumas, restas).
+      match /mates/{retoId} {
+        allow read, write: if invitada() && request.auth.uid == uid;
+      }
     }
 
     // ---------- todo lo demás ----------

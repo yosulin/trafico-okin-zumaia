@@ -25,6 +25,7 @@
 import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js";
 import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import { pintarModulos } from "./modulos.js";
+import * as Mates from "./matemagia.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
@@ -40,6 +41,9 @@ const pantallas = {
   hub: $("pantalla-hub"),
   inicio: $("pantalla-inicio"),
   diccionario: $("pantalla-diccionario"),
+  matemagia: $("pantalla-matemagia"),
+  matesReto: $("pantalla-mates-reto"),
+  matesFinal: $("pantalla-mates-final"),
   tarjeta: $("pantalla-tarjeta"),
   final: $("pantalla-final")
 };
@@ -65,6 +69,25 @@ const el = {
   campoBuscar: $("campo-buscar"),
   buscadorEstado: $("buscador-estado"),
   resultados: $("resultados"),
+
+  retos: $("retos"),
+  tablasRejilla: $("tablas-rejilla"),
+  volverHubMates: $("boton-volver-hub-mates"),
+  volverMates: $("boton-volver-mates"),
+  matesTitulo: $("mates-titulo"),
+  matesProgreso: $("mates-progreso"),
+  matesProgresoTexto: $("mates-progreso-texto"),
+  matesEnunciado: $("mates-enunciado"),
+  matesSaltos: $("mates-saltos"),
+  matesPregunta: $("mates-pregunta"),
+  matesAyuda: $("mates-ayuda"),
+  matesRespuesta: $("mates-respuesta"),
+  matesTeclado: $("mates-teclado"),
+  matesMarcador: $("mates-marcador"),
+  matesFinalEmoji: $("mates-final-emoji"),
+  matesFinalTitulo: $("mates-final-titulo"),
+  matesOtra: $("boton-mates-otra"),
+  matesMenu: $("boton-mates-menu"),
 
   marcadorInicio: $("marcador-inicio"),
   marcadorFinal: $("marcador-final"),
@@ -372,6 +395,199 @@ async function buscarPalabra(termino) {
   }
 }
 
+/* ---------- matemagia ---------- */
+
+let retoActual = null;      /* "tablas" | "sumas" | "restas" */
+let tablaActual = null;     /* número de tabla, o null para mezcla */
+let ejercicio = null;
+let paso = 0;
+let escrito = "";
+let rondaMates = { hechas: 0, aciertos: 0, fallos: 0 };
+
+const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "ok"];
+
+function pintarMenuMates() {
+  el.retos.innerHTML = "";
+  Mates.RETOS.forEach((reto) => {
+    const fila = document.createElement("li");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "reto";
+    boton.innerHTML = `
+      <span class="reto__icono" aria-hidden="true"></span>
+      <span class="reto__texto"><b></b><small></small></span>`;
+    boton.querySelector(".reto__icono").textContent = reto.icono;
+    boton.querySelector("b").textContent = reto.nombre;
+    boton.querySelector("small").textContent = reto.que;
+    boton.addEventListener("click", () => empezarRondaMates(reto.id, null));
+    fila.appendChild(boton);
+    el.retos.appendChild(fila);
+  });
+
+  /* Las tablas se pintan con su nivel: de un vistazo se ve cuál cojea. */
+  el.tablasRejilla.innerHTML = "";
+  for (let tabla = 1; tabla <= 10; tabla++) {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "tabla-boton";
+    boton.textContent = tabla;
+    boton.dataset.nivel = Mates.nivelDeTabla(tabla);
+    boton.setAttribute("aria-label", "Tabla del " + tabla);
+    boton.addEventListener("click", () => empezarRondaMates("tablas", tabla));
+    el.tablasRejilla.appendChild(boton);
+  }
+
+  const mezcla = document.createElement("button");
+  mezcla.type = "button";
+  mezcla.className = "tabla-boton tabla-boton--mezcla";
+  mezcla.textContent = "Mezcla de todas";
+  mezcla.addEventListener("click", () => empezarRondaMates("tablas", null));
+  el.tablasRejilla.appendChild(mezcla);
+}
+
+function pintarTeclado() {
+  el.matesTeclado.innerHTML = "";
+  TECLAS.forEach((tecla) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "tecla" + (tecla === "ok" ? " tecla--ok" : tecla === "borrar" ? " tecla--borrar" : "");
+    boton.textContent = tecla === "borrar" ? "←" : tecla === "ok" ? "✓" : tecla;
+    boton.setAttribute("aria-label", tecla === "borrar" ? "Borrar" : tecla === "ok" ? "Comprobar" : tecla);
+    boton.addEventListener("click", () => pulsarTecla(tecla));
+    el.matesTeclado.appendChild(boton);
+  });
+}
+
+function pintarSaltos() {
+  const saltos = ejercicio.saltos;
+  el.matesSaltos.hidden = saltos.length === 0;
+  if (saltos.length === 0) return;
+
+  el.matesSaltos.innerHTML = "";
+  saltos.forEach((valor, posicion) => {
+    if (posicion > 0) {
+      const flecha = document.createElement("li");
+      flecha.className = "salto-flecha";
+      flecha.setAttribute("aria-hidden", "true");
+      flecha.textContent = "→";
+      el.matesSaltos.appendChild(flecha);
+    }
+    const casilla = document.createElement("li");
+    casilla.className = "salto";
+    /* El primer número se ve desde el principio; los siguientes van
+       apareciendo según los va calculando. */
+    const visible = posicion === 0 || posicion <= pasosResueltosEnSaltos();
+    casilla.dataset.hecho = visible ? "si" : "no";
+    casilla.textContent = visible ? valor : "?";
+    el.matesSaltos.appendChild(casilla);
+  });
+}
+
+/** Cuántas casillas de la recta se han ganado ya (el paso 2 no mueve la recta). */
+function pasosResueltosEnSaltos() {
+  if (paso === 0) return 0;
+  if (paso === 1) return 1;
+  return paso === 2 ? 1 : 2;
+}
+
+function mostrarPaso() {
+  const actual = ejercicio.pasos[paso];
+  el.matesEnunciado.textContent = ejercicio.enunciado;
+  el.matesPregunta.textContent = actual.pregunta;
+  el.matesAyuda.textContent = actual.ayuda || "";
+  el.matesRespuesta.textContent = "";
+  el.matesRespuesta.removeAttribute("data-estado");
+  escrito = "";
+  pintarSaltos();
+}
+
+function siguienteEjercicio() {
+  ejercicio = Mates.generarEjercicio(retoActual, tablaActual);
+  paso = 0;
+  el.matesProgresoTexto.textContent = (rondaMates.hechas + 1) + " / " + Mates.PREGUNTAS_POR_RONDA;
+  el.matesProgreso.style.width = ((rondaMates.hechas + 1) / Mates.PREGUNTAS_POR_RONDA * 100) + "%";
+  mostrarPaso();
+}
+
+function pulsarTecla(tecla) {
+  if (tecla === "borrar") {
+    escrito = escrito.slice(0, -1);
+    el.matesRespuesta.textContent = escrito;
+    return;
+  }
+  if (tecla === "ok") {
+    comprobarPaso();
+    return;
+  }
+  if (escrito.length >= 4) return;
+  escrito += tecla;
+  el.matesRespuesta.textContent = escrito;
+}
+
+function comprobarPaso() {
+  if (escrito === "") return;
+
+  const actual = ejercicio.pasos[paso];
+  const acierta = Number(escrito) === actual.respuesta;
+  el.matesRespuesta.dataset.estado = acierta ? "bien" : "mal";
+
+  /* Solo cuenta el ejercicio entero, no cada salto: fallar un paso
+     intermedio ya se corrige enseñándolo, y no queremos castigar por
+     pensar en voz alta. */
+  if (!acierta) {
+    el.matesRespuesta.textContent = actual.respuesta;
+    el.matesAyuda.textContent = "Era " + actual.respuesta + ". Seguimos.";
+    ejercicio.falloEnAlgunPaso = true;
+  }
+
+  window.setTimeout(() => {
+    paso += 1;
+
+    if (paso < ejercicio.pasos.length) {
+      mostrarPaso();
+      return;
+    }
+
+    const bien = !ejercicio.falloEnAlgunPaso;
+    Mates.anotar(retoActual, bien, ejercicio.tabla);
+    rondaMates.hechas += 1;
+    if (bien) rondaMates.aciertos += 1; else rondaMates.fallos += 1;
+
+    if (rondaMates.hechas >= Mates.PREGUNTAS_POR_RONDA) {
+      terminarRondaMates();
+      return;
+    }
+    siguienteEjercicio();
+  }, acierta ? 450 : 1400);
+}
+
+function empezarRondaMates(reto, tabla) {
+  retoActual = reto;
+  tablaActual = tabla;
+  rondaMates = { hechas: 0, aciertos: 0, fallos: 0 };
+
+  const nombre = Mates.RETOS.find((item) => item.id === reto).nombre;
+  el.matesTitulo.textContent = tabla ? ("Tabla del " + tabla) : nombre;
+
+  mostrarPantalla("matesReto");
+  siguienteEjercicio();
+}
+
+function terminarRondaMates() {
+  const { aciertos, fallos } = rondaMates;
+  el.matesFinalEmoji.textContent = fallos === 0 ? "🏆" : aciertos >= fallos ? "🎉" : "💪";
+  el.matesFinalTitulo.textContent = fallos === 0
+    ? "¡Todas bien!"
+    : aciertos >= fallos ? "¡Buena ronda!" : "Ronda terminada";
+
+  el.matesMarcador.innerHTML = [
+    { estado: "known", texto: "Bien", valor: aciertos },
+    { estado: "review", texto: "A repasar", valor: fallos }
+  ].map((item) => `<li data-estado="${item.estado}"><b>${item.valor}</b><span>${item.texto}</span></li>`).join("");
+
+  mostrarPantalla("matesFinal");
+}
+
 /* ---------- entrada y salida ---------- */
 
 async function prepararSesion(usuario) {
@@ -385,7 +601,8 @@ async function prepararSesion(usuario) {
     const [contenido, etiquetas] = await Promise.all([
       cargarTarjetas(),
       cargarTemas(),
-      Progreso.cargar(usuario.uid)
+      Progreso.cargar(usuario.uid),
+      Mates.cargarProgreso(usuario.uid)
     ]);
     tarjetas = contenido;
     temas = etiquetas;
@@ -420,6 +637,7 @@ function cerrarSesion() {
   mazo = [];
   temas = {};
   Progreso.olvidar();
+  Mates.olvidarProgreso();
   olvidarUrls();
   el.usuario.hidden = true;
   el.error.hidden = true;
@@ -456,6 +674,7 @@ function pintarIndice() {
   activos.forEach(({ modulo, boton }) => {
     boton.addEventListener("click", () => {
       if (modulo.pantalla === "inicio") pintarMarcador(el.marcadorInicio);
+      if (modulo.pantalla === "matemagia") pintarMenuMates();
       mostrarPantalla(modulo.pantalla);
       if (modulo.pantalla === "diccionario") el.campoBuscar.focus();
     });
@@ -463,6 +682,10 @@ function pintarIndice() {
 }
 
 el.volverHub.addEventListener("click", irAlHub);
+el.volverHubMates.addEventListener("click", irAlHub);
+el.volverMates.addEventListener("click", () => { pintarMenuMates(); mostrarPantalla("matemagia"); });
+el.matesOtra.addEventListener("click", () => empezarRondaMates(retoActual, tablaActual));
+el.matesMenu.addEventListener("click", () => { pintarMenuMates(); mostrarPantalla("matemagia"); });
 el.volverHubInicio.addEventListener("click", irAlHub);
 el.volverHubTarjetas.addEventListener("click", irAlHub);
 el.volverHubFinal.addEventListener("click", irAlHub);
@@ -509,6 +732,8 @@ el.verTraduccion.addEventListener("click", () => {
 
 el.sabia.addEventListener("click", () => siguienteTarjeta(Progreso.ESTADOS.CONOCIDA));
 el.repasar.addEventListener("click", () => siguienteTarjeta(Progreso.ESTADOS.REPASO));
+
+pintarTeclado();
 
 /* Aviso discreto de que se está jugando sin red. */
 function pintarEstadoRed() { el.avisoRed.hidden = navigator.onLine; }
