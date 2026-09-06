@@ -115,8 +115,19 @@ node importar.mjs --origen csv --fichero unidad3.csv \
   --tema school --fuente escolar --libro "Explorers 4" --unidad 3 --dry-run
 ```
 
-`image`, `word_audio` y `example_audio` son ficheros dentro de la carpeta
-`--media`; sus rutas de Storage se calculan solas:
+Hay dos formas de indicar los medios:
+
+- `image`, `word_audio`, `example_audio` → **ficheros** dentro de `--media`; la
+  ruta de Storage se calcula sola.
+- `image_path`, `word_audio_path`, `example_audio_path` → **rutas ya guardadas**,
+  que es lo que exporta la app. Sirven para que exportar, corregir y volver a
+  importar no pierda las imágenes.
+
+También se admiten `id`, `deck` y `active`, así que el CSV que descarga la app
+desde Ajustes se puede reimportar tal cual: como lleva el `id`, actualiza las
+tarjetas en vez de duplicarlas.
+
+Rutas que se calculan solas a partir de `--media`:
 
 ```
 images/<tema>/<id>.<ext>

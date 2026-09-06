@@ -33,7 +33,7 @@ export const IDIOMAS = [
   { codigo: "en", nombre: "English", bandera: "🇬🇧" }
 ];
 
-const TEXTOS = {
+export const TEXTOS = {
   es: {
     "app.titulo": "Ayuda de Sofía",
     "app.lema": "Tus herramientas",
@@ -153,7 +153,12 @@ const TEXTOS = {
     "ajustes.sinComprobar": "Sin conexión: no se puede comprobar si hay una versión más nueva.",
     "ajustes.hayNueva": "Hay una versión más nueva publicada ({version} · {commit}, {fecha}). Estás usando una copia guardada.",
     "ajustes.actualizar": "Actualizar a la última versión",
-    "ajustes.actualizando": "Actualizando…"
+    "ajustes.actualizando": "Actualizando…",
+    "ajustes.contenido": "Contenido",
+    "ajustes.descargar": "Descargar las tarjetas (CSV)",
+    "ajustes.descargando": "Preparando…",
+    "ajustes.descargaError": "No se ha podido descargar: {motivo}",
+    "ajustes.descargaPista": "Para revisar o corregir el vocabulario fuera de la app. Se vuelve a subir con tools/import."
   },
 
   eu: {
@@ -275,7 +280,12 @@ const TEXTOS = {
     "ajustes.sinComprobar": "Konexiorik gabe: ezin da egiaztatu bertsio berriagorik dagoen.",
     "ajustes.hayNueva": "Bertsio berriago bat argitaratu da ({version} · {commit}, {fecha}). Gordetako kopia bat erabiltzen ari zara.",
     "ajustes.actualizar": "Eguneratu azken bertsiora",
-    "ajustes.actualizando": "Eguneratzen…"
+    "ajustes.actualizando": "Eguneratzen…",
+    "ajustes.contenido": "Edukia",
+    "ajustes.descargar": "Deskargatu txartelak (CSV)",
+    "ajustes.descargando": "Prestatzen…",
+    "ajustes.descargaError": "Ezin izan da deskargatu: {motivo}",
+    "ajustes.descargaPista": "Hiztegia app-etik kanpo berrikusteko edo zuzentzeko. tools/import erabiliz igotzen da berriro."
   },
 
   en: {
@@ -397,13 +407,21 @@ const TEXTOS = {
     "ajustes.sinComprobar": "You're offline: can't check whether there's a newer version.",
     "ajustes.hayNueva": "A newer version is published ({version} · {commit}, {fecha}). You're using a saved copy.",
     "ajustes.actualizar": "Update to the latest version",
-    "ajustes.actualizando": "Updating…"
+    "ajustes.actualizando": "Updating…",
+    "ajustes.contenido": "Content",
+    "ajustes.descargar": "Download the cards (CSV)",
+    "ajustes.descargando": "Getting it ready…",
+    "ajustes.descargaError": "Couldn't download: {motivo}",
+    "ajustes.descargaPista": "To review or fix the vocabulary outside the app. You upload it back with tools/import."
   }
 };
 
 const POR_DEFECTO = "es";
 
+/* Con guardas para poder importar este fichero desde Node: las
+   herramientas de tools/ leen TEXTOS sin navegador de por medio. */
 function leerGuardado() {
+  if (typeof window === "undefined") return POR_DEFECTO;
   try {
     const guardado = window.localStorage.getItem(CLAVE);
     if (guardado && TEXTOS[guardado]) return guardado;
@@ -439,6 +457,7 @@ export function t(clave, valores) {
  *   data-i18n-attr="placeholder:clave" → un atributo (o varios, con ;)
  */
 export function aplicar(raiz = document) {
+  if (typeof document === "undefined") return;
   raiz.querySelectorAll("[data-i18n]").forEach((elemento) => {
     elemento.textContent = t(elemento.dataset.i18n);
   });

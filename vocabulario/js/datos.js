@@ -68,6 +68,16 @@ export async function cargarTarjetas() {
   return respuesta.docs.map((documento) => normalizar(documento.id, documento.data()));
 }
 
+/**
+ * Todas las tarjetas activas, entren o no en el mazo. Es lo que se
+ * descarga en CSV desde Ajustes para revisar o corregir el contenido.
+ */
+export async function cargarTodasLasTarjetas() {
+  const consulta = query(collection(db, "cards"), where("active", "==", true));
+  const respuesta = await getDocs(consulta);
+  return respuesta.docs.map((documento) => normalizar(documento.id, documento.data()));
+}
+
 /* ---------- diccionario ---------- */
 
 const IDIOMAS = ["en", "es", "eu"];

@@ -140,8 +140,55 @@ regla).
 
 > El euskera lo escribió Claude y **está sin revisar por un hablante**. Las
 > frases de Matemagia son las más delicadas, porque llevan números declinados
-> (`80ra iristeko`). Corregir cualquiera de ellas es editar su línea en
-> `js/i18n.js`.
+> (`80ra iristeko`).
+
+### Revisar las traducciones fuera del código
+
+Para repasarlas con un LLM, con alguien que sepa euskera o en una hoja de
+cálculo, hay un viaje de ida y vuelta a CSV:
+
+```bash
+node tools/textos-csv.mjs exportar > textos.csv
+#  (se corrige textos.csv: una fila por texto, columnas clave,es,eu,en)
+node tools/textos-csv.mjs importar textos.csv
+```
+
+Al importar solo se tocan los textos: el resto de `i18n.js` se queda igual. Las
+claves que falten en el CSV se conservan, y las que sobren se avisan y se
+ignoran.
+
+---
+
+## Descargar el contenido en CSV
+
+En **Ajustes → Contenido** hay un botón que descarga **todas las tarjetas
+activas** en CSV, con las mismas columnas que entiende el importador:
+
+```
+id,word,es,eu,theme,type,layer,tags,
+example_en,example_es,example_eu,
+image_path,word_audio_path,example_audio_path,deck,active
+```
+
+El círculo se cierra así:
+
+```
+Ajustes → Descargar CSV        (la app lee Firestore)
+   ↓  se corrige donde sea cómodo
+tools/import --origen csv      (el importador escribe Firestore)
+```
+
+La app **no** puede subirlo: escribir contenido está prohibido desde el
+navegador, y eso no se toca. Se sube con:
+
+```bash
+cd tools/import
+node importar.mjs --origen csv --fichero tarjetas-2026-09-06.csv --sin-medios --dry-run
+```
+
+Como el CSV lleva el `id`, reimportar **actualiza** las tarjetas existentes en
+vez de duplicarlas — incluso si has cambiado la palabra. (El fichero lleva un BOM
+para que Excel abra bien los acentos; el importador lo quita al leer.)
 
 ---
 

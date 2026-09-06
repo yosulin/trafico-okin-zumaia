@@ -252,6 +252,7 @@ html, body {
 .idioma-boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 2px; }
 
 .ajustes-grupo { display: grid; gap: 10px; margin-bottom: 22px; }
+.ajustes-contenido { text-align: left; border-top: 2px solid var(--borde); padding-top: 16px; }
 .boton--bloque { width: 100%; }
 
 .ajustes-pista {

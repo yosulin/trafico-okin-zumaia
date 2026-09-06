@@ -4,9 +4,10 @@
  * ============================================================
  *  Cabecera esperada (el orden da igual, y sobra con las dos primeras):
  *
- *      word,es,eu,theme,type,layer,tags,
+ *      id,word,es,eu,theme,type,layer,tags,
  *      example_en,example_es,example_eu,
- *      image,word_audio,example_audio
+ *      image,word_audio,example_audio,
+ *      image_path,word_audio_path,example_audio_path,deck,active
  *
  *  "image", "word_audio" y "example_audio" son rutas de Storage o
  *  ficheros dentro de la carpeta indicada con --media.
@@ -45,7 +46,9 @@ function partir(texto) {
 }
 
 export function leerCsv(ruta) {
-  const filas = partir(readFileSync(ruta, "utf8"));
+  /* Se quita el BOM: Excel (y nuestra propia descarga) lo ponen, y sin
+     esto la primera columna se llamaría "\uFEFFid" y no se reconocería. */
+  const filas = partir(readFileSync(ruta, "utf8").replace(/^\uFEFF/, ""));
   if (filas.length < 2) return { tarjetas: [], temas: [] };
 
   const cabecera = filas[0].map((c) => c.trim().toLowerCase());
@@ -65,11 +68,19 @@ export function leerCsv(ruta) {
       type: valor("type"),
       layer: valor("layer"),
       tags: valor("tags"),
+      /* Rutas ya guardadas (las que exporta la app), para que exportar,
+         corregir y volver a importar no pierda las imágenes. */
+      imagePath: valor("image_path"),
+      wordAudioPath: valor("word_audio_path"),
       example: {
         en: valor("example_en"),
         es: valor("example_es"),
-        eu: valor("example_eu")
+        eu: valor("example_eu"),
+        audioPath: valor("example_audio_path")
       },
+      deck: valor("deck") === "" ? undefined : valor("deck") !== "false",
+      active: valor("active") === "" ? undefined : valor("active") !== "false",
+      /* Ficheros sueltos dentro de la carpeta --media. */
       media: {
         imagen: valor("image"),
         audioPalabra: valor("word_audio"),

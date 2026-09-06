@@ -23,7 +23,7 @@
  */
 
 import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js";
-import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
+import { buscar, cargarTarjetas, cargarTodasLasTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import { pintarModulos } from "./modulos.js";
 import * as Mates from "./matemagia.js";
 import { VERSION } from "./version.js";
@@ -59,6 +59,7 @@ const el = {
   ajustesCorreo: $("ajustes-correo"),
   pistaInstalar: $("pista-instalar"),
   selectorIdioma: $("selector-idioma"),
+  descargar: $("boton-descargar"),
   versionNumero: $("version-numero"),
   versionFecha: $("version-fecha"),
   versionNota: $("version-nota"),
@@ -626,6 +627,64 @@ function pintarSelectorIdioma() {
   });
 }
 
+/* ---------- descargar el contenido ---------- */
+
+/* Las mismas columnas que entiende el importador de tools/import, para
+   que exportar, corregir y volver a subir sea un círculo cerrado. */
+const COLUMNAS = [
+  "id", "word", "es", "eu", "theme", "type", "layer", "tags",
+  "example_en", "example_es", "example_eu",
+  "image_path", "word_audio_path", "example_audio_path",
+  "deck", "active"
+];
+
+function celdaCsv(valor) {
+  const texto = String(valor === undefined || valor === null ? "" : valor);
+  return /[",\n]/.test(texto) ? '"' + texto.replace(/"/g, '""') + '"' : texto;
+}
+
+function tarjetaAFila(tarjeta) {
+  return [
+    tarjeta.id, tarjeta.word, tarjeta.es, tarjeta.eu,
+    tarjeta.theme, tarjeta.type, tarjeta.layer, (tarjeta.tags || []).join(","),
+    tarjeta.example.en, tarjeta.example.es, tarjeta.example.eu,
+    tarjeta.imagePath, tarjeta.wordAudioPath, tarjeta.example.audioPath,
+    tarjeta.deck === false ? "false" : "true",
+    tarjeta.active === false ? "false" : "true"
+  ];
+}
+
+async function descargarTarjetas() {
+  const original = el.descargar.querySelector("span").textContent;
+  el.descargar.disabled = true;
+  el.descargar.querySelector("span").textContent = t("ajustes.descargando");
+
+  try {
+    /* Todas las activas, no solo las del mazo: el CSV es para revisar
+       el contenido, no para jugar. */
+    const todas = await cargarTodasLasTarjetas();
+    const filas = [COLUMNAS.join(",")].concat(
+      todas.map((tarjeta) => tarjetaAFila(tarjeta).map(celdaCsv).join(","))
+    );
+
+    /* El BOM es para que Excel abra bien los acentos. */
+    const contenido = new Blob(["\uFEFF" + filas.join("\n") + "\n"], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(contenido);
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = "tarjetas-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  } catch (fallo) {
+    mostrarError(t("ajustes.descargaError", { motivo: fallo.message }));
+  } finally {
+    el.descargar.disabled = false;
+    el.descargar.querySelector("span").textContent = original;
+  }
+}
+
 /* ---------- versión ---------- */
 
 function fechaLegible(iso) {
@@ -808,6 +867,7 @@ el.botonAjustes.addEventListener("click", () => {
 
 el.volverHubAjustes.addEventListener("click", irAlHub);
 el.actualizar.addEventListener("click", actualizarApp);
+el.descargar.addEventListener("click", descargarTarjetas);
 
 el.volverHub.addEventListener("click", irAlHub);
 el.volverHubMates.addEventListener("click", irAlHub);
