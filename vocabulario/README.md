@@ -110,6 +110,39 @@ Progreso en `users/{uid}/mates/{reto}`, separado del de las tarjetas.
 
 ---
 
+## Ajustes y versiones
+
+El engranaje de la cabecera abre **Ajustes**: quién ha entrado, instalar la app,
+cerrar sesión, borrar el progreso y **la versión**.
+
+Ahí se ven dos cosas que pueden no coincidir:
+
+- la versión que **estás usando** (`js/version.js`, que va dentro de la app y la
+  cachea el service worker),
+- la **publicada** (`version.json`, que se pide siempre a la red).
+
+Si difieren, el navegador se ha quedado con una copia vieja y aparece un botón
+**«Actualizar a la última versión»** que tira las cachés, quita el service worker
+y recarga. Es exactamente el lío que nos costó una tarde de diagnóstico.
+
+Las tres cosas las escribe `tools/sellar-version.mjs`, que **se ejecuta solo al
+desplegar** (está como `predeploy` en `firebase.json`), así que no se puede
+olvidar. También renombra las cachés del service worker con el sello del
+despliegue, para que cada publicación estrene caché.
+
+El número sale del fichero `VERSION` de la raíz, que se sube a mano:
+
+```
+0.4.0   →  0.5.0 cuando entre un módulo nuevo
+        →  0.4.1 para arreglos
+```
+
+Después de un despliegue, `version.json` y `js/version.js` aparecen modificados:
+son el sello de lo que acabas de publicar. Comitéalos si quieres dejar constancia
+de qué versión está viva, o descártalos, que se regeneran solos.
+
+---
+
 ## Puesta en marcha
 
 ### 1. Crear el proyecto Firebase

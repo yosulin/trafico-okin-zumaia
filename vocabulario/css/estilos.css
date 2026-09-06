@@ -87,9 +87,13 @@ html, body {
 
 .cabecera__sesion { display: flex; align-items: center; gap: 8px; }
 
-.usuario { display: flex; align-items: center; gap: 8px; }
-.usuario__foto { width: 32px; height: 32px; border-radius: 50%; background: #EFF1F4; object-fit: cover; }
-.usuario__nombre { font-weight: 800; font-size: .9rem; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.boton-ajustes {
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: 50%; width: 42px; height: 42px;
+  font-size: 1.15rem; line-height: 1; cursor: pointer;
+}
+.boton-ajustes:active { transform: translateY(2px); }
+.boton-ajustes:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
 
 /* ============================================================
    ESTRUCTURA
@@ -210,6 +214,52 @@ html, body {
 
 .final__emoji { font-size: 3rem; margin: 4px 0 0; }
 .final__titulo { font-family: var(--display); margin: 4px 0 18px; font-size: 1.7rem; }
+
+/* ============================================================
+   AJUSTES
+   ============================================================ */
+
+.ficha-usuario {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: #F7F8FA; border-radius: var(--radio-chico);
+  padding: 12px 14px; margin-bottom: 18px;
+}
+
+.ficha-usuario__foto { width: 44px; height: 44px; border-radius: 50%; background: #EFF1F4; object-fit: cover; flex: none; }
+.ficha-usuario__datos { display: grid; gap: 2px; min-width: 0; }
+.ficha-usuario__datos b { font-family: var(--display); font-size: 1.15rem; }
+.ficha-usuario__datos small { color: var(--tinta-suave); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; }
+
+.ajustes-grupo { display: grid; gap: 10px; margin-bottom: 22px; }
+.boton--bloque { width: 100%; }
+
+.ajustes-pista {
+  margin: -4px 0 0; font-size: .82rem; color: var(--tinta-suave);
+  background: #FFFBF3; border: 2px dashed #F0E2CB;
+  border-radius: var(--radio-chico); padding: 10px 12px; text-align: left;
+}
+
+/* Versión: lo que hay publicado y lo que estás usando. Si no coinciden,
+   el aviso y el botón de actualizar. */
+.version {
+  border-top: 2px solid var(--borde); padding-top: 14px; text-align: left;
+}
+
+.version__linea {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  margin: 0 0 6px; font-size: .9rem; color: var(--tinta-suave);
+}
+
+.version__linea b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+
+.version__nota { margin: 10px 0 0; font-size: .85rem; color: var(--tinta-suave); }
+
+.version__nota[data-estado="vieja"] {
+  color: #A96A00; background: #FFF3E0; font-weight: 700;
+  border-radius: var(--radio-chico); padding: 10px 12px;
+}
+
+.version #boton-actualizar { margin-top: 10px; }
 
 /* ============================================================
    ÍNDICE DE MÓDULOS

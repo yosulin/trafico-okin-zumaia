@@ -31,12 +31,7 @@
     </div>
 
     <div class="cabecera__sesion">
-      <button class="boton boton--fantasma boton--instalar" id="boton-instalar" type="button" hidden>📲 Instalar</button>
-      <div class="usuario" id="usuario" hidden>
-        <img class="usuario__foto" id="usuario-foto" alt="" width="32" height="32">
-        <span class="usuario__nombre" id="usuario-nombre"></span>
-        <button class="boton boton--fantasma boton--mini" id="boton-salir" type="button">Salir</button>
-      </div>
+      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden aria-label="Ajustes">⚙️</button>
     </div>
   </header>
 
@@ -67,6 +62,44 @@
       <button class="boton boton--grande boton--principal" id="boton-salir-sin-acceso" type="button">
         Probar con otra cuenta
       </button>
+    </section>
+
+    <!-- ========== AJUSTES ========== -->
+    <section class="panel panel--inicio" id="pantalla-ajustes" hidden style="--color-modulo: var(--tinta-suave)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-ajustes" type="button" aria-label="Volver">←</button>
+        <h2 class="modulo-cabecera__nombre">Ajustes</h2>
+      </div>
+
+      <div class="ficha-usuario">
+        <img class="ficha-usuario__foto" id="ajustes-foto" alt="" width="44" height="44">
+        <div class="ficha-usuario__datos">
+          <b id="ajustes-nombre"></b>
+          <small id="ajustes-correo"></small>
+        </div>
+      </div>
+
+      <div class="ajustes-grupo">
+        <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-instalar" type="button" hidden>
+          📲 Instalar la app
+        </button>
+        <p class="ajustes-pista" id="pista-instalar" hidden>
+          En iPhone o iPad: pulsa <b>Compartir</b> ⬆️ y luego <b>«Añadir a pantalla de inicio»</b>.
+        </p>
+        <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-salir" type="button">
+          👋 Cerrar sesión
+        </button>
+        <button class="boton boton--texto" id="boton-reiniciar" type="button">Borrar todo mi progreso</button>
+      </div>
+
+      <div class="version" id="version">
+        <p class="version__linea"><span>Versión</span> <b id="version-numero">…</b></p>
+        <p class="version__linea"><span>Actualizada</span> <b id="version-fecha">…</b></p>
+        <p class="version__nota" id="version-nota"></p>
+        <button class="boton boton--grande boton--principal" id="boton-actualizar" type="button" hidden>
+          Actualizar a la última versión
+        </button>
+      </div>
     </section>
 
     <!-- ========== ÍNDICE DE MÓDULOS ========== -->
@@ -110,7 +143,6 @@
       <p class="inicio__intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
       <ul class="marcador" id="marcador-inicio"></ul>
       <button class="boton boton--grande boton--principal" id="boton-empezar" type="button">Empezar</button>
-      <button class="boton boton--texto" id="boton-reiniciar" type="button">Empezar de cero</button>
       <p class="inicio__aviso" id="aviso-audio" hidden>Este navegador no puede leer las palabras en voz alta.</p>
     </section>
 

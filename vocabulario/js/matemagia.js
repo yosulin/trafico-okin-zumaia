@@ -23,6 +23,7 @@
  */
 
 import {
+  deleteDoc,
   doc,
   getDoc,
   setDoc,
@@ -230,6 +231,13 @@ export function anotar(reto, acierta, tabla) {
   setDoc(referencia(reto), carga, { merge: true }).catch(() => {
     /* queda encolado por la caché persistente de Firestore */
   });
+}
+
+/** "Empezar de cero": borra el progreso de los tres retos. */
+export async function reiniciar() {
+  if (!uidActual) return;
+  cache = {};
+  await Promise.all(RETOS.map((reto) => deleteDoc(referencia(reto.id)).catch(() => null)));
 }
 
 export { PREGUNTAS_POR_RONDA };

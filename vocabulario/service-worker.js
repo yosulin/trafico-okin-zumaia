@@ -25,7 +25,7 @@
  * ============================================================
  */
 
-const VERSION = "v7";
+const VERSION = "0.4.0+9ceb350";
 const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
 const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
 const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;
@@ -38,6 +38,7 @@ const FICHEROS_SHELL = [
   "./manifest.webmanifest",
   "./css/estilos.css",
   "./js/app.js",
+  "./js/version.js",
   "./js/modulos.js",
   "./js/matemagia.js",
   "./js/firebase.js",
@@ -107,6 +108,10 @@ self.addEventListener("fetch", (evento) => {
   if (evento.request.method !== "GET") return;
 
   const url = new URL(evento.request.url);
+
+  /* La versión publicada se pide siempre a la red: es justo lo que
+     sirve para saber si la copia cacheada se ha quedado atrás. */
+  if (url.pathname.endsWith("/version.json")) return;
 
   if (url.origin === self.location.origin) {
     evento.respondWith(cachePrimero(evento.request, CACHE_SHELL));

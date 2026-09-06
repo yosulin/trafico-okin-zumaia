@@ -26,6 +26,7 @@ import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js"
 import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import { pintarModulos } from "./modulos.js";
 import * as Mates from "./matemagia.js";
+import { VERSION } from "./version.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
@@ -39,6 +40,7 @@ const pantallas = {
   login: $("pantalla-login"),
   sinAcceso: $("pantalla-sin-acceso"),
   hub: $("pantalla-hub"),
+  ajustes: $("pantalla-ajustes"),
   inicio: $("pantalla-inicio"),
   diccionario: $("pantalla-diccionario"),
   matemagia: $("pantalla-matemagia"),
@@ -49,9 +51,16 @@ const pantallas = {
 };
 
 const el = {
-  usuario: $("usuario"),
-  usuarioFoto: $("usuario-foto"),
-  usuarioNombre: $("usuario-nombre"),
+  botonAjustes: $("boton-ajustes"),
+  volverHubAjustes: $("boton-volver-hub-ajustes"),
+  ajustesFoto: $("ajustes-foto"),
+  ajustesNombre: $("ajustes-nombre"),
+  ajustesCorreo: $("ajustes-correo"),
+  pistaInstalar: $("pista-instalar"),
+  versionNumero: $("version-numero"),
+  versionFecha: $("version-fecha"),
+  versionNota: $("version-nota"),
+  actualizar: $("boton-actualizar"),
   entrar: $("boton-entrar"),
   salir: $("boton-salir"),
   errorLogin: $("error-login"),
@@ -588,12 +597,86 @@ function terminarRondaMates() {
   mostrarPantalla("matesFinal");
 }
 
+/* ---------- versión ---------- */
+
+function fechaLegible(iso) {
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return "—";
+  return fecha.toLocaleString("es-ES", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function sello(version) {
+  return version ? version.version + "+" + version.commit : "";
+}
+
+/**
+ * Enseña dos cosas que pueden no coincidir: la versión que estás USANDO
+ * (la que el service worker tiene cacheada, y que viene dentro de la app)
+ * y la PUBLICADA (version.json, que se pide siempre a la red).
+ *
+ * Si difieren es que el navegador se ha quedado con una copia vieja, que
+ * es exactamente el lío que nos costó una tarde. Por eso hay un botón que
+ * tira las cachés y recarga.
+ */
+async function comprobarVersion() {
+  el.versionNumero.textContent = VERSION.version + " · " + VERSION.commit;
+  el.versionFecha.textContent = fechaLegible(VERSION.fecha);
+
+  let publicada = null;
+  try {
+    const respuesta = await fetch("version.json", { cache: "no-store" });
+    if (respuesta.ok) publicada = await respuesta.json();
+  } catch (error) {
+    /* sin conexión: no podemos comparar, y no pasa nada */
+  }
+
+  if (!publicada) {
+    el.versionNota.textContent = "Sin conexión: no se puede comprobar si hay una versión más nueva.";
+    el.versionNota.removeAttribute("data-estado");
+    return;
+  }
+
+  if (sello(publicada) === sello(VERSION)) {
+    el.versionNota.textContent = "Estás en la última versión.";
+    el.versionNota.removeAttribute("data-estado");
+    el.actualizar.hidden = true;
+    return;
+  }
+
+  el.versionNota.dataset.estado = "vieja";
+  el.versionNota.textContent =
+    "Hay una versión más nueva publicada (" + publicada.version + " · " + publicada.commit +
+    ", " + fechaLegible(publicada.fecha) + "). Estás usando una copia guardada.";
+  el.actualizar.hidden = false;
+}
+
+/** Tira todas las cachés, quita el service worker y recarga. */
+async function actualizarApp() {
+  el.actualizar.disabled = true;
+  el.actualizar.textContent = "Actualizando…";
+  try {
+    const nombres = await caches.keys();
+    await Promise.all(nombres.map((nombre) => caches.delete(nombre)));
+    if ("serviceWorker" in navigator) {
+      const registros = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registros.map((registro) => registro.unregister()));
+    }
+  } catch (error) {
+    /* si algo falla, la recarga de todas formas suele bastar */
+  }
+  window.location.reload();
+}
+
 /* ---------- entrada y salida ---------- */
 
 async function prepararSesion(usuario) {
-  el.usuario.hidden = false;
-  el.usuarioNombre.textContent = (usuario.displayName || "").split(" ")[0] || "Hola";
-  if (usuario.photoURL) el.usuarioFoto.src = usuario.photoURL;
+  el.botonAjustes.hidden = false;
+  el.ajustesNombre.textContent = usuario.displayName || "Sin nombre";
+  el.ajustesCorreo.textContent = usuario.email || "";
+  if (usuario.photoURL) el.ajustesFoto.src = usuario.photoURL;
 
   mostrarPantalla("cargando");
 
@@ -639,7 +722,7 @@ function cerrarSesion() {
   Progreso.olvidar();
   Mates.olvidarProgreso();
   olvidarUrls();
-  el.usuario.hidden = true;
+  el.botonAjustes.hidden = true;
   el.error.hidden = true;
   mostrarPantalla("login");
 }
@@ -681,6 +764,14 @@ function pintarIndice() {
   });
 }
 
+el.botonAjustes.addEventListener("click", () => {
+  mostrarPantalla("ajustes");
+  comprobarVersion();
+});
+
+el.volverHubAjustes.addEventListener("click", irAlHub);
+el.actualizar.addEventListener("click", actualizarApp);
+
 el.volverHub.addEventListener("click", irAlHub);
 el.volverHubMates.addEventListener("click", irAlHub);
 el.volverMates.addEventListener("click", () => { pintarMenuMates(); mostrarPantalla("matemagia"); });
@@ -700,9 +791,9 @@ el.empezar.addEventListener("click", empezarRonda);
 el.otraVuelta.addEventListener("click", empezarRonda);
 
 el.reiniciar.addEventListener("click", async () => {
-  const seguro = window.confirm("¿Seguro? Se olvidará todo lo aprendido y todas las palabras volverán a ser nuevas.");
+  const seguro = window.confirm("¿Seguro? Se borra el progreso de las tarjetas y de Matemagia, y todo vuelve a empezar.");
   if (!seguro) return;
-  await Progreso.reiniciar();
+  await Promise.all([Progreso.reiniciar(), Mates.reiniciar()]);
   pintarMarcador(el.marcadorInicio);
 });
 
@@ -764,7 +855,14 @@ window.addEventListener("beforeinstallprompt", (evento) => {
   evento.preventDefault();
   peticionInstalacion = evento;
   el.instalar.hidden = false;
+  el.pistaInstalar.hidden = true;
 });
+
+/* iOS no ofrece ese evento: ahí solo se puede explicar cómo se hace.
+   Y si ya está instalada, no hay nada que ofrecer. */
+const enIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const yaInstalada = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+if (enIOS && !yaInstalada) el.pistaInstalar.hidden = false;
 
 el.instalar.addEventListener("click", async () => {
   if (!peticionInstalacion) return;
