@@ -1,3 +1,5 @@
+import { t } from "./i18n.js";
+
 /**
  * ============================================================
  *  MÓDULOS — el registro de herramientas
@@ -7,8 +9,7 @@
  *  que tocar el HTML del índice ni la navegación.
  *
  *  Cada módulo tiene:
- *    id        interno
- *    nombre    lo que se lee en la tarjeta y en la cabecera
+ * *    nombre    lo que se lee en la tarjeta y en la cabecera
  *    icono     un emoji, que es lo que reconoce de un vistazo
  *    color     su color, que viaja a la cabecera y a sus botones
  *    que       una frase de qué hace, en su idioma, no en el nuestro
@@ -25,39 +26,33 @@
 export const MODULOS = [
   {
     id: "tarjetas",
-    nombre: "Tarjetas",
     icono: "🃏",
     color: "var(--coral)",
-    que: "Escucha, mira el dibujo y escribe la palabra en inglés",
     pantalla: "inicio",
-    estado: (contexto) => contexto.tarjetas + (contexto.tarjetas === 1 ? " palabra" : " palabras")
+    estado: (contexto) => (contexto.tarjetas === 1
+      ? t("modulo.tarjetas.estadoUna")
+      : t("modulo.tarjetas.estado", { n: contexto.tarjetas }))
   },
   {
     id: "diccionario",
-    nombre: "Diccionario",
     icono: "📖",
     color: "var(--cielo)",
-    que: "Una palabra en un idioma y te doy los otros dos",
     pantalla: "diccionario",
-    estado: () => "3 idiomas"
+    estado: () => t("modulo.diccionario.estado")
   },
   {
     id: "matemagia",
-    nombre: "Matemagia",
     icono: "✨",
     color: "var(--menta)",
-    que: "Tablas, sumas y restas con el método ABN",
     pantalla: "matemagia",
-    estado: () => "3 retos"
+    estado: () => t("modulo.matemagia.estado")
   },
   {
     id: "libre",
-    nombre: "Lo que venga",
     icono: "➕",
     color: "var(--sol)",
-    que: "Aquí irá la siguiente herramienta que hagamos",
     pantalla: null,
-    estado: () => "Libre"
+    estado: () => t("modulo.libre.estado")
   }
 ];
 
@@ -89,8 +84,8 @@ export function pintarModulos(lista, contexto = {}) {
       <span class="modulo__estado"></span>`;
 
     boton.querySelector(".modulo__icono").textContent = modulo.icono;
-    boton.querySelector(".modulo__nombre").textContent = modulo.nombre;
-    boton.querySelector(".modulo__que").textContent = modulo.que;
+    boton.querySelector(".modulo__nombre").textContent = t("modulo." + modulo.id + ".nombre");
+    boton.querySelector(".modulo__que").textContent = t("modulo." + modulo.id + ".que");
     boton.querySelector(".modulo__estado").textContent = modulo.estado(contexto);
 
     fila.appendChild(boton);

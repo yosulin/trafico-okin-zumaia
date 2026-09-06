@@ -230,6 +230,27 @@ html, body {
 .ficha-usuario__datos b { font-family: var(--display); font-size: 1.15rem; }
 .ficha-usuario__datos small { color: var(--tinta-suave); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; }
 
+.ajustes-idioma { text-align: left; margin-bottom: 20px; }
+
+.ajustes-idioma__titulo {
+  margin: 0 0 8px; font-weight: 800; font-size: .9rem; color: var(--tinta-suave);
+}
+
+.ajustes-idioma__opciones { display: grid; gap: 8px; }
+
+.idioma-boton {
+  font-family: var(--texto); font-weight: 800; font-size: .95rem;
+  text-align: left; padding: 12px 16px; cursor: pointer;
+  background: var(--superficie); color: var(--tinta);
+  border: 2px solid var(--borde); border-radius: var(--radio-chico);
+}
+
+.idioma-boton[aria-pressed="true"] {
+  border-color: var(--cielo); background: #EAF1FF; color: var(--cielo-oscuro);
+}
+
+.idioma-boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 2px; }
+
 .ajustes-grupo { display: grid; gap: 10px; margin-bottom: 22px; }
 .boton--bloque { width: 100%; }
 

@@ -25,13 +25,13 @@
     <div class="cabecera__marca">
       <span class="cabecera__logo" aria-hidden="true"></span>
       <div>
-        <h1 class="cabecera__titulo">Ayuda de Sofía</h1>
-        <p class="cabecera__lema">Tus herramientas</p>
+        <h1 class="cabecera__titulo" data-i18n="app.titulo">Ayuda de Sofía</h1>
+        <p class="cabecera__lema" data-i18n="app.lema">Tus herramientas</p>
       </div>
     </div>
 
     <div class="cabecera__sesion">
-      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden aria-label="Ajustes">⚙️</button>
+      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden data-i18n-attr="aria-label:comun.ajustes">⚙️</button>
     </div>
   </header>
 
@@ -39,15 +39,15 @@
 
     <!-- ========== CARGANDO ========== -->
     <section class="panel panel--inicio" id="pantalla-cargando">
-      <p class="cargando">Cargando…</p>
+      <p class="cargando" data-i18n="comun.cargando">Cargando…</p>
     </section>
 
     <!-- ========== LOGIN ========== -->
     <section class="panel panel--inicio" id="pantalla-login" hidden>
-      <p class="login__lema">Añade color a tu vida.<br>Aprende algo nuevo.</p>
-      <p class="inicio__intro">Entra con tu cuenta de Google para que la app recuerde lo que ya sabes.</p>
+      <p class="login__lema"><span data-i18n="login.lema">Añade color a tu vida.</span><br><span data-i18n="login.lema2">Aprende algo nuevo.</span></p>
+      <p class="inicio__intro" data-i18n="login.texto">Entra con tu cuenta de Google para que la app recuerde lo que ya sabes.</p>
       <button class="boton boton--grande boton--google" id="boton-entrar" type="button">
-        <span class="boton__icono" aria-hidden="true">🔑</span> Entrar con Google
+        <span class="boton__icono" aria-hidden="true">🔑</span> <span data-i18n="login.boton">Entrar con Google</span>
       </button>
       <p class="error" id="error-login" hidden></p>
     </section>
@@ -55,20 +55,20 @@
     <!-- ========== SIN ACCESO ========== -->
     <section class="panel panel--inicio" id="pantalla-sin-acceso" hidden>
       <p class="final__emoji" aria-hidden="true">🔒</p>
-      <h2 class="final__titulo">Esta app es privada</h2>
+      <h2 class="final__titulo" data-i18n="sinAcceso.titulo">Esta app es privada</h2>
       <p class="inicio__intro">
         Has entrado con <b id="sin-acceso-correo"></b>, pero esa cuenta no tiene acceso.
       </p>
       <button class="boton boton--grande boton--principal" id="boton-salir-sin-acceso" type="button">
-        Probar con otra cuenta
+        <span data-i18n="sinAcceso.boton">Probar con otra cuenta</span>
       </button>
     </section>
 
     <!-- ========== AJUSTES ========== -->
     <section class="panel panel--inicio" id="pantalla-ajustes" hidden style="--color-modulo: var(--tinta-suave)">
       <div class="modulo-cabecera">
-        <button class="modulo-cabecera__volver" id="boton-volver-hub-ajustes" type="button" aria-label="Volver">←</button>
-        <h2 class="modulo-cabecera__nombre">Ajustes</h2>
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-ajustes" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <h2 class="modulo-cabecera__nombre" data-i18n="comun.ajustes">Ajustes</h2>
       </div>
 
       <div class="ficha-usuario">
@@ -79,25 +79,30 @@
         </div>
       </div>
 
+      <div class="ajustes-idioma">
+        <p class="ajustes-idioma__titulo" data-i18n="ajustes.idioma">Idioma de la app</p>
+        <div class="ajustes-idioma__opciones" id="selector-idioma" role="group"></div>
+      </div>
+
       <div class="ajustes-grupo">
         <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-instalar" type="button" hidden>
-          📲 Instalar la app
+          <span data-i18n="ajustes.instalar">📲 Instalar la app</span>
         </button>
         <p class="ajustes-pista" id="pista-instalar" hidden>
           En iPhone o iPad: pulsa <b>Compartir</b> ⬆️ y luego <b>«Añadir a pantalla de inicio»</b>.
         </p>
         <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-salir" type="button">
-          👋 Cerrar sesión
+          <span data-i18n="ajustes.salir">👋 Cerrar sesión</span>
         </button>
-        <button class="boton boton--texto" id="boton-reiniciar" type="button">Borrar todo mi progreso</button>
+        <button class="boton boton--texto" id="boton-reiniciar" type="button" data-i18n="ajustes.borrar">Borrar todo mi progreso</button>
       </div>
 
       <div class="version" id="version">
-        <p class="version__linea"><span>Versión</span> <b id="version-numero">…</b></p>
-        <p class="version__linea"><span>Actualizada</span> <b id="version-fecha">…</b></p>
+        <p class="version__linea"><span data-i18n="ajustes.version">Versión</span> <b id="version-numero">…</b></p>
+        <p class="version__linea"><span data-i18n="ajustes.actualizada">Actualizada</span> <b id="version-fecha">…</b></p>
         <p class="version__nota" id="version-nota"></p>
         <button class="boton boton--grande boton--principal" id="boton-actualizar" type="button" hidden>
-          Actualizar a la última versión
+          <span data-i18n="ajustes.actualizar">Actualizar a la última versión</span>
         </button>
       </div>
     </section>
@@ -105,7 +110,7 @@
     <!-- ========== ÍNDICE DE MÓDULOS ========== -->
     <section class="panel panel--inicio" id="pantalla-hub" hidden>
       <h2 class="saludo" id="hub-saludo">Hola</h2>
-      <p class="saludo-sub">¿Qué quieres hacer hoy?</p>
+      <p class="saludo-sub" data-i18n="hub.pregunta">¿Qué quieres hacer hoy?</p>
 
       <ul class="modulos" id="modulos"></ul>
     </section>
@@ -113,19 +118,19 @@
     <!-- ========== DICCIONARIO ========== -->
     <section class="panel panel--diccionario" id="pantalla-diccionario" hidden style="--color-modulo: var(--cielo)">
       <div class="modulo-cabecera">
-        <button class="modulo-cabecera__volver" id="boton-volver-hub" type="button" aria-label="Volver">←</button>
+        <button class="modulo-cabecera__volver" id="boton-volver-hub" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
         <span class="modulo-cabecera__punto" aria-hidden="true"></span>
-        <h2 class="modulo-cabecera__nombre">Diccionario</h2>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.diccionario.nombre">Diccionario</h2>
       </div>
 
       <form class="buscador" id="form-buscar" autocomplete="off">
         <label class="respuesta-form__etiqueta" for="campo-buscar">
-          Escribe una palabra en inglés, castellano o euskera
+          <span data-i18n="dicc.etiqueta">Escribe una palabra en inglés, castellano o euskera</span>
         </label>
         <div class="buscador__linea">
           <input class="buscador__campo" id="campo-buscar" type="search" inputmode="search"
-                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="dog, perro, txakurra…">
-          <button class="boton boton--modulo buscador__boton" type="submit">Buscar</button>
+                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="dog, perro, txakurra…" data-i18n-attr="placeholder:dicc.pista">
+          <button class="boton boton--modulo buscador__boton" type="submit" data-i18n="dicc.buscar">Buscar</button>
         </div>
       </form>
 
@@ -136,33 +141,33 @@
     <!-- ========== INICIO ========== -->
     <section class="panel panel--inicio" id="pantalla-inicio" hidden style="--color-modulo: var(--coral)">
       <div class="modulo-cabecera">
-        <button class="modulo-cabecera__volver" id="boton-volver-hub-inicio" type="button" aria-label="Volver">←</button>
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-inicio" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
         <span class="modulo-cabecera__punto" aria-hidden="true"></span>
-        <h2 class="modulo-cabecera__nombre">Tarjetas</h2>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.tarjetas.nombre">Tarjetas</h2>
       </div>
-      <p class="inicio__intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
+      <p class="inicio__intro" data-i18n="tarjetas.intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
       <ul class="marcador" id="marcador-inicio"></ul>
-      <button class="boton boton--grande boton--principal" id="boton-empezar" type="button">Empezar</button>
-      <p class="inicio__aviso" id="aviso-audio" hidden>Este navegador no puede leer las palabras en voz alta.</p>
+      <button class="boton boton--grande boton--principal" id="boton-empezar" type="button" data-i18n="tarjetas.empezar">Empezar</button>
+      <p class="inicio__aviso" id="aviso-audio" hidden data-i18n="tarjetas.sinVoz">Este navegador no puede leer las palabras en voz alta.</p>
     </section>
 
     <!-- ========== MATEMAGIA: elegir reto ========== -->
     <section class="panel panel--inicio" id="pantalla-matemagia" hidden style="--color-modulo: var(--menta)">
       <div class="modulo-cabecera">
-        <button class="modulo-cabecera__volver" id="boton-volver-hub-mates" type="button" aria-label="Volver">←</button>
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-mates" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
         <span class="modulo-cabecera__punto" aria-hidden="true"></span>
-        <h2 class="modulo-cabecera__nombre">Matemagia</h2>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.matemagia.nombre">Matemagia</h2>
       </div>
 
       <ul class="retos" id="retos"></ul>
 
       <div class="tablas" id="tablas-panel">
-        <p class="tablas__titulo">O elige una tabla</p>
+        <p class="tablas__titulo" data-i18n="mates.elegirTabla">O elige una tabla</p>
         <div class="tablas__rejilla" id="tablas-rejilla"></div>
         <p class="tablas__leyenda">
-          <span class="punto punto--verde"></span> te la sabes
-          <span class="punto punto--media"></span> a medias
-          <span class="punto"></span> sin practicar
+          <span class="punto punto--verde"></span> <span data-i18n="mates.leyendaVerde">te la sabes</span>
+          <span class="punto punto--media"></span> <span data-i18n="mates.leyendaMedia">a medias</span>
+          <span class="punto"></span> <span data-i18n="mates.leyendaNada">sin practicar</span>
         </p>
       </div>
     </section>
@@ -170,7 +175,7 @@
     <!-- ========== MATEMAGIA: la ronda ========== -->
     <section class="panel panel--tarjeta" id="pantalla-mates-reto" hidden style="--color-modulo: var(--menta)">
       <div class="modulo-cabecera">
-        <button class="modulo-cabecera__volver" id="boton-volver-mates" type="button" aria-label="Volver">←</button>
+        <button class="modulo-cabecera__volver" id="boton-volver-mates" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
         <span class="modulo-cabecera__punto" aria-hidden="true"></span>
         <h2 class="modulo-cabecera__nombre" id="mates-titulo">Matemagia</h2>
       </div>
@@ -195,10 +200,10 @@
     <!-- ========== MATEMAGIA: final de ronda ========== -->
     <section class="panel panel--final" id="pantalla-mates-final" hidden style="--color-modulo: var(--menta)">
       <p class="final__emoji" id="mates-final-emoji" aria-hidden="true">🎉</p>
-      <h2 class="final__titulo" id="mates-final-titulo">¡Ronda terminada!</h2>
+      <h2 class="final__titulo" id="mates-final-titulo"></h2>
       <ul class="marcador" id="mates-marcador"></ul>
-      <button class="boton boton--grande boton--modulo" id="boton-mates-otra" type="button">Otra ronda</button>
-      <button class="boton boton--texto" id="boton-mates-menu" type="button">Elegir otro reto</button>
+      <button class="boton boton--grande boton--modulo" id="boton-mates-otra" type="button" data-i18n="mates.otraRonda">Otra ronda</button>
+      <button class="boton boton--texto" id="boton-mates-menu" type="button" data-i18n="mates.otroReto">Elegir otro reto</button>
     </section>
 
     <!-- ========== TARJETA ========== -->
@@ -219,17 +224,17 @@
       <!-- Cara A: la pregunta. La palabra en inglés no aparece. -->
       <div class="cara cara--pregunta" id="cara-pregunta">
         <button class="boton boton--escuchar" id="boton-escuchar-pregunta" type="button">
-          <span class="boton__icono" aria-hidden="true">🔊</span> Escuchar otra vez
+          <span class="boton__icono" aria-hidden="true">🔊</span> <span data-i18n="tarjetas.escucharOtra">Escuchar otra vez</span>
         </button>
 
         <form class="respuesta-form" id="form-respuesta" autocomplete="off">
-          <label class="respuesta-form__etiqueta" for="campo-respuesta">Escríbelo en inglés</label>
+          <label class="respuesta-form__etiqueta" for="campo-respuesta" data-i18n="tarjetas.escribe">Escríbelo en inglés</label>
           <input class="respuesta-form__campo" id="campo-respuesta" type="text" inputmode="text"
                  autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…">
-          <button class="boton boton--grande boton--principal" type="submit">Comprobar</button>
+          <button class="boton boton--grande boton--principal" type="submit" data-i18n="tarjetas.comprobar">Comprobar</button>
         </form>
 
-        <button class="boton boton--texto" id="boton-ver-respuesta" type="button">No lo sé, ver la respuesta</button>
+        <button class="boton boton--texto" id="boton-ver-respuesta" type="button" data-i18n="tarjetas.noLoSe">No lo sé, ver la respuesta</button>
       </div>
 
       <!-- Cara B: la respuesta. -->
@@ -238,7 +243,7 @@
 
         <div class="palabra">
           <h2 class="palabra__en" id="palabra-en"></h2>
-          <button class="boton boton--redondo" id="boton-escuchar-palabra" type="button" aria-label="Escuchar la palabra">🔊</button>
+          <button class="boton boton--redondo" id="boton-escuchar-palabra" type="button" data-i18n-attr="aria-label:tarjetas.escucharPalabra">🔊</button>
         </div>
 
         <ul class="traducciones">
@@ -249,7 +254,7 @@
         <div class="ejemplo" id="ejemplo">
           <div class="ejemplo__linea">
             <p class="ejemplo__en" id="ejemplo-en"></p>
-            <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" aria-label="Escuchar la frase">🔊</button>
+            <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" data-i18n-attr="aria-label:tarjetas.escucharFrase">🔊</button>
           </div>
           <button class="boton boton--texto boton--mini" id="boton-ver-traduccion" type="button" aria-expanded="false">Ver la traducción</button>
           <ul class="ejemplo__traducciones" id="ejemplo-traducciones" hidden>
@@ -259,8 +264,8 @@
         </div>
 
         <div class="decision">
-          <button class="boton boton--grande boton--repasar" id="boton-repasar" type="button">🔁 Repasar</button>
-          <button class="boton boton--grande boton--sabia" id="boton-sabia" type="button">✅ La sabía</button>
+          <button class="boton boton--grande boton--repasar" id="boton-repasar" type="button" data-i18n="tarjetas.repasar">🔁 Repasar</button>
+          <button class="boton boton--grande boton--sabia" id="boton-sabia" type="button" data-i18n="tarjetas.sabia">✅ La sabía</button>
         </div>
       </div>
     </section>
@@ -268,14 +273,14 @@
     <!-- ========== FINAL DE SESIÓN ========== -->
     <section class="panel panel--final" id="pantalla-final" hidden style="--color-modulo: var(--coral)">
       <p class="final__emoji" aria-hidden="true">🎉</p>
-      <h2 class="final__titulo">¡Ronda terminada!</h2>
+      <h2 class="final__titulo" data-i18n="tarjetas.final">¡Ronda terminada!</h2>
       <ul class="marcador" id="marcador-final"></ul>
-      <button class="boton boton--grande boton--principal" id="boton-otra-vuelta" type="button">Otra vuelta</button>
-      <button class="boton boton--texto" id="boton-volver-hub-final" type="button">Volver al menú</button>
+      <button class="boton boton--grande boton--principal" id="boton-otra-vuelta" type="button" data-i18n="tarjetas.otraVuelta">Otra vuelta</button>
+      <button class="boton boton--texto" id="boton-volver-hub-final" type="button" data-i18n="tarjetas.volverMenu">Volver al menú</button>
     </section>
 
     <p class="error" id="error" hidden></p>
-    <p class="aviso-red" id="aviso-red" hidden>Sin conexión: sigues jugando y tu progreso se guardará al volver la red.</p>
+    <p class="aviso-red" id="aviso-red" hidden data-i18n="comun.sinConexion">Sin conexión: sigues jugando y tu progreso se guardará al volver la red.</p>
   </main>
 
   <script type="module" src="js/app.js"></script>

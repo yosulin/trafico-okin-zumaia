@@ -110,6 +110,41 @@ Progreso en `users/{uid}/mates/{reto}`, separado del de las tarjetas.
 
 ---
 
+## Idiomas de la interfaz (i18n)
+
+La app se ve en **castellano, euskera o inglés**, y se elige en Ajustes. Vale
+para todo lo que dice la app.
+
+Lo que **no** se traduce es el contenido que se está aprendiendo: la palabra
+inglesa de una tarjeta sigue siendo la palabra inglesa, y sus traducciones al
+castellano y al euskera son datos, no interfaz. Traducir eso vaciaría de sentido
+el ejercicio.
+
+Todos los textos viven en **`js/i18n.js`**, en un único objeto por idioma:
+corregir una frase es cambiar una línea. Se usan así:
+
+```html
+<b data-i18n="hub.pregunta"></b>
+<input data-i18n-attr="placeholder:dicc.pista">
+```
+
+```js
+t("mates.tablaDel", { n: 7 })
+```
+
+Si falta una clave en el idioma elegido, cae al castellano antes que enseñar la
+clave cruda. El idioma se guarda **en el dispositivo** (`localStorage`): es una
+preferencia de cómo se ve la app, no parte del progreso. Si algún día queremos
+que la siga entre el móvil y la tablet, se mueve a Firestore (10 líneas y una
+regla).
+
+> El euskera lo escribió Claude y **está sin revisar por un hablante**. Las
+> frases de Matemagia son las más delicadas, porque llevan números declinados
+> (`80ra iristeko`). Corregir cualquiera de ellas es editar su línea en
+> `js/i18n.js`.
+
+---
+
 ## Ajustes y versiones
 
 El engranaje de la cabecera abre **Ajustes**: quién ha entrado, instalar la app,

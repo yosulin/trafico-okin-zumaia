@@ -32,29 +32,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import { db } from "./firebase.js";
+import { t } from "./i18n.js";
 
 const PREGUNTAS_POR_RONDA = 10;
 
+/* El nombre y la descripción salen de i18n.js, con las claves
+   "mates.<id>.nombre" y "mates.<id>.que". */
 export const RETOS = [
-  {
-    id: "tablas",
-    nombre: "Tablas",
-    icono: "✖️",
-    que: "Del 1 al 10, a toda velocidad"
-  },
-  {
-    id: "sumas",
-    nombre: "Sumas ABN",
-    icono: "➕",
-    que: "Completa la decena y suma lo que queda"
-  },
-  {
-    id: "restas",
-    nombre: "Restas ABN",
-    icono: "➖",
-    que: "Baja hasta la decena y quita lo que queda"
-  }
+  { id: "tablas", icono: "✖️" },
+  { id: "sumas", icono: "➕" },
+  { id: "restas", icono: "➖" }
 ];
+
+export function nombreDeReto(id) {
+  return t("mates." + id + ".nombre");
+}
+
+export function queHaceReto(id) {
+  return t("mates." + id + ".que");
+}
 
 /* ============================================================
    GENERADORES DE EJERCICIOS
@@ -99,18 +95,18 @@ function ejercicioSuma() {
     saltos: [primero, redondo, primero + segundo],
     pasos: [
       {
-        pregunta: "¿Cuánto le falta a " + primero + " para llegar a " + redondo + "?",
-        ayuda: "Primero completamos la decena.",
+        pregunta: t("mates.sumaPaso1", { a: primero, b: redondo }),
+        ayuda: t("mates.sumaPaso1Ayuda"),
         respuesta: falta
       },
       {
-        pregunta: "Ya has usado " + falta + ". ¿Cuánto te queda por sumar?",
-        ayuda: "De los " + segundo + " que sumabas.",
+        pregunta: t("mates.sumaPaso2", { a: falta }),
+        ayuda: t("mates.sumaPaso2Ayuda", { n: segundo }),
         respuesta: sobra
       },
       {
         pregunta: redondo + " + " + sobra,
-        ayuda: "Y ya está.",
+        ayuda: t("mates.pasoFinalAyuda"),
         respuesta: primero + segundo
       }
     ]
@@ -132,18 +128,18 @@ function ejercicioResta() {
     saltos: [primero, redondo, primero - segundo],
     pasos: [
       {
-        pregunta: "¿Cuánto le quitas a " + primero + " para bajar a " + redondo + "?",
-        ayuda: "Primero bajamos a la decena.",
+        pregunta: t("mates.restaPaso1", { a: primero, b: redondo }),
+        ayuda: t("mates.restaPaso1Ayuda"),
         respuesta: unidad
       },
       {
-        pregunta: "Ya has quitado " + unidad + ". ¿Cuánto te queda por quitar?",
-        ayuda: "De los " + segundo + " que quitabas.",
+        pregunta: t("mates.restaPaso2", { a: unidad }),
+        ayuda: t("mates.restaPaso2Ayuda", { n: segundo }),
         respuesta: sobra
       },
       {
         pregunta: redondo + " − " + sobra,
-        ayuda: "Y ya está.",
+        ayuda: t("mates.pasoFinalAyuda"),
         respuesta: primero - segundo
       }
     ]

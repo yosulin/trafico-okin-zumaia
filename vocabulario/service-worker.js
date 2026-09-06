@@ -39,6 +39,7 @@ const FICHEROS_SHELL = [
   "./css/estilos.css",
   "./js/app.js",
   "./js/version.js",
+  "./js/i18n.js",
   "./js/modulos.js",
   "./js/matemagia.js",
   "./js/firebase.js",

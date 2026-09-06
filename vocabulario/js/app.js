@@ -27,6 +27,7 @@ import { buscar, cargarTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import { pintarModulos } from "./modulos.js";
 import * as Mates from "./matemagia.js";
 import { VERSION } from "./version.js";
+import { IDIOMAS, aplicar as aplicarIdioma, cambiarIdioma, idiomaActual, t } from "./i18n.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
@@ -57,6 +58,7 @@ const el = {
   ajustesNombre: $("ajustes-nombre"),
   ajustesCorreo: $("ajustes-correo"),
   pistaInstalar: $("pista-instalar"),
+  selectorIdioma: $("selector-idioma"),
   versionNumero: $("version-numero"),
   versionFecha: $("version-fecha"),
   versionNota: $("version-nota"),
@@ -141,6 +143,7 @@ const el = {
 
 /* ---------- estado en memoria ---------- */
 
+let nombreUsuario = "";
 let tarjetas = [];
 let temas = {};
 let mazo = [];
@@ -184,10 +187,10 @@ async function sonar(boton, reproducir, tarjeta) {
 function pintarMarcador(lista) {
   const cuenta = Progreso.resumen(tarjetas);
   const etiquetas = [
-    { estado: "known", texto: "La sabía" },
-    { estado: "review", texto: "Repasar" },
-    { estado: "learning", texto: "Vistas" },
-    { estado: "new", texto: "Nuevas" }
+    { estado: "known", texto: t("marcador.conocida") },
+    { estado: "review", texto: t("marcador.repaso") },
+    { estado: "learning", texto: t("marcador.vista") },
+    { estado: "new", texto: t("marcador.nueva") }
   ];
   lista.innerHTML = etiquetas
     .map((item) => `<li data-estado="${item.estado}"><b>${cuenta[item.estado]}</b><span>${item.texto}</span></li>`)
@@ -208,7 +211,7 @@ function adelantarSiguiente() {
 }
 
 async function pintarImagen(tarjeta) {
-  el.imagen.alt = "Escena en gris donde solo aparece en color: " + tarjeta.es;
+  el.imagen.alt = t("tarjetas.alt", { que: tarjeta.es });
   el.imagen.removeAttribute("src");
   const url = await urlDe(tarjeta.imagePath);
   /* Puede haber cambiado de tarjeta mientras Storage respondía. */
@@ -233,7 +236,7 @@ function mostrarPregunta() {
   el.veredicto.hidden = true;
   el.ejemploTraducciones.hidden = true;
   el.verTraduccion.setAttribute("aria-expanded", "false");
-  el.verTraduccion.textContent = "Ver la traducción";
+  el.verTraduccion.textContent = t("tarjetas.verTraduccion");
 
   Progreso.marcarVista(tarjeta.id);
 
@@ -311,11 +314,11 @@ function pintarEntrada(tarjeta) {
   seccion.innerHTML = `
     <div class="entrada__cabecera">
       <h3 class="entrada__palabra"></h3>
-      <button class="boton boton--redondo" type="button" aria-label="Escuchar la palabra">🔊</button>
+      <button class="boton boton--redondo" type="button" aria-label="${t("tarjetas.escucharPalabra")}">🔊</button>
     </div>
     <ul class="traducciones">
-      <li><span class="traducciones__idioma">Castellano</span><span class="traducciones__texto"></span></li>
-      <li><span class="traducciones__idioma">Euskara</span><span class="traducciones__texto"></span></li>
+      <li><span class="traducciones__idioma">${t("idioma.es")}</span><span class="traducciones__texto"></span></li>
+      <li><span class="traducciones__idioma">${t("idioma.eu")}</span><span class="traducciones__texto"></span></li>
     </ul>`;
 
   seccion.querySelector(".entrada__palabra").textContent = tarjeta.word;
@@ -357,7 +360,7 @@ function pintarEntrada(tarjeta) {
     ejemplo.innerHTML = `
       <div class="ejemplo__linea">
         <p class="ejemplo__en"></p>
-        <button class="boton boton--redondo" type="button" aria-label="Escuchar la frase">🔊</button>
+        <button class="boton boton--redondo" type="button" aria-label="${t("tarjetas.escucharFrase")}">🔊</button>
       </div>`;
     ejemplo.querySelector(".ejemplo__en").textContent = tarjeta.example.en;
 
@@ -365,8 +368,8 @@ function pintarEntrada(tarjeta) {
       const lista = document.createElement("ul");
       lista.className = "ejemplo__traducciones";
       lista.innerHTML = `
-        <li><span class="traducciones__idioma">Castellano</span><span></span></li>
-        <li><span class="traducciones__idioma">Euskara</span><span></span></li>`;
+        <li><span class="traducciones__idioma">${t("idioma.es")}</span><span></span></li>
+        <li><span class="traducciones__idioma">${t("idioma.eu")}</span><span></span></li>`;
       const celdas = lista.querySelectorAll("li span:last-child");
       celdas[0].textContent = tarjeta.example.es;
       celdas[1].textContent = tarjeta.example.eu;
@@ -384,13 +387,13 @@ function pintarEntrada(tarjeta) {
 async function buscarPalabra(termino) {
   el.resultados.innerHTML = "";
   el.buscadorEstado.hidden = false;
-  el.buscadorEstado.textContent = "Buscando…";
+  el.buscadorEstado.textContent = t("dicc.buscando");
 
   try {
     const encontradas = await buscar(termino);
 
     if (encontradas.length === 0) {
-      el.buscadorEstado.textContent = "No tengo esa palabra todavía.";
+      el.buscadorEstado.textContent = t("dicc.nada");
       return;
     }
 
@@ -400,7 +403,7 @@ async function buscarPalabra(termino) {
     /* Si solo hay una, se dice sola: es lo que se viene a oír. */
     if (encontradas.length === 1) playWordAudio(encontradas[0]);
   } catch (fallo) {
-    el.buscadorEstado.textContent = "No se ha podido buscar: " + fallo.message;
+    el.buscadorEstado.textContent = t("dicc.error", { motivo: fallo.message });
   }
 }
 
@@ -426,8 +429,8 @@ function pintarMenuMates() {
       <span class="reto__icono" aria-hidden="true"></span>
       <span class="reto__texto"><b></b><small></small></span>`;
     boton.querySelector(".reto__icono").textContent = reto.icono;
-    boton.querySelector("b").textContent = reto.nombre;
-    boton.querySelector("small").textContent = reto.que;
+    boton.querySelector("b").textContent = Mates.nombreDeReto(reto.id);
+    boton.querySelector("small").textContent = Mates.queHaceReto(reto.id);
     boton.addEventListener("click", () => empezarRondaMates(reto.id, null));
     fila.appendChild(boton);
     el.retos.appendChild(fila);
@@ -441,7 +444,7 @@ function pintarMenuMates() {
     boton.className = "tabla-boton";
     boton.textContent = tabla;
     boton.dataset.nivel = Mates.nivelDeTabla(tabla);
-    boton.setAttribute("aria-label", "Tabla del " + tabla);
+    boton.setAttribute("aria-label", t("mates.tablaAria", { n: tabla }));
     boton.addEventListener("click", () => empezarRondaMates("tablas", tabla));
     el.tablasRejilla.appendChild(boton);
   }
@@ -449,7 +452,7 @@ function pintarMenuMates() {
   const mezcla = document.createElement("button");
   mezcla.type = "button";
   mezcla.className = "tabla-boton tabla-boton--mezcla";
-  mezcla.textContent = "Mezcla de todas";
+  mezcla.textContent = t("mates.mezcla");
   mezcla.addEventListener("click", () => empezarRondaMates("tablas", null));
   el.tablasRejilla.appendChild(mezcla);
 }
@@ -461,7 +464,7 @@ function pintarTeclado() {
     boton.type = "button";
     boton.className = "tecla" + (tecla === "ok" ? " tecla--ok" : tecla === "borrar" ? " tecla--borrar" : "");
     boton.textContent = tecla === "borrar" ? "←" : tecla === "ok" ? "✓" : tecla;
-    boton.setAttribute("aria-label", tecla === "borrar" ? "Borrar" : tecla === "ok" ? "Comprobar" : tecla);
+    boton.setAttribute("aria-label", tecla === "borrar" ? t("mates.borrar") : tecla === "ok" ? t("mates.comprobar") : tecla);
     boton.addEventListener("click", () => pulsarTecla(tecla));
     el.matesTeclado.appendChild(boton);
   });
@@ -545,7 +548,7 @@ function comprobarPaso() {
      pensar en voz alta. */
   if (!acierta) {
     el.matesRespuesta.textContent = actual.respuesta;
-    el.matesAyuda.textContent = "Era " + actual.respuesta + ". Seguimos.";
+    el.matesAyuda.textContent = t("mates.era", { n: actual.respuesta });
     ejercicio.falloEnAlgunPaso = true;
   }
 
@@ -575,8 +578,7 @@ function empezarRondaMates(reto, tabla) {
   tablaActual = tabla;
   rondaMates = { hechas: 0, aciertos: 0, fallos: 0 };
 
-  const nombre = Mates.RETOS.find((item) => item.id === reto).nombre;
-  el.matesTitulo.textContent = tabla ? ("Tabla del " + tabla) : nombre;
+  el.matesTitulo.textContent = tabla ? t("mates.tablaDel", { n: tabla }) : Mates.nombreDeReto(reto);
 
   mostrarPantalla("matesReto");
   siguienteEjercicio();
@@ -586,15 +588,42 @@ function terminarRondaMates() {
   const { aciertos, fallos } = rondaMates;
   el.matesFinalEmoji.textContent = fallos === 0 ? "🏆" : aciertos >= fallos ? "🎉" : "💪";
   el.matesFinalTitulo.textContent = fallos === 0
-    ? "¡Todas bien!"
-    : aciertos >= fallos ? "¡Buena ronda!" : "Ronda terminada";
+    ? t("mates.todasBien")
+    : aciertos >= fallos ? t("mates.buenaRonda") : t("mates.rondaTerminada");
 
   el.matesMarcador.innerHTML = [
-    { estado: "known", texto: "Bien", valor: aciertos },
-    { estado: "review", texto: "A repasar", valor: fallos }
+    { estado: "known", texto: t("mates.bien"), valor: aciertos },
+    { estado: "review", texto: t("mates.aRepasar"), valor: fallos }
   ].map((item) => `<li data-estado="${item.estado}"><b>${item.valor}</b><span>${item.texto}</span></li>`).join("");
 
   mostrarPantalla("matesFinal");
+}
+
+/* ---------- idioma ---------- */
+
+/**
+ * Los tres idiomas, como botones. Cambiar de idioma repinta lo que hay
+ * escrito en el HTML y también lo que generamos nosotros (el índice, el
+ * menú de mates), porque eso último no lleva data-i18n.
+ */
+function pintarSelectorIdioma() {
+  el.selectorIdioma.innerHTML = "";
+  IDIOMAS.forEach((idioma) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "idioma-boton";
+    boton.textContent = idioma.bandera + " " + idioma.nombre;
+    boton.setAttribute("aria-pressed", String(idioma.codigo === idiomaActual()));
+    boton.addEventListener("click", () => {
+      cambiarIdioma(idioma.codigo);
+      pintarSelectorIdioma();
+      pintarIndice();
+      pintarMenuMates();
+      el.pistaInstalar.textContent = t("ajustes.instalarIOS");
+      comprobarVersion();
+    });
+    el.selectorIdioma.appendChild(boton);
+  });
 }
 
 /* ---------- versión ---------- */
@@ -602,7 +631,7 @@ function terminarRondaMates() {
 function fechaLegible(iso) {
   const fecha = new Date(iso);
   if (Number.isNaN(fecha.getTime())) return "—";
-  return fecha.toLocaleString("es-ES", {
+  return fecha.toLocaleString(idiomaActual(), {
     day: "numeric", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit"
   });
@@ -634,29 +663,31 @@ async function comprobarVersion() {
   }
 
   if (!publicada) {
-    el.versionNota.textContent = "Sin conexión: no se puede comprobar si hay una versión más nueva.";
+      el.versionNota.textContent = t("ajustes.sinComprobar");
     el.versionNota.removeAttribute("data-estado");
     return;
   }
 
   if (sello(publicada) === sello(VERSION)) {
-    el.versionNota.textContent = "Estás en la última versión.";
+    el.versionNota.textContent = t("ajustes.alDia");
     el.versionNota.removeAttribute("data-estado");
     el.actualizar.hidden = true;
     return;
   }
 
   el.versionNota.dataset.estado = "vieja";
-  el.versionNota.textContent =
-    "Hay una versión más nueva publicada (" + publicada.version + " · " + publicada.commit +
-    ", " + fechaLegible(publicada.fecha) + "). Estás usando una copia guardada.";
+  el.versionNota.textContent = t("ajustes.hayNueva", {
+    version: publicada.version,
+    commit: publicada.commit,
+    fecha: fechaLegible(publicada.fecha)
+  });
   el.actualizar.hidden = false;
 }
 
 /** Tira todas las cachés, quita el service worker y recarga. */
 async function actualizarApp() {
   el.actualizar.disabled = true;
-  el.actualizar.textContent = "Actualizando…";
+  el.actualizar.textContent = t("ajustes.actualizando");
   try {
     const nombres = await caches.keys();
     await Promise.all(nombres.map((nombre) => caches.delete(nombre)));
@@ -691,31 +722,31 @@ async function prepararSesion(usuario) {
     temas = etiquetas;
 
     if (tarjetas.length === 0) {
-      mostrarError("No hay tarjetas en Firestore todavía. Súbelas con tools/import (ver README).");
+      mostrarError(t("tarjetas.vacio"));
       return;
     }
 
     el.error.hidden = true;
     pintarMarcador(el.marcadorInicio);
     el.avisoAudio.hidden = hayVozDelNavegador();
-    const nombre = (usuario.displayName || "").split(" ")[0];
-    el.hubSaludo.textContent = nombre ? ("Hola, " + nombre) : "Hola";
+    nombreUsuario = (usuario.displayName || "").split(" ")[0];
     pintarIndice();
     mostrarPantalla("hub");
   } catch (fallo) {
     /* Las reglas de Firestore solo dejan leer a quien está en la lista
        de invitadas: cualquiera puede entrar con Google, pero no ver nada. */
     if (fallo.code === "permission-denied") {
-      el.sinAccesoCorreo.textContent = usuario.email || "esta cuenta";
+      el.sinAccesoCorreo.textContent = usuario.email || "—";
       mostrarPantalla("sinAcceso");
       return;
     }
     mostrarPantalla("hub");
-    mostrarError("No se han podido cargar las tarjetas: " + fallo.message);
+    mostrarError(t("tarjetas.error", { motivo: fallo.message }));
   }
 }
 
 function cerrarSesion() {
+  nombreUsuario = "";
   tarjetas = [];
   mazo = [];
   temas = {};
@@ -736,7 +767,7 @@ el.entrar.addEventListener("click", async () => {
     await entrar();
   } catch (fallo) {
     el.errorLogin.hidden = false;
-    el.errorLogin.textContent = "No se ha podido entrar: " + (fallo.code || fallo.message);
+    el.errorLogin.textContent = t("login.error", { motivo: fallo.code || fallo.message });
   } finally {
     el.entrar.disabled = false;
   }
@@ -751,8 +782,14 @@ function irAlHub() {
   mostrarPantalla("hub");
 }
 
-/** Dibuja el índice y conecta cada módulo con su pantalla. */
+/** Dibuja el saludo y el índice, y conecta cada módulo con su pantalla. */
 function pintarIndice() {
+  /* El saludo se repinta aquí y no una sola vez al entrar: si no, al
+     cambiar de idioma se quedaba en el anterior. */
+  el.hubSaludo.textContent = nombreUsuario
+    ? t("hub.saludo", { nombre: nombreUsuario })
+    : t("hub.saludoSinNombre");
+
   const activos = pintarModulos(el.modulos, { tarjetas: tarjetas.length });
   activos.forEach(({ modulo, boton }) => {
     boton.addEventListener("click", () => {
@@ -791,7 +828,7 @@ el.empezar.addEventListener("click", empezarRonda);
 el.otraVuelta.addEventListener("click", empezarRonda);
 
 el.reiniciar.addEventListener("click", async () => {
-  const seguro = window.confirm("¿Seguro? Se borra el progreso de las tarjetas y de Matemagia, y todo vuelve a empezar.");
+  const seguro = window.confirm(t("ajustes.borrarSeguro"));
   if (!seguro) return;
   await Promise.all([Progreso.reiniciar(), Mates.reiniciar()]);
   pintarMarcador(el.marcadorInicio);
@@ -808,8 +845,8 @@ el.formRespuesta.addEventListener("submit", (evento) => {
   el.campo.classList.toggle("es-correcta", acierta);
   el.campo.classList.toggle("es-fallo", !acierta);
   mostrarRespuesta(acierta
-    ? { tipo: "bien", texto: "¡Muy bien! 🎉" }
-    : { tipo: "casi", texto: "Casi. Mira cómo se escribe:" });
+    ? { tipo: "bien", texto: t("tarjetas.bien") }
+    : { tipo: "casi", texto: t("tarjetas.casi") });
 });
 
 el.verRespuesta.addEventListener("click", () => mostrarRespuesta(null));
@@ -818,13 +855,15 @@ el.verTraduccion.addEventListener("click", () => {
   const abierto = el.ejemploTraducciones.hidden === false;
   el.ejemploTraducciones.hidden = abierto;
   el.verTraduccion.setAttribute("aria-expanded", String(!abierto));
-  el.verTraduccion.textContent = abierto ? "Ver la traducción" : "Ocultar la traducción";
+  el.verTraduccion.textContent = abierto ? t("tarjetas.verTraduccion") : t("tarjetas.ocultarTraduccion");
 });
 
 el.sabia.addEventListener("click", () => siguienteTarjeta(Progreso.ESTADOS.CONOCIDA));
 el.repasar.addEventListener("click", () => siguienteTarjeta(Progreso.ESTADOS.REPASO));
 
 pintarTeclado();
+pintarSelectorIdioma();
+aplicarIdioma();
 
 /* Aviso discreto de que se está jugando sin red. */
 function pintarEstadoRed() { el.avisoRed.hidden = navigator.onLine; }
