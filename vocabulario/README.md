@@ -1,8 +1,11 @@
-# Colores — vocabulario en inglés
+# Ayuda de Sofía
 
-> **Añade color a tu vida. Aprende un idioma nuevo.**
+> **Añade color a tu vida. Aprende algo nuevo.**
 
-PWA para reforzar y ampliar vocabulario en inglés. No sustituye al colegio ni a
+PWA con las herramientas de Sofía. Empezó siendo solo vocabulario en inglés y
+ahora es un índice de módulos: tarjetas, diccionario y Matemagia.
+
+El módulo de **tarjetas** («Colores») refuerza y amplía vocabulario en inglés. No sustituye al colegio ni a
 Duolingo: es una herramienta personal, pensada para alimentarla poco a poco con
 palabras de los libros del cole, de sus intereses y de conversaciones reales.
 
@@ -48,9 +51,9 @@ Tras entrar aparece un **índice**, y de ahí se elige:
 - **Matemagia** — cálculo con **método ABN**: tablas del 1 al 10, sumas y restas
   que cruzan la decena. Ver más abajo.
 
-Las dos leen la **misma** colección `cards`: una tarjeta ya es una entrada
-trilingüe, así que no hay dos contenidos que mantener. Lo que las separa es un
-campo:
+**Tarjetas y diccionario** leen la **misma** colección `cards`: una tarjeta ya es
+una entrada trilingüe, así que no hay dos contenidos que mantener. Lo que las
+separa es un campo:
 
 - `deck: true` → entra en el juego de tarjetas.
 - `active: true` → se puede buscar en el diccionario.
