@@ -40,6 +40,10 @@ export const TEXTOS = {
     "comun.cargando": "Cargando…",
     "comun.volver": "Volver",
     "comun.ajustes": "Ajustes",
+    "nav.inicio": "Inicio",
+    "nav.principal": "Navegación principal",
+    "nav.menu": "Abrir el menú",
+    "nav.cerrarMenu": "Cerrar el menú",
     "comun.sinConexion": "Sin conexión: sigues jugando y tu progreso se guardará al volver la red.",
 
     "login.lema": "Añade color a tu vida.",
@@ -167,6 +171,10 @@ export const TEXTOS = {
     "comun.cargando": "Kargatzen…",
     "comun.volver": "Itzuli",
     "comun.ajustes": "Ezarpenak",
+    "nav.inicio": "Hasiera",
+    "nav.principal": "Nabigazio nagusia",
+    "nav.menu": "Menua ireki",
+    "nav.cerrarMenu": "Menua itxi",
     "comun.sinConexion": "Konexiorik gabe: jolasten jarraitu dezakezu eta zure aurrerapena gordeko da sarea itzultzean.",
 
     "login.lema": "Eman kolorea zure bizitzari.",
@@ -294,6 +302,10 @@ export const TEXTOS = {
     "comun.cargando": "Loading…",
     "comun.volver": "Back",
     "comun.ajustes": "Settings",
+    "nav.inicio": "Home",
+    "nav.principal": "Main navigation",
+    "nav.menu": "Open the menu",
+    "nav.cerrarMenu": "Close the menu",
     "comun.sinConexion": "You're offline: keep playing, your progress will be saved when you're back.",
 
     "login.lema": "Add colour to your life.",

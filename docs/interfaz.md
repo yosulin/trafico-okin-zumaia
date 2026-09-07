@@ -4,8 +4,9 @@ Especificación de cómo debe comportarse **Ayuda de Sofía** en cada tipo de
 pantalla y cómo se separan los idiomas. Es un documento de decisiones, no un
 manual: lo que aquí se fija se implementa después, por fases.
 
-> **Estado.** Auditoría y diseño. Nada de lo que sigue está implementado salvo
-> lo que se dice explícitamente que ya existe.
+> **Estado.** Fases 0 y 1 **implementadas** (versión 0.5.0). El armazón, la
+> navegación y los siete arreglos están en producción. Las fases 2 a 5 siguen
+> pendientes.
 
 ---
 
@@ -562,7 +563,7 @@ Se mantiene lo definido, con un matiz:
 Cinco fases. Cada una entrega algo utilizable y ninguna necesita a la
 siguiente para tener sentido. **No hay reescritura.**
 
-### Fase 0 · Correcciones · sin cambiar el aspecto
+### Fase 0 · Correcciones · sin cambiar el aspecto ✅ hecha
 
 Los fallos verificados de la sección 1. Nada de esto cambia cómo se ve la
 aplicación, y todo se vuelve más caro cuanto más crezca:
@@ -575,7 +576,7 @@ aplicación, y todo se vuelve más caro cuanto más crezca:
 6. Estados de hover solo bajo `hover: hover`.
 7. `100dvh` donde hoy haya alturas de ventana.
 
-### Fase 1 · El armazón y la navegación
+### Fase 1 · El armazón y la navegación ✅ hecha
 
 El cambio estructural, y el único con riesgo visual. **Mockup HTML antes**, como
 con la pestaña de Ajustes.
@@ -613,6 +614,28 @@ móvil, con el mismo contenido.
 
 - `roles` en `modulos.js` y filtrado en la navegación.
 - Reglas de Firestore por rol cuando existan datos de tutor.
+
+### Lo que enseñó implementarlo
+
+Cuatro cosas que el diseño no había previsto y que conviene no volver a
+descubrir:
+
+- **La barra lateral de iconos no lleva texto.** Se probó con etiqueta de
+  0.62rem bajo el icono y se cortaba en cualquier idioma con palabras largas
+  («Diccionario», «Ezarpenak», «Dictionary»). Media palabra con puntos
+  suspensivos no ayuda a nadie: el nombre completo va por `aria-label` y por
+  `title`.
+- **La pestaña de Ajustes solo existe por debajo de 56rem.** Colgar el panel
+  del engranaje solo es verdad mientras el engranaje está encima del panel. Con
+  barra lateral, el engranaje se va a su pie y Ajustes pasa a ser una pantalla
+  más.
+- **La cabecera necesita algo que decir cuando aparece la barra lateral.** Al
+  quitarle la marca (que ya está a la izquierda) se quedaba en blanco: ahora
+  nombra la pantalla en la que estás.
+- **Un cajón fuera de pantalla sigue en el orden de tabulación.** Hace falta
+  `visibility: hidden`, y la transición de `visibility` debe ser `0s` al abrir
+  y con retraso al cerrar; si no, el primer fotograma sigue siendo invisible y
+  `focus()` se ignora sin avisar.
 
 ### Regla de trabajo
 

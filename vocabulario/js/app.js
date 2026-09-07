@@ -25,6 +25,7 @@
 import { alCambiarSesion, entrar, salir, recogerRedireccion } from "./sesion.js";
 import { buscar, cargarTarjetas, cargarTodasLasTarjetas, cargarTemas, ordenarMazo } from "./datos.js";
 import { pintarModulos } from "./modulos.js";
+import * as Navegacion from "./navegacion.js";
 import * as Mates from "./matemagia.js";
 import { VERSION } from "./version.js";
 import { IDIOMAS, aplicar as aplicarIdioma, cambiarIdioma, idiomaActual, t } from "./i18n.js";
@@ -52,7 +53,13 @@ const pantallas = {
 };
 
 const el = {
+  navegacion: $("navegacion"),
+  navegacionLista: $("navegacion-lista"),
+  botonMenu: $("boton-menu"),
+  veloMenu: $("velo-menu"),
+  cabeceraPantalla: $("cabecera-pantalla"),
   botonAjustes: $("boton-ajustes"),
+  botonAjustesLateral: $("boton-ajustes-lateral"),
   volverHubAjustes: $("boton-volver-hub-ajustes"),
   ajustesFoto: $("ajustes-foto"),
   ajustesNombre: $("ajustes-nombre"),
@@ -149,10 +156,12 @@ let tarjetas = [];
 let temas = {};
 let mazo = [];
 let indice = 0;
+let pantallaActual = "cargando";
 
 /* ---------- utilidades ---------- */
 
 function mostrarPantalla(nombre) {
+  pantallaActual = nombre;
   Object.keys(pantallas).forEach((clave) => {
     pantallas[clave].hidden = (clave !== nombre);
   });
@@ -164,6 +173,38 @@ function mostrarPantalla(nombre) {
   const enAjustes = (nombre === "ajustes");
   document.body.classList.toggle("ajustes-abierto", enAjustes);
   el.botonAjustes.setAttribute("aria-expanded", String(enAjustes));
+  el.botonAjustesLateral.setAttribute("aria-expanded", String(enAjustes));
+
+  /* La navegación marca el módulo al que pertenece la pantalla, no la
+     pantalla: así "Inglés" sigue encendido aunque estés respondiendo
+     la séptima tarjeta. */
+  Navegacion.marcar(el.navegacionLista, enAjustes ? null : Navegacion.destinoDePantalla(nombre));
+  el.cabeceraPantalla.textContent = Navegacion.nombreDePantalla(nombre);
+
+  /* Navegar cierra el cajón: dejarlo abierto encima de la pantalla
+     nueva es la forma más rápida de que nadie entienda dónde está. */
+  cerrarMenu();
+}
+
+/* ---------- el cajón ---------- */
+
+function abrirMenu() {
+  document.body.classList.add("menu-abierto");
+  el.veloMenu.hidden = false;
+  el.botonMenu.setAttribute("aria-expanded", "true");
+  /* El foco entra en el cajón: si no, quien navega con teclado abre un
+     menú y sigue estando fuera de él. Leer una medida fuerza a recalcular
+     el estilo antes de enfocar: focus() sobre algo todavía invisible se
+     ignora sin decir nada. */
+  el.navegacion.getBoundingClientRect();
+  const primero = el.navegacionLista.querySelector(".nav-boton");
+  if (primero) primero.focus();
+}
+
+function cerrarMenu() {
+  document.body.classList.remove("menu-abierto");
+  el.veloMenu.hidden = true;
+  el.botonMenu.setAttribute("aria-expanded", "false");
 }
 
 function mostrarError(mensaje) {
@@ -626,6 +667,8 @@ function pintarSelectorIdioma() {
     boton.addEventListener("click", () => {
       cambiarIdioma(idioma.codigo);
       pintarSelectorIdioma();
+      pintarNavegacion();
+      el.cabeceraPantalla.textContent = Navegacion.nombreDePantalla(pantallaActual);
       pintarIndice();
       pintarMenuMates();
       el.pistaInstalar.textContent = t("ajustes.instalarIOS");
@@ -772,6 +815,9 @@ async function actualizarApp() {
 
 async function prepararSesion(usuario) {
   el.botonAjustes.hidden = false;
+  el.botonMenu.hidden = false;
+  el.navegacion.hidden = false;
+  pintarNavegacion();
   el.ajustesNombre.textContent = usuario.displayName || "Sin nombre";
   el.ajustesCorreo.textContent = usuario.email || "";
   if (usuario.photoURL) el.ajustesFoto.src = usuario.photoURL;
@@ -821,6 +867,9 @@ function cerrarSesion() {
   Mates.olvidarProgreso();
   olvidarUrls();
   el.botonAjustes.hidden = true;
+  el.botonMenu.hidden = true;
+  el.navegacion.hidden = true;
+  cerrarMenu();
   el.error.hidden = true;
   mostrarPantalla("login");
 }
@@ -849,6 +898,27 @@ function irAlHub() {
   mostrarPantalla("hub");
 }
 
+/**
+ * Dibuja la navegación. Lleva a la pantalla de entrada de cada módulo,
+ * que es lo mismo que hace el índice: no hay dos caminos distintos.
+ */
+function pintarNavegacion() {
+  Navegacion.pintar(el.navegacionLista, {
+    activo: Navegacion.destinoDePantalla(pantallaActual),
+    alElegir: (destino) => irA(destino.pantalla)
+  });
+}
+
+/** Punto único de entrada a un módulo, venga del índice o de la barra. */
+function irA(pantalla) {
+  parar();
+  if (pantalla === "hub") { irAlHub(); return; }
+  if (pantalla === "inicio") pintarMarcador(el.marcadorInicio);
+  if (pantalla === "matemagia") pintarMenuMates();
+  mostrarPantalla(pantalla);
+  if (pantalla === "diccionario") el.campoBuscar.focus();
+}
+
 /** Dibuja el saludo y el índice, y conecta cada módulo con su pantalla. */
 function pintarIndice() {
   /* El saludo se repinta aquí y no una sola vez al entrar: si no, al
@@ -859,12 +929,7 @@ function pintarIndice() {
 
   const activos = pintarModulos(el.modulos, { tarjetas: tarjetas.length });
   activos.forEach(({ modulo, boton }) => {
-    boton.addEventListener("click", () => {
-      if (modulo.pantalla === "inicio") pintarMarcador(el.marcadorInicio);
-      if (modulo.pantalla === "matemagia") pintarMenuMates();
-      mostrarPantalla(modulo.pantalla);
-      if (modulo.pantalla === "diccionario") el.campoBuscar.focus();
-    });
+    boton.addEventListener("click", () => irA(modulo.pantalla));
   });
 }
 
@@ -876,6 +941,29 @@ el.botonAjustes.addEventListener("click", () => {
     comprobarVersion();
   } else {
     irAlHub();
+  }
+});
+
+el.botonAjustesLateral.addEventListener("click", () => {
+  if (pantallas.ajustes.hidden) {
+    mostrarPantalla("ajustes");
+    comprobarVersion();
+  } else {
+    irAlHub();
+  }
+});
+
+el.botonMenu.addEventListener("click", () => {
+  if (document.body.classList.contains("menu-abierto")) cerrarMenu();
+  else abrirMenu();
+});
+
+el.veloMenu.addEventListener("click", cerrarMenu);
+
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && document.body.classList.contains("menu-abierto")) {
+    cerrarMenu();
+    el.botonMenu.focus();
   }
 });
 

@@ -21,6 +21,8 @@
 </head>
 <body>
 
+<div class="armazon">
+
   <header class="cabecera">
     <div class="cabecera__marca">
       <span class="cabecera__logo" aria-hidden="true"></span>
@@ -30,12 +32,46 @@
       </div>
     </div>
 
+    <!-- Con barra lateral la marca ya está a la izquierda, así que la
+         cabecera pasa a decir dónde estás. Por debajo de 56rem no se
+         enseña: allí manda la marca. -->
+    <h2 class="cabecera__pantalla" id="cabecera-pantalla"></h2>
+
     <div class="cabecera__sesion">
+      <button class="boton-menu" id="boton-menu" type="button" hidden
+              aria-expanded="false" aria-controls="navegacion"
+              data-i18n-attr="aria-label:nav.menu">☰</button>
       <button class="boton-ajustes" id="boton-ajustes" type="button" hidden
               aria-expanded="false" aria-controls="pantalla-ajustes"
               data-i18n-attr="aria-label:comun.ajustes"><span class="boton-ajustes__icono" aria-hidden="true">⚙️</span></button>
     </div>
   </header>
+
+  <!-- ========== NAVEGACIÓN ==========
+       Un solo elemento para los cuatro repartos (barra inferior, barra
+       lateral de iconos, barra lateral con texto y cajón). Lo coloca el
+       CSS; navegacion.js solo dibuja la lista. -->
+  <nav class="navegacion" id="navegacion" hidden data-i18n-attr="aria-label:nav.principal">
+    <div class="navegacion__marca">
+      <span class="cabecera__logo" aria-hidden="true"></span>
+      <p class="navegacion__nombre" data-i18n="app.titulo">Ayuda de Sofía</p>
+    </div>
+
+    <ul class="navegacion__lista" id="navegacion-lista"></ul>
+
+    <div class="navegacion__pie">
+      <button class="nav-boton" id="boton-ajustes-lateral" type="button"
+              aria-expanded="false" aria-controls="pantalla-ajustes"
+              data-i18n-attr="aria-label:comun.ajustes;title:comun.ajustes">
+        <span class="nav-boton__icono" aria-hidden="true">⚙️</span>
+        <span class="nav-boton__texto" data-i18n="comun.ajustes">Ajustes</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Velo del cajón: solo existe cuando la navegación está plegada. -->
+  <button class="velo-menu" id="velo-menu" type="button" hidden
+          data-i18n-attr="aria-label:nav.cerrarMenu"></button>
 
   <main class="escenario">
 
@@ -219,7 +255,7 @@
     <!-- ========== TARJETA ========== -->
     <section class="panel panel--tarjeta" id="pantalla-tarjeta" hidden>
 
-      <button class="boton boton--texto boton--volver" id="boton-volver-hub-tarjetas" type="button">← Volver</button>
+      <button class="boton boton--texto boton--volver" id="boton-volver-hub-tarjetas" type="button"><span aria-hidden="true">← </span><span data-i18n="comun.volver">Volver</span></button>
 
       <div class="progreso">
         <div class="progreso__barra"><span class="progreso__relleno" id="progreso-relleno"></span></div>
@@ -252,7 +288,7 @@
         <p class="veredicto" id="veredicto" hidden></p>
 
         <div class="palabra">
-          <h2 class="palabra__en" id="palabra-en"></h2>
+          <h2 class="palabra__en" id="palabra-en" lang="en"></h2>
           <button class="boton boton--redondo" id="boton-escuchar-palabra" type="button" data-i18n-attr="aria-label:tarjetas.escucharPalabra">🔊</button>
         </div>
 
@@ -263,7 +299,7 @@
 
         <div class="ejemplo" id="ejemplo">
           <div class="ejemplo__linea">
-            <p class="ejemplo__en" id="ejemplo-en"></p>
+            <p class="ejemplo__en" id="ejemplo-en" lang="en"></p>
             <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" data-i18n-attr="aria-label:tarjetas.escucharFrase">🔊</button>
           </div>
           <button class="boton boton--texto boton--mini" id="boton-ver-traduccion" type="button" aria-expanded="false">Ver la traducción</button>
@@ -292,6 +328,8 @@
     <p class="error" id="error" hidden></p>
     <p class="aviso-red" id="aviso-red" hidden data-i18n="comun.sinConexion">Sin conexión: sigues jugando y tu progreso se guardará al volver la red.</p>
   </main>
+
+</div>
 
   <script type="module" src="js/app.js"></script>
 </body>

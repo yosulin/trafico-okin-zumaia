@@ -43,7 +43,9 @@ html, body {
   background: var(--crema);
   color: var(--tinta);
   font-family: var(--texto);
-  font-size: 17px;
+  /* Relativo, no 17px fijos: si alguien agranda la letra del sistema
+     —los abuelos, sin ir más lejos— la app tiene que crecer con ella. */
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -57,9 +59,11 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 18px calc(14px + env(safe-area-inset-top, 0px));
-  max-width: 620px;
-  margin: 0 auto;
+  /* El inset de arriba va arriba. Estaba sumado al padding inferior,
+     así que en un móvil con notch la cabecera se separaba por abajo y
+     el título seguía pudiendo quedar tapado. */
+  padding-block: max(14px, env(safe-area-inset-top, 0px)) 14px;
+  padding-inline: 18px;
 }
 
 .cabecera__marca { display: flex; align-items: center; gap: 12px; }
@@ -87,6 +91,18 @@ html, body {
 
 .cabecera__sesion { display: flex; align-items: center; gap: 8px; }
 
+.cabecera__pantalla {
+  display: none;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .boton-ajustes {
   background: var(--superficie); border: 2px solid var(--borde);
   border-radius: 50%; width: 42px; height: 42px;
@@ -113,31 +129,36 @@ body.ajustes-abierto .boton-ajustes__icono { transform: rotate(112deg); }
    El panel renuncia a su esquina superior derecha para que la unión
    no tenga costura, y a la sombra, porque ya lleva borde.
 
-   Que la lengüeta y el panel queden alineados no es casualidad:
-   .cabecera y .escenario comparten ancho máximo y el mismo padding
-   lateral, así que el canto derecho del engranaje cae exactamente
-   sobre el del panel.
+   La pestaña solo existe MIENTRAS EL ENGRANAJE ESTÁ ENCIMA DEL PANEL,
+   es decir por debajo de 56rem. Con barra lateral, el engranaje se va
+   al pie de la barra y colgar de él un panel que está en otra columna
+   sería mentira: allí Ajustes es una pantalla más.
    ------------------------------------------------------------ */
 
-body.ajustes-abierto .cabecera { padding-bottom: 0; }
-body.ajustes-abierto .escenario { padding-top: 0; }
+@media (max-width: 55.99rem) {
+  body.ajustes-abierto .cabecera { padding-bottom: 0; }
+  body.ajustes-abierto .escenario { padding-top: 0; }
 
-body.ajustes-abierto .boton-ajustes {
-  width: 54px;
-  height: 46px;
-  border-radius: var(--radio-chico) var(--radio-chico) 0 0;
-  border-bottom-color: transparent;
-  margin-bottom: -2px;
-}
+  body.ajustes-abierto .boton-ajustes {
+    width: 54px;
+    height: 46px;
+    border-radius: var(--radio-chico) var(--radio-chico) 0 0;
+    border-bottom-color: transparent;
+    margin-bottom: -2px;
+  }
 
-body.ajustes-abierto .panel--ajustes {
-  border: 2px solid var(--borde);
-  border-top-right-radius: 0;
-  box-shadow: none;
-  /* El panel no "aparece": se despliega desde la lengüeta, así que
-     no puede desplazarse o se despegaría de ella. Solo funde. */
-  animation: desplegar .2s ease both;
-  transform-origin: top right;
+  body.ajustes-abierto .panel--ajustes {
+    border: 2px solid var(--borde);
+    border-top-right-radius: 0;
+    box-shadow: none;
+    /* El panel no "aparece": se despliega desde la lengüeta, así que
+       no puede desplazarse o se despegaría de ella. Solo funde. */
+    animation: desplegar .2s ease both;
+    transform-origin: top right;
+    /* El panel manda hasta el canto del engranaje: si se quedara
+       centrado con su ancho máximo, la lengüeta apuntaría al aire. */
+    max-width: none;
+  }
 }
 
 @keyframes desplegar {
@@ -146,16 +167,296 @@ body.ajustes-abierto .panel--ajustes {
 }
 
 /* ============================================================
+   ARMAZÓN — una rejilla, cuatro repartos
+   ------------------------------------------------------------
+   La navegación es SIEMPRE el mismo elemento: lo único que cambia
+   es dónde lo coloca la rejilla. Por eso al girar la tablet no hay
+   salto, no se pierde el foco del teclado y no hay tres
+   navegaciones que mantener.
+
+       < 56rem              barra inferior
+       56rem – 75rem        barra lateral de iconos
+       ≥ 75rem              barra lateral con texto
+       tumbado y sin alto   cajón que sale de la cabecera
+
+   Los cortes están en rem y los marca el contenido, no el catálogo
+   de ningún fabricante: si alguien agranda la letra del sistema, la
+   estructura cambia ANTES de quedarse apretada.
+   ============================================================ */
+
+.armazon {
+  display: grid;
+  height: 100vh;    /* reserva para navegadores sin dvh */
+  height: 100dvh;   /* dvh y no vh: el teclado y la barra del navegador
+                       cambian la altura real, y con vh el botón de
+                       comprobar se queda debajo del teclado */
+  grid-template-areas:
+    "cabecera"
+    "trabajo"
+    "navegacion";
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cabecera   { grid-area: cabecera; }
+.navegacion { grid-area: navegacion; }
+
+/* ---- 56rem: la navegación se va al lado ---- */
+@media (min-width: 56rem) {
+  .armazon {
+    grid-template-areas:
+      "navegacion cabecera"
+      "navegacion trabajo";
+    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .cabecera { border-bottom: 2px solid var(--borde); }
+}
+
+/* ---- 75rem: la barra lateral gana su texto ---- */
+@media (min-width: 75rem) {
+  .armazon { grid-template-columns: 236px minmax(0, 1fr); }
+}
+
+/* ---- tumbado y con poco alto (o con el teclado abierto):
+        la navegación se pliega y el contenido se queda el sitio ---- */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .armazon {
+    grid-template-areas:
+      "cabecera"
+      "trabajo";
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cabecera { padding-block: max(7px, env(safe-area-inset-top, 0px)) 7px; }
+  .cabecera__lema { display: none; }
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+.navegacion {
+  background: var(--superficie);
+  border-top: 2px solid var(--borde);
+  padding: 6px 8px max(6px, env(safe-area-inset-bottom, 0px));
+  min-width: 0;
+}
+
+.navegacion__marca,
+.navegacion__pie { display: none; }
+
+.navegacion__lista {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; justify-content: space-around; gap: 2px;
+}
+
+.navegacion__lista li { flex: 1; min-width: 0; }
+
+.nav-boton {
+  font-family: var(--texto);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--tinta-suave);
+  border-radius: var(--radio-chico);
+  padding: 7px 6px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 48px;
+}
+
+.nav-boton__icono { font-size: 1.3rem; line-height: 1; }
+
+.nav-boton__texto {
+  font-size: .68rem; font-weight: 800;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.nav-boton[aria-current="page"] { color: var(--tinta); background: var(--crema); }
+.nav-boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: -2px; }
+
+/* Móvil pequeño: el texto no cabe sin apretujarse, y el nombre sigue
+   llegando por aria-label a quien navegue con lector de pantalla. */
+@media (max-width: 26rem) {
+  .nav-boton__texto { display: none; }
+}
+
+/* ---- barra lateral de iconos ---- */
+@media (min-width: 56rem) {
+  .navegacion {
+    border-top: none;
+    border-right: 2px solid var(--borde);
+    padding: 12px 8px max(12px, env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+  .navegacion__lista { flex-direction: column; justify-content: flex-start; gap: 4px; }
+  .navegacion__lista li { flex: none; }
+  .navegacion__marca { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 4px 0 8px; }
+  .navegacion__nombre { display: none; margin: 0; }
+  .navegacion__pie {
+    display: block;
+    margin-top: auto;
+    border-top: 2px solid var(--borde);
+    padding-top: 10px;
+  }
+  .nav-boton { padding: 11px 4px; }
+  /* Barra de ICONOS: el texto se corta en cualquier idioma con palabras
+     largas ("Diccionario", "Ezarpenak"), y media palabra con puntos
+     suspensivos no ayuda a nadie. El nombre completo sigue llegando por
+     aria-label y por el title al pasar el ratón. */
+  .nav-boton__texto { display: none; }
+  .nav-boton__icono { font-size: 1.45rem; }
+
+  /* Con barra lateral, la marca ya está a la izquierda: la cabecera
+     deja de repetirla y el engranaje se va al pie de la barra. */
+  .cabecera__marca { display: none; }
+  .boton-ajustes { display: none; }
+  .cabecera__pantalla { display: block; }
+}
+
+/* ---- barra lateral con texto ---- */
+@media (min-width: 75rem) {
+  .navegacion { padding: 14px 12px max(14px, env(safe-area-inset-bottom, 0px)); }
+  .navegacion__marca { justify-content: flex-start; padding: 4px 8px 14px; }
+  .navegacion__nombre {
+    display: block;
+    font-family: var(--display);
+    font-size: 1rem;
+    line-height: 1.1;
+  }
+  .nav-boton {
+    grid-template-columns: 26px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  .nav-boton__texto { display: block; font-size: .95rem; font-weight: 700; }
+  .nav-boton__icono { font-size: 1.3rem; }
+  .nav-boton[aria-current="page"] {
+    box-shadow: inset 3px 0 0 var(--color-modulo, var(--coral));
+  }
+}
+
+/* ---- cajón ---- */
+.boton-menu {
+  display: none;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: 50%; width: 42px; height: 42px;
+  font-size: 1.05rem; line-height: 1; cursor: pointer; flex: none;
+  color: var(--tinta);
+}
+
+.boton-menu:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+.velo-menu {
+  position: fixed; inset: 0; z-index: 9;
+  border: none; padding: 0; width: 100%;
+  background: rgba(43, 52, 64, .45);
+  cursor: pointer;
+}
+
+@media (orientation: landscape) and (max-height: 32rem) {
+  .boton-menu { display: block; }
+
+  /* El mismo <nav>, ahora fuera de la rejilla y fuera de la pantalla
+     hasta que se pide. No se duplica el marcado en ningún momento. */
+  .navegacion {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 10;
+    width: min(240px, 72vw);
+    border-top: none;
+    border-right: 2px solid var(--borde);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding: 12px 10px max(12px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-102%);
+    /* visibility, y no solo transform: un cajón que se ha ido de la
+       pantalla pero sigue "visible" continúa en el orden de tabulación,
+       y con el tabulador se cae dentro de un menú que no se ve.
+
+       El 0s con retraso no es un adorno: al ABRIR queremos que sea
+       visible ya, para poder llevarle el foco en el acto; al CERRAR
+       esperamos a que termine de salirse, o desaparecería de golpe. */
+    visibility: hidden;
+    transition: transform .22s ease, visibility 0s linear .22s;
+  }
+
+  .navegacion__marca { display: flex; align-items: center; gap: 10px; padding: 4px 6px 10px; }
+  .navegacion__nombre { display: block; margin: 0; font-family: var(--display); font-size: .95rem; }
+  .navegacion__lista { flex-direction: column; gap: 4px; }
+  .navegacion__lista li { flex: none; }
+  .navegacion__pie { display: block; margin-top: auto; border-top: 2px solid var(--borde); padding-top: 10px; }
+
+  .nav-boton {
+    grid-template-columns: 26px minmax(0, 1fr);
+    justify-items: start; align-items: center;
+    gap: 11px; padding: 11px 12px; text-align: left;
+  }
+  .nav-boton__texto { display: block; font-size: .92rem; font-weight: 700; }
+
+  body.menu-abierto .navegacion {
+    transform: none;
+    visibility: visible;
+    transition: transform .22s ease, visibility 0s;
+  }
+}
+
+/* ============================================================
+   DEDO Y RATÓN
+   No es lo mismo señalar que tocar. El ancho no lo distingue: una
+   tablet en horizontal tiene tanto sitio como un portátil y se usa
+   con el dedo igual que un móvil.
+   ============================================================ */
+
+@media (pointer: coarse) {
+  .boton--fantasma,
+  .boton--mini,
+  .nav-boton { min-height: 48px; }
+  .tecla { padding-block: 16px; }
+}
+
+@media (hover: hover) {
+  .nav-boton:hover { color: var(--tinta); background: var(--crema); }
+  .boton:hover { filter: brightness(.97); }
+  .modulo:hover { border-color: var(--color-modulo, var(--borde)); }
+}
+
+/* ============================================================
    ESTRUCTURA
    ============================================================ */
 
 .escenario {
-  max-width: 620px;
-  margin: 0 auto;
-  padding: 4px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+  grid-area: trabajo;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 4px 18px max(28px, env(safe-area-inset-bottom, 0px));
+
+  /* De tamaño y no solo de ancho: la tarjeta necesita preguntar
+     también por el alto para decidir si se reparte en dos columnas. */
+  container-type: size;
+  container-name: trabajo;
 }
 
+/* Lo que se limita en ancho es el panel, no el escenario: así el área
+   de trabajo ocupa todo su hueco y la lectura sigue cómoda.
+   width:100% no sobra: con margin auto dentro de una rejilla, el panel
+   se encogería a su contenido en vez de ocupar la pista. */
 .panel {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
   background: var(--superficie);
   border-radius: var(--radio);
   box-shadow: var(--sombra);

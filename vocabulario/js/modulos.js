@@ -14,6 +14,11 @@ import { t } from "./i18n.js";
  *    color     su color, que viaja a la cabecera y a sus botones
  *    que       una frase de qué hace, en su idioma, no en el nuestro
  *    pantalla  a qué pantalla lleva (null = todavía no existe)
+ *    pantallas todas las pantallas que son "suyas", para que la
+ *              navegación sepa marcarlo aunque estés tres pasos dentro
+ *    roles     quién lo ve. Hoy solo existe "alumno", pero el campo
+ *              está desde el principio: así añadir el perfil de tutor
+ *              no obliga a rehacer la navegación
  *    estado    la etiqueta de la tarjeta; puede ser una función que
  *              recibe el contexto (por ejemplo, cuántas palabras hay)
  *
@@ -29,6 +34,8 @@ export const MODULOS = [
     icono: "🃏",
     color: "var(--coral)",
     pantalla: "inicio",
+    pantallas: ["inicio", "tarjeta", "final"],
+    roles: ["alumno", "tutor"],
     estado: (contexto) => (contexto.tarjetas === 1
       ? t("modulo.tarjetas.estadoUna")
       : t("modulo.tarjetas.estado", { n: contexto.tarjetas }))
@@ -38,6 +45,8 @@ export const MODULOS = [
     icono: "📖",
     color: "var(--cielo)",
     pantalla: "diccionario",
+    pantallas: ["diccionario"],
+    roles: ["alumno", "tutor"],
     estado: () => t("modulo.diccionario.estado")
   },
   {
@@ -45,6 +54,8 @@ export const MODULOS = [
     icono: "✨",
     color: "var(--menta)",
     pantalla: "matemagia",
+    pantallas: ["matemagia", "matesReto", "matesFinal"],
+    roles: ["alumno", "tutor"],
     estado: () => t("modulo.matemagia.estado")
   },
   {
@@ -52,6 +63,8 @@ export const MODULOS = [
     icono: "➕",
     color: "var(--sol)",
     pantalla: null,
+    pantallas: [],
+    roles: ["alumno", "tutor"],
     estado: () => t("modulo.libre.estado")
   }
 ];
