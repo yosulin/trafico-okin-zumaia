@@ -153,9 +153,21 @@ que mapea número → nombre original, y los medios numerados. El zip se lee sin
 dependencias (`lib/zip.mjs`); leer SQLite necesita `better-sqlite3`, que instala
 `npm install`.
 
-Anki guarda **todos los campos de una nota en una sola columna**, separados por
-`0x1f` y en el orden en que los definió quien hizo el mazo. Por eso hay que
-decirle al importador qué posición ocupa cada campo:
+**Los campos se emparejan por NOMBRE**, no por posición. Como el tipo de nota
+trae los nombres de sus campos, `English`, `Spanish`, `Basque`, `ExampleEN`,
+`ConceptId`… se reconocen solos (sin distinguir mayúsculas, espacios ni
+guiones). Los que no se reconocen **se conservan tal cual**, con su nombre.
+
+Mira antes qué va a entender, sin tocar nada:
+
+```bash
+node inspeccionar.mjs mazo.apkg     # sección "QUÉ ENTENDERÁ EL IMPORTADOR"
+```
+
+`--campos` sigue existiendo para mazos cuyos campos se llaman «Field 1», y
+manda sobre el emparejamiento automático. Anki guarda todos los campos de una
+nota en una sola columna separados por `0x1f`, así que ahí hay que decir qué
+posición ocupa cada uno:
 
 ```bash
 # primero, mirar qué trae el mazo
@@ -249,3 +261,20 @@ Termina diciendo qué se perdería al convertirlo, que es la pregunta que import
 antes de construir nada encima: la programación de repasos, el historial, las
 opciones del mazo, el CSS y las plantillas **no** sobreviven a la conversión;
 los campos de texto, las etiquetas, los medios y el `guid` sí.
+
+---
+
+## Índices de Firestore
+
+Están en **`firestore.indexes.json` de la raíz**, que es el que despliega
+`firebase.json`. Aquí había una copia que no desplegaba nadie, y por eso la
+búsqueda por principio de palabra del diccionario nunca llegó a funcionar en
+producción: la consulta fallaba y el `catch` devolvía una lista vacía.
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
+Tarda unos minutos en construirse. Hasta que termine, el diccionario encuentra
+las palabras exactas pero no las acepciones sueltas ni los principios de
+palabra.

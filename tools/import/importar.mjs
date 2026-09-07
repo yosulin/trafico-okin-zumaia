@@ -113,7 +113,10 @@ async function leerOrigen() {
   if (opciones.origen === "anki") {
     return leerApkg(ficheroEntrada, {
       campos: camposDeAnki(opciones.campos),
-      limite: opciones.limite
+      limite: opciones.limite,
+      /* Sin medios no hace falta escribir 6.000 ficheros en el disco
+         para luego no usarlos: basta con anotar cómo se llamaban. */
+      sinMedios
     });
   }
   throw new Error("Origen desconocido: " + opciones.origen + " (json, csv o anki)");
@@ -195,6 +198,20 @@ async function principal() {
     unidad: opciones.unidad === true ? undefined : opciones.unidad
   };
 
+  /* Lo que ha entendido el lector del mazo: si reconoce 3 campos de 33,
+     mejor saberlo antes de escribir nada en Firestore. */
+  if (origen.informe) {
+    const i = origen.informe;
+    console.log(`\nMazo leído: ${i.notas} notas · tipos: ${i.tiposUsados.join(", ") || "?"}`);
+    (i.emparejamientos || []).forEach((e) => {
+      console.log(`  «${e.tipo}»: ${e.reconocidos} de ${e.total} campos reconocidos`);
+      console.log(`    ${Object.entries(e.mapa).map(([k, v]) => k + "=" + v).join(", ")}`);
+      if (e.extras.length) console.log(`    se conservan tal cual: ${e.extras.join(", ")}`);
+    });
+    if (i.sinPalabra) console.log(`  ⚠ ${i.sinPalabra} notas sin palabra en inglés`);
+    console.log(`  con audio de palabra: ${i.conAudioPalabra} · de ejemplo: ${i.conAudioEjemplo} · con imagen: ${i.conImagen}`);
+  }
+
   let crudas = origen.tarjetas;
   if (opciones.limite) crudas = crudas.slice(0, Number(opciones.limite));
 
@@ -257,10 +274,11 @@ async function principal() {
   }
   if (!sinMedios && medios.length > 0) process.stdout.write("\n");
 
-  const escritas = await escribirTarjetas(tarjetas);
+  const escritura = await escribirTarjetas(tarjetas);
   const temas = await escribirTemas(origen.temas);
 
-  console.log(`\nListo: ${escritas} tarjetas en Firestore` +
+  console.log(`\nListo: ${escritura.escritas} tarjetas en Firestore` +
+    ` (${escritura.nuevas} nuevas, ${escritura.actualizadas} actualizadas)` +
     (sinMedios ? "" : `, ${subidos} medios nuevos en Storage`) +
     (temas ? `, ${temas} temas` : "") + ".\n");
 }

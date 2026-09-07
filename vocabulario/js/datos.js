@@ -108,10 +108,16 @@ function unir(respuestas) {
  * Busca una palabra en los tres idiomas a la vez: se escriba "dog",
  * "perro" o "txakurra", sale la misma entrada.
  *
- * Primero la palabra exacta. Si no hay nada, prueba por principio de
- * palabra ("txak" → "txakurra"), que necesita índices compuestos; si no
- * están desplegados Firestore protesta y nos quedamos con lo exacto en
- * lugar de romper.
+ * Tres intentos, de más preciso a más amplio:
+ *
+ *   1. la palabra exacta en cualquiera de los tres idiomas
+ *   2. una ACEPCIÓN suelta ("dirigir" dentro de "correr; dirigir;
+ *      funcionar"), que es como viene casi la mitad del Oxford 3000
+ *   3. por principio de palabra ("txak" → "txakurra")
+ *
+ * Los intentos 2 y 3 necesitan índices compuestos; si no están
+ * desplegados, Firestore protesta y nos quedamos con lo que haya en vez
+ * de romper la búsqueda entera.
  */
 export async function buscar(termino) {
   const texto = textoDeBusqueda(termino);
@@ -126,6 +132,21 @@ export async function buscar(termino) {
 
   const encontradas = unir(exactas);
   if (encontradas.length > 0) return encontradas;
+
+  /* Por acepción suelta. Una sola consulta para los tres idiomas: la
+     lista "terminos" ya los lleva todos. */
+  try {
+    const porAcepcion = await getDocs(query(
+      collection(db, "cards"),
+      where("active", "==", true),
+      where("terminos", "array-contains", texto),
+      limit(10)
+    ));
+    const resultado = unir([porAcepcion]);
+    if (resultado.length > 0) return resultado;
+  } catch (error) {
+    /* sin índice todavía: seguimos con el siguiente intento */
+  }
 
   try {
     const porPrincipio = await Promise.all(IDIOMAS.map((idioma) => getDocs(query(

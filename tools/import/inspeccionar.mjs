@@ -27,13 +27,15 @@
  * ============================================================
  */
 
-import { mkdtempSync, writeFileSync, statSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { zstdDecompressSync } from "node:zlib";
-import { leerZip } from "./lib/zip.mjs";
-
-const SEPARADOR_CAMPOS = "\u001f";
+import { statSync } from "node:fs";
+import {
+  abrirMazo,
+  SEPARADOR_CAMPOS,
+  audiosDe,
+  imagenesDe,
+  textoLimpio as sinHtmlBase
+} from "./lib/mazo.mjs";
+import { emparejarCampos } from "./lib/origen-anki.mjs";
 
 /* ---------- línea de comandos ---------- */
 
@@ -71,196 +73,32 @@ const frecuencias = (lista) => {
   return [...cuenta.entries()].sort((a, b) => b[1] - a[1]);
 };
 
-const audiosDe = (texto) =>
-  [...String(texto).matchAll(/\[sound:([^\]]+)\]/g)].map((m) => m[1]);
-
-const imagenesDe = (texto) =>
-  [...String(texto).matchAll(/<img[^>]+src\s*=\s*["']?([^"'>\s]+)/gi)].map((m) => m[1]);
-
-/** Quita etiquetas HTML para poder enseñar el texto de verdad. */
+/** El texto de un campo, legible, con el audio marcado. */
 const sinHtml = (texto) =>
-  String(texto)
-    .replace(/\[sound:[^\]]+\]/g, "🔊")
-    .replace(/<br\s*\/?>/gi, " / ")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
-
-/**
- * Abre el SQLite del mazo en solo lectura.
- *
- * Primero con "node:sqlite", que viene DENTRO de Node desde la 22 y no
- * exige instalar nada: ni compilador, ni binarios nativos, ni permisos
- * de scripts de instalación. Si no está (Node antiguo), se recurre a
- * better-sqlite3, que es opcional justamente por esto.
- *
- * Si fallan las dos, se enseñan los dos errores de verdad. Un "hace
- * falta better-sqlite3" a secas esconde la causa real, que casi nunca
- * es que falte el paquete.
- */
-async function abrirSqlite(ruta) {
-  const fallos = [];
-
-  try {
-    const { DatabaseSync } = await import("node:sqlite");
-    return new DatabaseSync(ruta, { readOnly: true });
-  } catch (error) {
-    fallos.push("node:sqlite → " + error.message.split("\n")[0]);
-  }
-
-  try {
-    const modulo = await import("better-sqlite3");
-    return new modulo.default(ruta, { readonly: true });
-  } catch (error) {
-    fallos.push("better-sqlite3 → " + error.message.split("\n")[0]);
-  }
-
-  throw new Error(
-    "No se ha podido abrir la base del mazo por ninguna vía:\n\n" +
-    fallos.map((f) => "  · " + f).join("\n") +
-    "\n\nLo normal es que baste con Node 22 o superior, que ya trae SQLite.\n" +
-    "En Node 22 puede hacer falta el modificador:\n" +
-    "  node --experimental-sqlite inspeccionar.mjs <fichero.apkg>"
-  );
-}
+  sinHtmlBase(String(texto).replace(/\[sound:[^\]]+\]/g, " 🔊 "));
 
 /* ============================================================
    LECTURA
    ============================================================ */
 
 const tamanoApkg = statSync(fichero).size;
-const zip = leerZip(fichero);
-const entradas = [...zip.keys()];
 
-/**
- * De más nueva a más vieja, porque la que manda es la más nueva.
- *
- * Un .apkg moderno incluye ADEMÁS un "collection.anki2" señuelo con una
- * sola nota que dice «actualiza Anki e impórtalo otra vez». Si nos
- * quedáramos con el señuelo veríamos un mazo de una nota y miles de
- * audios huérfanos, que es exactamente lo que parece un mazo roto sin
- * serlo.
- */
-const CANDIDATAS = ["collection.anki21b", "collection.anki21", "collection.anki2"];
-
-/* zstd suelto dentro de la entrada del zip (no comprimido POR el zip). */
-const esZstd = (b) => b && b.length > 4 &&
-  b[0] === 0x28 && b[1] === 0xb5 && b[2] === 0x2f && b[3] === 0xfd;
-
-let nombreBase = null;
-let contenidoBase = null;
-const noLegibles = [];
-
-for (const candidata of CANDIDATAS) {
-  if (!zip.has(candidata)) continue;
-  let datos = zip.get(candidata);
-  if (datos === null) { noLegibles.push(candidata); continue; }
-  if (esZstd(datos)) {
-    try {
-      datos = zstdDecompressSync(datos);
-    } catch (error) {
-      noLegibles.push(candidata + " (zstd: " + error.message + ")");
-      continue;
-    }
-  }
-  nombreBase = candidata;
-  contenidoBase = datos;
-  break;
-}
-
-if (!nombreBase) {
-  if (noLegibles.length) {
-    console.error(
-      "El mazo trae su base en un formato que este Node no sabe descomprimir:\n" +
-      noLegibles.map((n) => "  · " + n).join("\n") +
-      "\n\nCon Node 22.15 o superior se lee sin instalar nada. Si no puedes\n" +
-      "actualizar, reexporta el mazo desde Anki marcando «Compatibilidad con\n" +
-      "versiones anteriores» (Support older Anki versions)."
-    );
-  } else {
-    console.error("El fichero no parece un .apkg: no contiene ninguna base de colección.");
-    console.error("Entradas encontradas: " + entradas.slice(0, 20).join(", "));
-  }
+let mazo;
+try {
+  mazo = await abrirMazo(fichero);
+} catch (error) {
+  console.error(error.message);
   process.exit(1);
 }
 
-const carpeta = mkdtempSync(join(tmpdir(), "inspeccion-anki-"));
-const rutaBase = join(carpeta, "collection.anki2");
-writeFileSync(rutaBase, contenidoBase);
-const base = await abrirSqlite(rutaBase);
+const {
+  zip, base, entradas, nombreBase, basesPresentes,
+  versionEsquema, creada, tablas, tiposDeNota, tipoPorId, mazos, carpeta
+} = mazo;
 
-/* Qué bases hay, para que se vea si había un señuelo y cuál se ha usado. */
-const basesPresentes = CANDIDATAS.filter((c) => zip.has(c));
-
-/* ---------- mapa de medios ---------- */
-
-const crudoMedia = zip.get("media");
-let mapaMedios = {};
-let mediaLegible = true;
-try {
-  mapaMedios = crudoMedia ? JSON.parse(crudoMedia.toString("utf8")) : {};
-} catch (error) {
-  /* En los .apkg nuevos "media" es binario, no JSON. */
-  mediaLegible = false;
-}
-const nombrePorNumero = new Map(Object.entries(mapaMedios));
-const numeroPorNombre = new Map([...nombrePorNumero].map(([n, f]) => [f, n]));
-
-/* ---------- tipos de nota ---------- */
-
-const tablas = new Set(
-  base.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((f) => f.name)
-);
-
-/* Anki guardaba los tipos de nota como JSON dentro de col.models; desde el
-   esquema 18 viven en tablas propias. Admitimos las dos formas. */
-let tiposDeNota = [];
-let versionEsquema = null;
-let creada = null;
-
-const fila = base.prepare("SELECT * FROM col LIMIT 1").get();
-if (fila) {
-  creada = fila.crt ? new Date(fila.crt * 1000).toISOString().slice(0, 10) : null;
-  versionEsquema = fila.ver;
-}
-
-if (fila && fila.models && String(fila.models).trim().startsWith("{")) {
-  const modelos = JSON.parse(fila.models);
-  tiposDeNota = Object.values(modelos).map((m) => ({
-    id: String(m.id),
-    nombre: m.name,
-    campos: (m.flds || []).sort((a, b) => a.ord - b.ord).map((f) => f.name),
-    plantillas: (m.tmpls || []).map((t) => ({
-      nombre: t.name,
-      anverso: (t.qfmt || "").replace(/\s+/g, " ").trim(),
-      reverso: (t.afmt || "").replace(/\s+/g, " ").trim()
-    })),
-    css: (m.css || "").length
-  }));
-} else if (tablas.has("notetypes") && tablas.has("fields")) {
-  const tipos = base.prepare("SELECT id, name FROM notetypes").all();
-  tiposDeNota = tipos.map((t) => ({
-    id: String(t.id),
-    nombre: t.name,
-    campos: base.prepare("SELECT name FROM fields WHERE ntid=? ORDER BY ord").all(t.id).map((f) => f.name),
-    plantillas: base.prepare("SELECT name, config FROM templates WHERE ntid=? ORDER BY ord").all(t.id)
-      .map((p) => ({ nombre: p.name, anverso: "(en config binaria)", reverso: "(en config binaria)" })),
-    css: 0
-  }));
-}
-
-const tipoPorId = new Map(tiposDeNota.map((t) => [t.id, t]));
-
-/* ---------- mazos ---------- */
-
-let mazos = [];
-if (fila && fila.decks && String(fila.decks || "").trim().startsWith("{")) {
-  mazos = Object.values(JSON.parse(fila.decks)).map((d) => d.name);
-} else if (tablas.has("decks")) {
-  mazos = base.prepare("SELECT name FROM decks").all().map((d) => String(d.name).replace(/\u001f/g, "::"));
-}
+const nombrePorNumero = mazo.medios.porNumero;
+const numeroPorNombre = mazo.medios.porNombre;
+const mediaLegible = mazo.medios.legible;
 
 /* ---------- notas y tarjetas ---------- */
 
@@ -273,7 +111,7 @@ const conRepaso = tablas.has("revlog")
   ? base.prepare("SELECT COUNT(*) n FROM revlog").get().n : 0;
 const tarjetasVistas = base.prepare("SELECT COUNT(*) n FROM cards WHERE reps > 0").get().n;
 
-base.close();
+mazo.cerrar();
 
 /* ============================================================
    ANÁLISIS
@@ -413,6 +251,19 @@ console.log("(vacías / longitud media del texto / cuántas llevan audio, imagen
     " · longitud media " + media +
     " · audio " + p.audios + " · imagen " + p.imagenes + " · HTML " + p.html);
   if (p.muestra) console.log("    ej.: " + p.muestra);
+});
+
+titulo("QUÉ ENTENDERÁ EL IMPORTADOR");
+console.log("(emparejamiento por NOMBRE de campo; --campos solo si esto falla)");
+tiposDeNota.forEach((tipo) => {
+  if (!tipo.campos.length) return;
+  const e = emparejarCampos(tipo.campos);
+  console.log("\n  «" + tipo.nombre + "»: " + e.reconocidos + " de " + e.total + " campos");
+  Object.entries(e.mapa).forEach(([nuestro, posicion]) => {
+    console.log("    " + nuestro.padEnd(14) + "← [" + posicion + "] " + tipo.campos[posicion]);
+  });
+  const extras = Object.keys(e.extras);
+  if (extras.length) console.log("    se conservan tal cual: " + extras.join(", "));
 });
 
 titulo("6. ETIQUETAS");

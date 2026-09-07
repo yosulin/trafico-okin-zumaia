@@ -67,6 +67,32 @@ export function idDesde(palabra, tema) {
 }
 
 /**
+ * Trocea traducciones con varias acepciones y las normaliza, sin
+ * repetidas y sin vacíos. Firestore limita los arrays de un índice, así
+ * que se corta en 20: de sobra para cualquier palabra real.
+ */
+function acepciones(valores) {
+  const lista = [];
+  valores.filter(Boolean).forEach((valor) => {
+    String(valor).split(/[;,/|]|\bo\b/).forEach((trozo) => {
+      const limpio = textoDeBusqueda(trozo);
+      if (limpio && !lista.includes(limpio)) lista.push(limpio);
+    });
+  });
+  return lista.slice(0, 20);
+}
+
+/** Deja un id de documento que Firestore acepte, o "" si no hay nada. */
+function idValido(bruto) {
+  const limpio = String(bruto || "")
+    .trim()
+    .replace(/[/\\]+/g, "_")      // "/" separa colecciones: prohibido
+    .replace(/\s+/g, "_")
+    .replace(/^\.+$/, "");        // "." y ".." son ids reservados
+  return limpio.slice(0, 400);
+}
+
+/**
  * @param {object} cruda    lo que ha devuelto el lector de origen.
  * @param {object} opciones valores comunes a toda la importación
  *                          (tema, capa, procedencia escolar, libro, unidad).
@@ -79,7 +105,10 @@ export function normalizarTarjeta(cruda, opciones = {}) {
   const ejemplo = cruda.example || {};
 
   const tarjeta = {
-    id: cruda.id || idDesde(palabra, tema),
+    /* Un id que venga del origen (ConceptId) puede traer cualquier cosa,
+       y Firestore no admite "/" ni ".", ni ids vacíos. Se sanea aquí, que
+       es por donde pasan todos los orígenes. */
+    id: idValido(cruda.id) || idDesde(palabra, tema),
 
     word: palabra,
     es: limpiar(cruda.es),
@@ -99,9 +128,12 @@ export function normalizarTarjeta(cruda, opciones = {}) {
       audioPath: ejemplo.audioPath || ""
     },
 
+    /* Anki separa sus etiquetas por ESPACIOS; los CSV y los JSON, por
+       comas o puntos y coma. Se admiten los tres o "oxford3000 a1"
+       entra como una sola etiqueta que no sirve para filtrar nada. */
     tags: Array.isArray(cruda.tags)
       ? cruda.tags.map(limpiar).filter(Boolean)
-      : limpiar(cruda.tags).split(/[,;]\s*/).filter(Boolean),
+      : limpiar(cruda.tags).split(/[,;\s]+/).filter(Boolean),
 
     source: {
       type: (cruda.source && cruda.source.type) || opciones.fuente || "general",
@@ -124,6 +156,13 @@ export function normalizarTarjeta(cruda, opciones = {}) {
     es: textoDeBusqueda(tarjeta.es),
     eu: textoDeBusqueda(tarjeta.eu)
   };
+
+  /* Y además CADA ACEPCIÓN por separado, en una lista.
+     Casi la mitad del Oxford 3000 trae varias acepciones en una sola
+     celda ("correr; dirigir; funcionar"). Con solo el campo entero,
+     buscar "dirigir" no encuentra nada, que para un diccionario es
+     justo lo contrario de lo que se le pide. */
+  tarjeta.terminos = acepciones([tarjeta.word, tarjeta.es, tarjeta.eu]);
 
   /* Campos extra del origen que no están en el esquema base: se
      conservan tal cual (nivel CEFR, edad, dificultad, deck...). */

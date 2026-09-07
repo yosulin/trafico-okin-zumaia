@@ -105,10 +105,22 @@ export async function subirMedia(rutaLocal, rutaStorage, opciones = {}) {
   return { rutaStorage, subido: true, nombre: basename(rutaLocal) };
 }
 
-/** Escribe (merge) las tarjetas en la colección "cards", por lotes. */
+/**
+ * Escribe (merge) las tarjetas en la colección "cards", por lotes.
+ *
+ * createdAt SOLO en el alta. updatedAt se reescribe en cada pasada, así
+ * que no sirve para saber cuándo entró una palabra: si mañana corriges
+ * el euskera de las 3.000, las 3.000 dirían que son de mañana. Por eso
+ * se mira primero qué ids ya existen —una lectura por documento, una
+ * vez— y de paso sale gratis el informe de cuántas son nuevas.
+ *
+ * @returns {Promise<{escritas: number, nuevas: number, actualizadas: number}>}
+ */
 export async function escribirTarjetas(tarjetas) {
   const { almacen } = await conectar();
   const { FieldValue } = await import("firebase-admin/firestore");
+
+  const existentes = await idsExistentes(almacen, tarjetas.map((t) => t.id));
 
   const TAMANO_LOTE = 400;
   let escritas = 0;
@@ -117,17 +129,34 @@ export async function escribirTarjetas(tarjetas) {
     const lote = almacen.batch();
     tarjetas.slice(i, i + TAMANO_LOTE).forEach((tarjeta) => {
       const { id, ...datos } = tarjeta;
-      lote.set(
-        almacen.collection("cards").doc(id),
-        Object.assign({}, datos, { updatedAt: FieldValue.serverTimestamp() }),
-        { merge: true }
-      );
+      const carga = Object.assign({}, datos, { updatedAt: FieldValue.serverTimestamp() });
+      if (!existentes.has(id)) carga.createdAt = FieldValue.serverTimestamp();
+      lote.set(almacen.collection("cards").doc(id), carga, { merge: true });
     });
     await lote.commit();
     escritas += Math.min(TAMANO_LOTE, tarjetas.length - i);
   }
 
-  return escritas;
+  const nuevas = tarjetas.filter((t) => !existentes.has(t.id)).length;
+  return { escritas, nuevas, actualizadas: escritas - nuevas };
+}
+
+/** Qué ids de "cards" existen ya, preguntando de 300 en 300. */
+async function idsExistentes(almacen, ids) {
+  const encontrados = new Set();
+  const TAMANO = 300;
+
+  for (let i = 0; i < ids.length; i += TAMANO) {
+    const referencias = ids.slice(i, i + TAMANO)
+      .map((id) => almacen.collection("cards").doc(id));
+    /* select() sin campos trae solo la existencia, no el contenido. */
+    const documentos = await almacen.getAll(...referencias, { fieldMask: [] });
+    documentos.forEach((documento) => {
+      if (documento.exists) encontrados.add(documento.id);
+    });
+  }
+
+  return encontrados;
 }
 
 /** Escribe las etiquetas de tema en la colección "themes". */

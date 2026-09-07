@@ -2,143 +2,237 @@
  * ============================================================
  *  ORIGEN ANKI (.apkg)
  * ============================================================
- *  Cadena completa:
+ *      .apkg  →  lib/mazo.mjs (abrir, señuelo, zstd, esquemas)
+ *             →  emparejar campos  →  normalizar  →  Firestore
  *
- *      .apkg  →  descomprimir (lib/zip.mjs, sin dependencias)
- *             →  leer notas de collection.anki2 (SQLite)
- *             →  extraer los medios a una carpeta temporal
- *             →  normalizar  →  subir  →  Firestore
+ *  EMPAREJAR POR NOMBRE, NO POR POSICIÓN.
+ *  Anki guarda todos los campos de una nota en una sola columna,
+ *  separados por 0x1f, y el orden lo decidió quien hizo el mazo. Pedir
+ *  ese orden a mano (--campos word=0,es=1...) funciona, pero es
+ *  frágil: un dígito mal puesto mete las frases de ejemplo en la
+ *  columna de la traducción y no lo avisa nadie.
  *
- *  Un .apkg es un zip con la base "collection.anki2", un fichero
- *  "media" (JSON con numero → nombre original) y los medios
- *  numerados. Las notas guardan todos sus campos en una sola columna,
- *  separados por el carácter 0x1f y en el orden en que los definió
- *  quien hizo el mazo: por eso hay que decir qué campo es qué con
- *  --campos (ver README).
+ *  Como el tipo de nota SÍ trae los nombres de sus campos, aquí se
+ *  emparejan por nombre siempre que se reconozcan, y --campos queda
+ *  como último recurso para mazos con campos llamados "Field 1".
  *
- *  Leer SQLite sí necesita una dependencia:
- *
- *      cd tools/import && npm install
- *
- *  Los .apkg más nuevos usan "collection.anki21b" comprimido con
- *  zstd; en ese caso hay que reexportar el mazo desde Anki marcando
- *  "Compatibilidad con versiones anteriores", que genera
- *  collection.anki2.
+ *  Los nombres se comparan sin mayúsculas, espacios ni guiones, así
+ *  que "Example EN", "example_en" y "ExampleEN" son el mismo campo.
  * ============================================================
  */
 
-import { mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { leerZip } from "./zip.mjs";
+import { abrirMazo, SEPARADOR_CAMPOS, audiosDe, imagenesDe, textoLimpio } from "./mazo.mjs";
 
-/* Anki separa los campos de una nota con 0x1f (unit separator). */
-const SEPARADOR_CAMPOS = "\u001f";
+/** Nombres que reconocemos, y a qué campo nuestro van. */
+const SINONIMOS = {
+  conceptid: "id", id: "id",
 
-function referenciasDeMedios(texto) {
-  const nombres = [];
-  for (const encontrado of String(texto).matchAll(/\[sound:([^\]]+)\]/g)) {
-    nombres.push({ tipo: "audio", nombre: encontrado[1] });
-  }
-  for (const encontrado of String(texto).matchAll(/<img[^>]+src\s*=\s*["']?([^"'>\s]+)/gi)) {
-    nombres.push({ tipo: "imagen", nombre: encontrado[1] });
-  }
-  return nombres;
-}
+  english: "word", word: "word", front: "word", term: "word", ingles: "word",
+  spanish: "es", es: "es", castellano: "es", traduccion: "es", back: "es",
+  basque: "eu", eu: "eu", euskara: "eu", euskera: "eu",
 
-async function abrirSqlite(ruta) {
-  try {
-    const modulo = await import("better-sqlite3");
-    return new modulo.default(ruta, { readonly: true });
-  } catch (error) {
-    throw new Error(
-      "Para leer mazos de Anki hace falta la dependencia better-sqlite3.\n" +
-      "  cd tools/import && npm install"
-    );
-  }
+  partofspeech: "type", wordtype: "type", type: "type", pos: "type", tipo: "type",
+  theme: "theme", tema: "theme", topic: "theme",
+  stage: "layer", layer: "layer", capa: "layer",
+  tags: "tags", etiquetas: "tags",
+
+  exampleen: "example_en", example: "example_en", sentence: "example_en", ejemplo: "example_en",
+  examplees: "example_es", ejemploes: "example_es",
+  exampleeu: "example_eu", ejemploeu: "example_eu",
+
+  /* Medios: el valor es "[sound:xxx.mp3]" o "<img src=...>" */
+  wordaudioen: "word_audio", wordaudio: "word_audio", audio: "word_audio",
+  exampleaudioen: "example_audio", exampleaudio: "example_audio",
+  image: "image", imagen: "image",
+
+  eustatus: "euStatus",
+  cefr: "cefr",
+  active: "active",
+  imageprompt: "imagePrompt"
+};
+
+/* Campos del esquema que NO se pueden pisar con un campo suelto del
+   mazo: si el mazo trae uno que se llama igual, se guarda con prefijo. */
+const RESERVADOS = new Set([
+  "id", "word", "es", "eu", "theme", "layer", "type", "tags", "source",
+  "example", "search", "deck", "active", "imagePath", "wordAudioPath",
+  "createdAt", "updatedAt"
+]);
+
+const clave = (nombre) => String(nombre || "")
+  .toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9]/g, "");
+
+/**
+ * Decide, para un tipo de nota, qué posición ocupa cada campo nuestro.
+ * Devuelve { mapa: {word: 0, es: 2, ...}, extras: {"SensesES": 6, ...},
+ *            reconocidos: n, total: n }
+ */
+export function emparejarCampos(nombresDeCampos, forzados = null) {
+  const mapa = {};
+  const extras = {};
+  let reconocidos = 0;
+
+  nombresDeCampos.forEach((nombre, posicion) => {
+    const destino = SINONIMOS[clave(nombre)];
+    if (destino) {
+      /* El primero gana: si un mazo trae "Word" y "WordAudioEN", el
+         segundo no debe robarle el sitio al primero. */
+      if (mapa[destino] === undefined) { mapa[destino] = posicion; reconocidos += 1; }
+    } else if (String(nombre || "").trim()) {
+      extras[nombre] = posicion;
+    }
+  });
+
+  /* --campos manda siempre: es el último recurso y el más explícito. */
+  if (forzados) Object.assign(mapa, forzados);
+
+  return { mapa, extras, reconocidos, total: nombresDeCampos.length };
 }
 
 /**
- * @param {string} ruta        fichero .apkg
+ * @param {string} ruta       fichero .apkg
  * @param {object} opciones
- *        - campos: { word: 0, es: 1, example_en: 2, ... } posición de cada campo
- *        - limite: máximo de notas a leer
- * @returns {Promise<{tarjetas: object[], temas: object[], carpetaMedios: string}>}
+ *        - campos: { word: 0, es: 1, ... } fuerza posiciones concretas
+ *        - limite: máximo de notas
+ *        - sinMedios: no extraer ficheros (solo se anota su nombre)
+ * @returns {Promise<{tarjetas: object[], temas: object[], carpetaMedios: string, informe: object}>}
  */
 export async function leerApkg(ruta, opciones = {}) {
-  const zip = leerZip(ruta);
+  const mazo = await abrirMazo(ruta);
 
-  const nombreBase = ["collection.anki2", "collection.anki21"].find((n) => zip.get(n));
-  if (!nombreBase) {
-    throw new Error(zip.has("collection.anki21b")
-      ? "Este .apkg usa el formato nuevo (collection.anki21b, comprimido con zstd). " +
-        "Vuelve a exportarlo desde Anki marcando «Compatibilidad con versiones anteriores»."
-      : "El .apkg no contiene collection.anki2");
-  }
-
-  const carpeta = mkdtempSync(join(tmpdir(), "colores-anki-"));
-
-  /* Medios: el fichero "media" mapea número de entrada → nombre original. */
-  const mapaCrudo = zip.get("media");
-  const mapa = mapaCrudo ? JSON.parse(mapaCrudo.toString("utf8")) : {};
-  const porNombre = new Map();
-  Object.entries(mapa).forEach(([numero, nombre]) => porNombre.set(nombre, numero));
-
-  const rutaBase = join(carpeta, "collection.anki2");
-  writeFileSync(rutaBase, zip.get(nombreBase));
-
-  const base = await abrirSqlite(rutaBase);
   const limite = opciones.limite ? " LIMIT " + Number(opciones.limite) : "";
-  const notas = base.prepare("SELECT id, tags, flds FROM notes ORDER BY id" + limite).all();
-  base.close();
+  const notas = mazo.base
+    .prepare("SELECT id, guid, mid, tags, flds FROM notes ORDER BY id" + limite)
+    .all();
+  mazo.cerrar();
 
-  const campos = opciones.campos || { word: 0, es: 1 };
+  /* Emparejamiento por tipo de nota: un mazo puede tener varios. */
+  const emparejamientos = new Map();
+  mazo.tiposDeNota.forEach((tipo) => {
+    emparejamientos.set(tipo.id, emparejarCampos(tipo.campos, opciones.campos));
+  });
 
   const extraer = (nombreFichero) => {
-    const numero = porNombre.get(nombreFichero);
+    if (opciones.sinMedios) return "";
+    const numero = mazo.medios.porNombre.get(nombreFichero);
     if (numero === undefined) return "";
-    const contenido = zip.get(String(numero));
+    const contenido = mazo.zip.get(String(numero));
     if (!contenido) return "";
-    const destino = join(carpeta, nombreFichero);
+    const destino = join(mazo.carpeta, nombreFichero);
     writeFileSync(destino, contenido);
     return destino;
   };
 
+  const informe = {
+    notas: notas.length,
+    tiposUsados: new Set(),
+    sinEmparejar: 0,
+    sinPalabra: 0,
+    conAudioPalabra: 0,
+    conAudioEjemplo: 0,
+    conImagen: 0
+  };
+
   const tarjetas = notas.map((nota) => {
+    const tipo = mazo.tipoPorId.get(String(nota.mid));
+    const emparejamiento = emparejamientos.get(String(nota.mid));
     const partes = String(nota.flds).split(SEPARADOR_CAMPOS);
-    const campo = (nombre) => {
-      const posicion = campos[nombre];
+
+    if (tipo) informe.tiposUsados.add(tipo.nombre);
+    if (!emparejamiento || emparejamiento.reconocidos === 0) informe.sinEmparejar += 1;
+
+    const mapa = (emparejamiento && emparejamiento.mapa) || {};
+    const bruto = (nuestro) => {
+      const posicion = mapa[nuestro];
       return posicion === undefined ? "" : (partes[posicion] || "");
     };
+    const campo = (nuestro) => textoLimpio(bruto(nuestro));
 
-    /* Los audios suelen venir incrustados en su propio campo, pero en
-       muchos mazos van pegados al campo de la palabra o del ejemplo. */
-    const mediosDe = (nombre) => referenciasDeMedios(campo(nombre));
-    const primero = (lista, tipo) => {
-      const encontrado = lista.find((medio) => medio.tipo === tipo);
-      return encontrado ? extraer(encontrado.nombre) : "";
+    /* Los audios suelen tener campo propio, pero en muchos mazos van
+       pegados al de la palabra o al del ejemplo: se busca en los dos. */
+    const primerAudio = (...nuestros) => {
+      for (const nuestro of nuestros) {
+        const encontrados = audiosDe(bruto(nuestro));
+        if (encontrados.length) return encontrados[0];
+      }
+      return "";
+    };
+    const primeraImagen = (...nuestros) => {
+      for (const nuestro of nuestros) {
+        const encontradas = imagenesDe(bruto(nuestro));
+        if (encontradas.length) return encontradas[0];
+      }
+      return "";
     };
 
-    return {
-      word: campo("word"),
+    const audioPalabra = primerAudio("word_audio", "word");
+    const audioEjemplo = primerAudio("example_audio", "example_en");
+    const imagen = primeraImagen("image", "word");
+
+    if (audioPalabra) informe.conAudioPalabra += 1;
+    if (audioEjemplo) informe.conAudioEjemplo += 1;
+    if (imagen) informe.conImagen += 1;
+
+    const palabra = campo("word");
+    if (!palabra) informe.sinPalabra += 1;
+
+    const tarjeta = {
+      id: campo("id") || undefined,
+      word: palabra,
       es: campo("es"),
       eu: campo("eu"),
       type: campo("type"),
       theme: campo("theme"),
+      layer: campo("layer"),
       example: {
         en: campo("example_en"),
         es: campo("example_es"),
         eu: campo("example_eu")
       },
-      tags: String(nota.tags || "").trim(),
+      /* Las etiquetas del mazo y las del campo "Tags", juntas. */
+      tags: [String(nota.tags || "").trim(), campo("tags")].filter(Boolean).join(" "),
       media: {
-        imagen: primero(mediosDe("image").concat(mediosDe("word")), "imagen"),
-        audioPalabra: primero(mediosDe("word_audio").concat(mediosDe("word")), "audio"),
-        audioEjemplo: primero(mediosDe("example_audio").concat(mediosDe("example_en")), "audio")
+        imagen: imagen ? extraer(imagen) : "",
+        audioPalabra: audioPalabra ? extraer(audioPalabra) : "",
+        audioEjemplo: audioEjemplo ? extraer(audioEjemplo) : ""
       },
-      ankiNoteId: String(nota.id)
+      /* Aunque no subamos los medios, dejamos apuntado CUÁL era: es lo
+         que permitirá enlazarlos después sin volver a abrir el mazo, y
+         es la trazabilidad de su procedencia. */
+      wordAudioSource: audioPalabra || "",
+      exampleAudioSource: audioEjemplo || "",
+      imageSource: imagen || "",
+
+      ankiNoteId: String(nota.id),
+      ankiGuid: String(nota.guid || "")
     };
+
+    /* Campos del mazo que no sabemos interpretar: se conservan tal cual,
+       porque tirarlos es perder trabajo de otro. */
+    if (emparejamiento) {
+      Object.entries(emparejamiento.extras).forEach(([nombre, posicion]) => {
+        const valor = textoLimpio(partes[posicion] || "");
+        if (!valor) return;
+        const destino = RESERVADOS.has(nombre) ? "anki_" + nombre : nombre;
+        tarjeta[destino] = valor;
+      });
+    }
+
+    return tarjeta;
   });
 
-  return { tarjetas, temas: [], carpetaMedios: carpeta };
+  informe.tiposUsados = [...informe.tiposUsados];
+  informe.emparejamientos = [...emparejamientos.entries()].map(([id, e]) => ({
+    tipo: (mazo.tipoPorId.get(id) || {}).nombre || id,
+    reconocidos: e.reconocidos,
+    total: e.total,
+    mapa: e.mapa,
+    extras: Object.keys(e.extras)
+  }));
+
+  return { tarjetas, temas: [], carpetaMedios: mazo.carpeta, informe };
 }
