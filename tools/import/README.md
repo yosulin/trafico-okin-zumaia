@@ -184,9 +184,9 @@ esquema, así que rellenarlos después no exige migrar nada. El audio de Anki se
 sube tal cual a `audio/words/` y `audio/examples/`, y la app lo usa en lugar de
 la voz sintética en cuanto existe.
 
-> Si el `.apkg` es del formato nuevo (`collection.anki21b`, comprimido con zstd),
-> vuelve a exportarlo desde Anki marcando **«Compatibilidad con versiones
-> anteriores»**.
+> El importador (a diferencia de `inspeccionar.mjs`) todavía solo lee
+> `collection.anki2`. Si el `.apkg` es del formato nuevo, vuelve a exportarlo
+> desde Anki marcando **«Compatibilidad con versiones anteriores»**.
 
 ---
 
@@ -225,11 +225,18 @@ Añadir un origen nuevo es escribir un lector que devuelva objetos sueltos con
 node inspeccionar.mjs "mazo.apkg" [--muestras 10] [--json]
 ```
 
-**No necesita instalar nada.** Lee el SQLite del mazo con `node:sqlite`, que
-viene dentro de Node desde la versión 22. En Node 22 puede hacer falta añadir
+**No necesita instalar nada.** Lee el SQLite del mazo con `node:sqlite` y
+descomprime el formato nuevo con el zstd de `node:zlib`: las dos cosas vienen
+dentro de Node desde la 22. En Node 22 puede hacer falta añadir
 `--experimental-sqlite`; desde la 24 no. Si tu Node es anterior, recurre a
 `better-sqlite3` (`npm install`), pero es el camino largo: compila código
 nativo y en Windows suele pedir herramientas de compilación.
+
+Un `.apkg` moderno trae **dos bases**: la real (`collection.anki21b`) y un
+`collection.anki2` **señuelo** con una sola nota que dice «actualiza Anki». La
+herramienta se queda siempre con la más nueva y avisa de que había señuelo. Es
+importante: quedarse con el señuelo hace parecer que un mazo de 3.000 palabras
+tiene una sola nota y miles de audios huérfanos.
 
 Solo lee: **no modifica el `.apkg`**, no sube nada y no necesita credenciales.
 Cuenta notas y tarjetas, saca los tipos de nota con sus campos exactos y en su

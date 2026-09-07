@@ -8,13 +8,20 @@
  *      media              JSON: { "0": "perro.mp3", "1": "gato.jpg" }
  *      0, 1, 2, ...       los ficheros de medios, numerados
  *
- *  Aquí solo se lee el zip. Node ya trae inflate, así que no hace
- *  falta ninguna librería.
+ *  Aquí solo se lee el zip. Node ya trae inflate y, desde la 22.15,
+ *  zstd, así que no hace falta ninguna librería.
  * ============================================================
  */
 
 import { readFileSync } from "node:fs";
-import { inflateRawSync } from "node:zlib";
+import * as zlib from "node:zlib";
+
+const { inflateRawSync } = zlib;
+
+/* Los .apkg modernos guardan alguna entrada comprimida con zstd (método
+   93). Node lo trae de serie desde la 22.15; en versiones anteriores esa
+   entrada se queda a null y quien llama decide qué hacer. */
+const zstdDisponible = typeof zlib.zstdDecompressSync === "function";
 
 const FIRMA_DIRECTORIO = 0x02014b50;
 const FIRMA_FIN = 0x06054b50;
@@ -63,8 +70,10 @@ export function leerZip(ruta) {
         ficheros.set(nombre, Buffer.from(datos));
       } else if (metodo === 8) {
         ficheros.set(nombre, inflateRawSync(datos));
+      } else if (metodo === 93 && zstdDisponible) {
+        ficheros.set(nombre, zlib.zstdDecompressSync(datos));
       } else {
-        /* Método 93 = zstd: los .apkg nuevos de Anki lo usan. */
+        /* Método desconocido, o zstd en un Node que no lo trae. */
         ficheros.set(nombre, null);
       }
     }

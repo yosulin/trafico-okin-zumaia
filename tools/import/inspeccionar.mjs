@@ -19,15 +19,18 @@
  *    · cuántas notas tienen audio, imagen, ejemplo o campos vacíos
  *    · una muestra de notas reales, campo a campo
  *
- *  Los .apkg nuevos (collection.anki21b, comprimido con zstd) no se
- *  pueden leer sin dependencias extra: en ese caso lo dice y explica
- *  cómo reexportar el mazo en formato compatible.
+ *  Lee tanto el formato viejo como el nuevo (collection.anki21b,
+ *  comprimido con zstd), y cuando el mazo trae varias bases se queda
+ *  con la más nueva: los .apkg modernos incluyen un collection.anki2
+ *  señuelo de una sola nota que, tomado por bueno, hace parecer roto
+ *  un mazo que está perfectamente.
  * ============================================================
  */
 
 import { mkdtempSync, writeFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { zstdDecompressSync } from "node:zlib";
 import { leerZip } from "./lib/zip.mjs";
 
 const SEPARADOR_CAMPOS = "\u001f";
@@ -131,17 +134,53 @@ const tamanoApkg = statSync(fichero).size;
 const zip = leerZip(fichero);
 const entradas = [...zip.keys()];
 
-const nombreBase = ["collection.anki2", "collection.anki21"].find((n) => zip.get(n));
+/**
+ * De más nueva a más vieja, porque la que manda es la más nueva.
+ *
+ * Un .apkg moderno incluye ADEMÁS un "collection.anki2" señuelo con una
+ * sola nota que dice «actualiza Anki e impórtalo otra vez». Si nos
+ * quedáramos con el señuelo veríamos un mazo de una nota y miles de
+ * audios huérfanos, que es exactamente lo que parece un mazo roto sin
+ * serlo.
+ */
+const CANDIDATAS = ["collection.anki21b", "collection.anki21", "collection.anki2"];
+
+/* zstd suelto dentro de la entrada del zip (no comprimido POR el zip). */
+const esZstd = (b) => b && b.length > 4 &&
+  b[0] === 0x28 && b[1] === 0xb5 && b[2] === 0x2f && b[3] === 0xfd;
+
+let nombreBase = null;
+let contenidoBase = null;
+const noLegibles = [];
+
+for (const candidata of CANDIDATAS) {
+  if (!zip.has(candidata)) continue;
+  let datos = zip.get(candidata);
+  if (datos === null) { noLegibles.push(candidata); continue; }
+  if (esZstd(datos)) {
+    try {
+      datos = zstdDecompressSync(datos);
+    } catch (error) {
+      noLegibles.push(candidata + " (zstd: " + error.message + ")");
+      continue;
+    }
+  }
+  nombreBase = candidata;
+  contenidoBase = datos;
+  break;
+}
+
 if (!nombreBase) {
-  if (zip.has("collection.anki21b")) {
+  if (noLegibles.length) {
     console.error(
-      "Este .apkg usa el formato nuevo (collection.anki21b, comprimido con zstd),\n" +
-      "que no se puede leer sin dependencias adicionales.\n\n" +
-      "Vuelve a exportarlo desde Anki con «Compatibilidad con versiones anteriores»\n" +
-      "(Support older Anki versions) y genera collection.anki2."
+      "El mazo trae su base en un formato que este Node no sabe descomprimir:\n" +
+      noLegibles.map((n) => "  · " + n).join("\n") +
+      "\n\nCon Node 22.15 o superior se lee sin instalar nada. Si no puedes\n" +
+      "actualizar, reexporta el mazo desde Anki marcando «Compatibilidad con\n" +
+      "versiones anteriores» (Support older Anki versions)."
     );
   } else {
-    console.error("El fichero no parece un .apkg: no contiene collection.anki2.");
+    console.error("El fichero no parece un .apkg: no contiene ninguna base de colección.");
     console.error("Entradas encontradas: " + entradas.slice(0, 20).join(", "));
   }
   process.exit(1);
@@ -149,8 +188,11 @@ if (!nombreBase) {
 
 const carpeta = mkdtempSync(join(tmpdir(), "inspeccion-anki-"));
 const rutaBase = join(carpeta, "collection.anki2");
-writeFileSync(rutaBase, zip.get(nombreBase));
+writeFileSync(rutaBase, contenidoBase);
 const base = await abrirSqlite(rutaBase);
+
+/* Qué bases hay, para que se vea si había un señuelo y cuál se ha usado. */
+const basesPresentes = CANDIDATAS.filter((c) => zip.has(c));
 
 /* ---------- mapa de medios ---------- */
 
@@ -335,6 +377,10 @@ console.log("RADIOGRAFÍA DE " + fichero);
 console.log("═".repeat(60));
 console.log("Tamaño del .apkg   " + bonito(tamanoApkg));
 console.log("Base interna       " + nombreBase + "  (esquema v" + versionEsquema + ")");
+if (basesPresentes.length > 1) {
+  console.log("Bases en el zip    " + basesPresentes.join(", ") +
+    "   ← se usa la primera; las demás son señuelos de compatibilidad");
+}
 console.log("Colección creada   " + (creada || "?"));
 console.log("Entradas del zip   " + entradas.length);
 console.log("Mazos              " + (mazos.join(", ") || "(ninguno)"));
