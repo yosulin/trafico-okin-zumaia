@@ -103,6 +103,7 @@ export function normalizarTarjeta(cruda, opciones = {}) {
   const palabra = limpiar(cruda.word);
 
   const ejemplo = cruda.example || {};
+  const definicion = cruda.definition || {};
 
   const tarjeta = {
     /* Un id que venga del origen (ConceptId) puede traer cualquier cosa,
@@ -126,6 +127,14 @@ export function normalizarTarjeta(cruda, opciones = {}) {
       es: limpiar(ejemplo.es),
       eu: limpiar(ejemplo.eu),
       audioPath: ejemplo.audioPath || ""
+    },
+
+    /* Traducción y definición son cosas distintas: "perro" frente a
+       "animal de cuatro patas que ladra". El diccionario da las dos. */
+    definition: {
+      en: limpiar(definicion.en),
+      es: limpiar(definicion.es),
+      eu: limpiar(definicion.eu)
     },
 
     /* Anki separa sus etiquetas por ESPACIOS; los CSV y los JSON, por

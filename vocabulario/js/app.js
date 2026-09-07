@@ -386,14 +386,33 @@ function pintarEntrada(tarjeta) {
     seccion.querySelector(".entrada__cabecera").insertBefore(etiqueta, botonPalabra);
   }
 
-  /* La definición aún no existe en ninguna tarjeta, pero si algún día se
-     añade (definition.es / .en / .eu), aparece aquí sin tocar nada. */
-  const definicion = tarjeta.definition && (tarjeta.definition.es || tarjeta.definition.en || tarjeta.definition.eu);
-  if (definicion) {
-    const parrafo = document.createElement("p");
-    parrafo.className = "entrada__definicion";
-    parrafo.textContent = definicion;
-    seccion.insertBefore(parrafo, seccion.querySelector(".traducciones"));
+  /* DEFINICIONES, las tres.
+     Traducción y definición son cosas distintas —"perro" frente a
+     "animal de cuatro patas que ladra"— y el diccionario da las dos.
+     Cada una lleva su atributo lang: si no, un lector de pantalla lee
+     la definición inglesa con fonética castellana. Las que estén
+     vacías no ocupan sitio. */
+  const definiciones = tarjeta.definition || {};
+  const conTexto = ["en", "es", "eu"].filter((codigo) => definiciones[codigo]);
+
+  if (conTexto.length > 0) {
+    const bloque = document.createElement("div");
+    bloque.className = "definiciones";
+    bloque.innerHTML = '<p class="definiciones__titulo"></p><ul class="definiciones__lista"></ul>';
+    bloque.querySelector(".definiciones__titulo").textContent = t("dicc.definicion");
+
+    const lista = bloque.querySelector(".definiciones__lista");
+    conTexto.forEach((codigo) => {
+      const fila = document.createElement("li");
+      fila.innerHTML = '<span class="traducciones__idioma"></span><span class="definiciones__texto"></span>';
+      fila.querySelector(".traducciones__idioma").textContent = t("idioma." + codigo);
+      const texto = fila.querySelector(".definiciones__texto");
+      texto.textContent = definiciones[codigo];
+      texto.lang = codigo;
+      lista.appendChild(fila);
+    });
+
+    seccion.insertBefore(bloque, seccion.querySelector(".traducciones").nextSibling);
   }
 
   if (tarjeta.imagePath) {

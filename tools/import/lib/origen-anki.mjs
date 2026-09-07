@@ -47,6 +47,10 @@ const SINONIMOS = {
   exampleaudioen: "example_audio", exampleaudio: "example_audio",
   image: "image", imagen: "image",
 
+  definitionen: "definition_en", definition: "definition_en", definicionen: "definition_en",
+  definitiones: "definition_es", definiciones: "definition_es", definicion: "definition_es",
+  definitioneu: "definition_eu", definizioa: "definition_eu",
+
   eustatus: "euStatus",
   cefr: "cefr",
   active: "active",
@@ -57,7 +61,7 @@ const SINONIMOS = {
    mazo: si el mazo trae uno que se llama igual, se guarda con prefijo. */
 const RESERVADOS = new Set([
   "id", "word", "es", "eu", "theme", "layer", "type", "tags", "source",
-  "example", "search", "deck", "active", "imagePath", "wordAudioPath",
+  "example", "definition", "search", "deck", "active", "imagePath", "wordAudioPath",
   "createdAt", "updatedAt"
 ]);
 
@@ -192,6 +196,15 @@ export async function leerApkg(ruta, opciones = {}) {
         en: campo("example_en"),
         es: campo("example_es"),
         eu: campo("example_eu")
+      },
+      /* El diccionario da traducción Y definición en los tres idiomas.
+         En el mazo de Oxford vienen vacías —traía glosas, no
+         definiciones—, pero el hueco está hecho: en cuanto se rellenen
+         en el mazo, aparecen en la app sin tocar código. */
+      definition: {
+        en: campo("definition_en"),
+        es: campo("definition_es"),
+        eu: campo("definition_eu")
       },
       /* Las etiquetas del mazo y las del campo "Tags", juntas. */
       tags: [String(nota.tags || "").trim(), campo("tags")].filter(Boolean).join(" "),
