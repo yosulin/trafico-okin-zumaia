@@ -164,17 +164,27 @@ exactamente la razón de separar `pointer` del ancho.
 ### Container queries: dónde sí
 
 Las container queries se ganan el sitio en **un** caso, y es un caso real: la
-tarjeta de vocabulario vive en contenedores de anchos muy distintos según haya
-o no barra lateral y columna auxiliar. Preguntar por el ancho de la ventana da
-la respuesta equivocada; preguntar por el ancho de *su caja* da la correcta.
+tarjeta de vocabulario vive en contenedores muy distintos según haya o no barra
+lateral y columna auxiliar. Preguntar por la ventana da la respuesta
+equivocada; preguntar por *su caja* da la correcta.
 
 ```css
-.area-trabajo { container-type: inline-size; container-name: trabajo; }
+.trabajo { container-type: size; container-name: trabajo; }
 
-@container trabajo (min-width: 34rem) {
-  .tarjeta { grid-template-columns: 1fr auto; }   /* dibujo y respuesta al lado */
+/* Lado a lado solo si el área de trabajo es MÁS ANCHA QUE ALTA. */
+@container trabajo (min-width: 34rem) and (orientation: landscape) {
+  .tarjeta { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
 }
 ```
+
+**La orientación no sobra, y lo aprendimos en el mockup.** La primera versión
+de esta regla miraba solo el ancho, y en tablet vertical daba una escena tan
+pequeña como en un móvil: el área de trabajo tiene 788 px, de sobra para dos
+columnas, pero ahí lo escaso no es el ancho. Con la orientación, la tablet en
+vertical apila y la escena sale a 600 px, que es la razón de usar una tablet.
+
+Por eso el contenedor es `container-type: size` y no `inline-size`: hay que
+poder preguntar también por el alto.
 
 En el resto de la aplicación no aportan: media queries normales bastan.
 
@@ -198,6 +208,22 @@ En el resto de la aplicación no aportan: media queries normales bastan.
   abuelos puedan leerla.
 - **Objetivos táctiles de 48 px** bajo `pointer: coarse`, incluidos los botones
   hoy más pequeños.
+- **Un panel centrado dentro de una rejilla necesita `width: 100%`.** Con solo
+  `margin-inline: auto` y `max-width`, el elemento se encoge a su contenido en
+  vez de ocupar la pista. Cuesta un rato encontrarlo porque no parece un error.
+
+---
+
+## 2 bis. El armazón, validado
+
+El reparto de esta sección está probado en un mockup navegable con los seis
+formatos, dos pantallas y los tres idiomas, y **aprobado como versión de
+partida**. El mockup usa container queries dentro del marco para poder comparar
+formatos sin abrir seis ventanas; en producción son media queries con los
+mismos valores.
+
+> Mockup: `https://claude.ai/code/artifact/c13b697c-9ca7-40db-be06-f5473c5eed7e`
+> Es una referencia, no código a copiar: la implementación parte del CSS actual.
 
 ---
 
