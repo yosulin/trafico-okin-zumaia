@@ -222,9 +222,14 @@ Añadir un origen nuevo es escribir un lector que devuelva objetos sueltos con
 ## Radiografiar un mazo antes de decidir nada
 
 ```bash
-npm install                       # better-sqlite3, para leer el SQLite del mazo
-npm run inspeccionar -- mazo.apkg [--muestras 10] [--json]
+node inspeccionar.mjs "mazo.apkg" [--muestras 10] [--json]
 ```
+
+**No necesita instalar nada.** Lee el SQLite del mazo con `node:sqlite`, que
+viene dentro de Node desde la versión 22. En Node 22 puede hacer falta añadir
+`--experimental-sqlite`; desde la 24 no. Si tu Node es anterior, recurre a
+`better-sqlite3` (`npm install`), pero es el camino largo: compila código
+nativo y en Windows suele pedir herramientas de compilación.
 
 Solo lee: **no modifica el `.apkg`**, no sube nada y no necesita credenciales.
 Cuenta notas y tarjetas, saca los tipos de nota con sus campos exactos y en su

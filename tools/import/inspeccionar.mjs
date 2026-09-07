@@ -85,16 +85,42 @@ const sinHtml = (texto) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/**
+ * Abre el SQLite del mazo en solo lectura.
+ *
+ * Primero con "node:sqlite", que viene DENTRO de Node desde la 22 y no
+ * exige instalar nada: ni compilador, ni binarios nativos, ni permisos
+ * de scripts de instalación. Si no está (Node antiguo), se recurre a
+ * better-sqlite3, que es opcional justamente por esto.
+ *
+ * Si fallan las dos, se enseñan los dos errores de verdad. Un "hace
+ * falta better-sqlite3" a secas esconde la causa real, que casi nunca
+ * es que falte el paquete.
+ */
 async function abrirSqlite(ruta) {
+  const fallos = [];
+
+  try {
+    const { DatabaseSync } = await import("node:sqlite");
+    return new DatabaseSync(ruta, { readOnly: true });
+  } catch (error) {
+    fallos.push("node:sqlite → " + error.message.split("\n")[0]);
+  }
+
   try {
     const modulo = await import("better-sqlite3");
     return new modulo.default(ruta, { readonly: true });
   } catch (error) {
-    throw new Error(
-      "Para leer el mazo hace falta better-sqlite3:\n" +
-      "  cd tools/import && npm install"
-    );
+    fallos.push("better-sqlite3 → " + error.message.split("\n")[0]);
   }
+
+  throw new Error(
+    "No se ha podido abrir la base del mazo por ninguna vía:\n\n" +
+    fallos.map((f) => "  · " + f).join("\n") +
+    "\n\nLo normal es que baste con Node 22 o superior, que ya trae SQLite.\n" +
+    "En Node 22 puede hacer falta el modificador:\n" +
+    "  node --experimental-sqlite inspeccionar.mjs <fichero.apkg>"
+  );
 }
 
 /* ============================================================
