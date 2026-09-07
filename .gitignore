@@ -11,3 +11,8 @@ vocabulario/js/firebase-config.js
 clave-*.json
 
 node_modules/
+
+# El lockfile del importador se genera en cada máquina: better-sqlite3 se
+# compila para su plataforma, así que compartirlo solo provoca choques
+# al hacer pull entre Windows y Linux.
+tools/import/package-lock.json
