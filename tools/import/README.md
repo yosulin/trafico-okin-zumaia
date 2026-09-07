@@ -216,3 +216,24 @@ datos/                las 10 tarjetas de demostración
 
 Añadir un origen nuevo es escribir un lector que devuelva objetos sueltos con
 `word`, `es`, `example`... El resto de la cadena no cambia.
+
+---
+
+## Radiografiar un mazo antes de decidir nada
+
+```bash
+npm install                       # better-sqlite3, para leer el SQLite del mazo
+npm run inspeccionar -- mazo.apkg [--muestras 10] [--json]
+```
+
+Solo lee: **no modifica el `.apkg`**, no sube nada y no necesita credenciales.
+Cuenta notas y tarjetas, saca los tipos de nota con sus campos exactos y en su
+orden, las plantillas, las etiquetas y su frecuencia, y hace un perfil campo a
+campo (cuántas notas lo dejan vacío, longitud media, cuántas llevan audio,
+imagen o HTML). De los medios dice cuántos hay, de qué formato, cuánto ocupan,
+cuáles están en el zip sin que los use nadie y cuáles se citan sin estar.
+
+Termina diciendo qué se perdería al convertirlo, que es la pregunta que importa
+antes de construir nada encima: la programación de repasos, el historial, las
+opciones del mazo, el CSS y las plantillas **no** sobreviven a la conversión;
+los campos de texto, las etiquetas, los medios y el `guid` sí.
