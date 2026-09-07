@@ -91,9 +91,59 @@ html, body {
   background: var(--superficie); border: 2px solid var(--borde);
   border-radius: 50%; width: 42px; height: 42px;
   font-size: 1.15rem; line-height: 1; cursor: pointer;
+  flex: none;
+  /* por encima del panel: es lo que tapa la costura de la pestaña */
+  position: relative; z-index: 3;
+  transition: width .2s ease, height .2s ease, border-radius .2s ease,
+              margin-bottom .2s ease, border-color .2s ease;
 }
 .boton-ajustes:active { transform: translateY(2px); }
 .boton-ajustes:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+/* El icono gira al abrir: el dedo nota que ha pasado algo. */
+.boton-ajustes__icono { display: block; transition: transform .35s cubic-bezier(.4, 1.5, .5, 1); }
+body.ajustes-abierto .boton-ajustes__icono { transform: rotate(112deg); }
+
+/* ------------------------------------------------------------
+   AJUSTES COMO PESTAÑA
+   Con Ajustes abierto, el engranaje deja de ser un botón suelto y
+   pasa a ser la lengüeta de su panel: se ensancha, pierde la forma
+   redonda y el borde de abajo, y se sienta sobre el canto del panel
+   (de ahí el margen negativo de 2px, justo el grosor del borde).
+   El panel renuncia a su esquina superior derecha para que la unión
+   no tenga costura, y a la sombra, porque ya lleva borde.
+
+   Que la lengüeta y el panel queden alineados no es casualidad:
+   .cabecera y .escenario comparten ancho máximo y el mismo padding
+   lateral, así que el canto derecho del engranaje cae exactamente
+   sobre el del panel.
+   ------------------------------------------------------------ */
+
+body.ajustes-abierto .cabecera { padding-bottom: 0; }
+body.ajustes-abierto .escenario { padding-top: 0; }
+
+body.ajustes-abierto .boton-ajustes {
+  width: 54px;
+  height: 46px;
+  border-radius: var(--radio-chico) var(--radio-chico) 0 0;
+  border-bottom-color: transparent;
+  margin-bottom: -2px;
+}
+
+body.ajustes-abierto .panel--ajustes {
+  border: 2px solid var(--borde);
+  border-top-right-radius: 0;
+  box-shadow: none;
+  /* El panel no "aparece": se despliega desde la lengüeta, así que
+     no puede desplazarse o se despegaría de ella. Solo funde. */
+  animation: desplegar .2s ease both;
+  transform-origin: top right;
+}
+
+@keyframes desplegar {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
 /* ============================================================
    ESTRUCTURA

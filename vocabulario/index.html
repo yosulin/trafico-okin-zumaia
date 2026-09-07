@@ -31,7 +31,9 @@
     </div>
 
     <div class="cabecera__sesion">
-      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden data-i18n-attr="aria-label:comun.ajustes">⚙️</button>
+      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden
+              aria-expanded="false" aria-controls="pantalla-ajustes"
+              data-i18n-attr="aria-label:comun.ajustes"><span class="boton-ajustes__icono" aria-hidden="true">⚙️</span></button>
     </div>
   </header>
 
@@ -65,7 +67,7 @@
     </section>
 
     <!-- ========== AJUSTES ========== -->
-    <section class="panel panel--inicio" id="pantalla-ajustes" hidden style="--color-modulo: var(--tinta-suave)">
+    <section class="panel panel--inicio panel--ajustes" id="pantalla-ajustes" hidden style="--color-modulo: var(--tinta-suave)">
       <div class="modulo-cabecera">
         <button class="modulo-cabecera__volver" id="boton-volver-hub-ajustes" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
         <h2 class="modulo-cabecera__nombre" data-i18n="comun.ajustes">Ajustes</h2>

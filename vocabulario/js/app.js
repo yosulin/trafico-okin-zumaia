@@ -156,6 +156,14 @@ function mostrarPantalla(nombre) {
   Object.keys(pantallas).forEach((clave) => {
     pantallas[clave].hidden = (clave !== nombre);
   });
+
+  /* Ajustes cuelga del engranaje como una pestaña, así que el estado
+     "abierto" vive en el <body>: lo marcamos aquí, en el único sitio
+     por el que pasa todo cambio de pantalla, y no en cada botón que
+     lleva a otra parte. Así no puede quedarse una lengüeta suelta. */
+  const enAjustes = (nombre === "ajustes");
+  document.body.classList.toggle("ajustes-abierto", enAjustes);
+  el.botonAjustes.setAttribute("aria-expanded", String(enAjustes));
 }
 
 function mostrarError(mensaje) {
@@ -860,9 +868,15 @@ function pintarIndice() {
   });
 }
 
+/* El engranaje abre y cierra: pulsarlo otra vez devuelve al índice, que
+   es lo que promete la pestaña. La flecha ← hace lo mismo. */
 el.botonAjustes.addEventListener("click", () => {
-  mostrarPantalla("ajustes");
-  comprobarVersion();
+  if (pantallas.ajustes.hidden) {
+    mostrarPantalla("ajustes");
+    comprobarVersion();
+  } else {
+    irAlHub();
+  }
 });
 
 el.volverHubAjustes.addEventListener("click", irAlHub);
