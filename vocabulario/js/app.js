@@ -27,11 +27,21 @@ import { buscar, cargarTarjetas, cargarTodasLasTarjetas, cargarTemas, ordenarMaz
 import { pintarModulos } from "./modulos.js";
 import * as Navegacion from "./navegacion.js";
 import * as Mates from "./matemagia.js";
-import { VERSION } from "./version.js";
 import { IDIOMAS, aplicar as aplicarIdioma, cambiarIdioma, idiomaActual, t } from "./i18n.js";
 import * as Progreso from "./progreso.js";
 import { urlDe, precargar, olvidarUrls } from "./media.js";
 import { desbloquear, parar, playWordAudio, playExampleAudio, hayVozDelNavegador } from "./audio.js";
+
+/* version.js lo genera el sello al desplegar y NO está en el
+   repositorio: es resultado de una compilación, no código fuente. Si
+   falta (una copia recién clonada, sin desplegar), la app funciona
+   igual y se identifica como "dev". */
+let VERSION = { version: "dev", commit: "local", fecha: null };
+try {
+  ({ VERSION } = await import("./version.js"));
+} catch (error) {
+  /* sin sellar todavía */
+}
 
 /* ---------- referencias al DOM ---------- */
 
@@ -758,6 +768,9 @@ async function descargarTarjetas() {
 /* ---------- versión ---------- */
 
 function fechaLegible(iso) {
+  /* new Date(null) es 1970, no una fecha inválida: sin este guardia, una
+     copia sin sellar dice que se actualizó el 1 de enero de 1970. */
+  if (!iso) return "—";
   const fecha = new Date(iso);
   if (Number.isNaN(fecha.getTime())) return "—";
   return fecha.toLocaleString(idiomaActual(), {
@@ -1065,7 +1078,9 @@ alCambiarSesion((usuario) => {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").catch(() => { /* sin offline */ });
+    navigator.serviceWorker
+      .register("service-worker.js?v=" + encodeURIComponent(VERSION.version + "+" + VERSION.commit))
+      .catch(() => { /* sin offline */ });
   });
 }
 

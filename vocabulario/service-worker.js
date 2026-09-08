@@ -21,11 +21,20 @@
  *  propia cola de escrituras pendientes; interceptarlas solo podría
  *  romperlas.
  *
- *  Al publicar cambios, sube el número de VERSION.
+ *  La versión la pone quien lo registra, en la URL: así este
+ *  fichero no cambia en cada despliegue.
  * ============================================================
  */
 
-const VERSION = "0.6.0+56f9a9e";
+/* La versión llega en la URL con la que se registra el service worker
+   (service-worker.js?v=0.6.0+abc1234), no clavada en el fichero.
+
+   Dos cosas se arreglan con esto: el sello del despliegue deja de
+   reescribir un fichero versionado —lo que hacía chocar cada git pull
+   después de cada deploy— y el navegador ve una URL distinta en cada
+   versión, que es justo lo que le hace instalar el service worker
+   nuevo en lugar de quedarse con el viejo. */
+const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
 const CACHE_SHELL = "vocabulario-okin-shell-" + VERSION;
 const CACHE_VENDOR = "vocabulario-okin-vendor-" + VERSION;
 const CACHE_MEDIA = "vocabulario-okin-media-" + VERSION;

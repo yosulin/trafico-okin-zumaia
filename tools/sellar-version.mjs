@@ -64,13 +64,10 @@ export const VERSION = ${JSON.stringify(sello, null, 2)};
   "utf8"
 );
 
-/* Las cachés llevan el identificador del despliegue: cada publicación
-   estrena caché y nadie se queda con la copia vieja. */
-const rutaSW = resolve(raiz, "vocabulario/service-worker.js");
-const sw = readFileSync(rutaSW, "utf8").replace(
-  /const VERSION = "[^"]*";/,
-  `const VERSION = "${identificador}";`
-);
-writeFileSync(rutaSW, sw, "utf8");
+/* El service worker YA NO se toca aquí. Su versión le llega en la URL
+   con la que la app lo registra (service-worker.js?v=...), así que las
+   cachés siguen estrenándose en cada publicación sin que el sello tenga
+   que reescribir un fichero versionado. Eso es lo que hacía chocar el
+   git pull después de cada despliegue. */
 
 console.log("Sellado " + identificador + "  (" + sello.fecha + ")");

@@ -16,3 +16,9 @@ node_modules/
 # compila para su plataforma, así que compartirlo solo provoca choques
 # al hacer pull entre Windows y Linux.
 tools/import/package-lock.json
+
+# Sello de versión: lo genera tools/sellar-version.mjs en cada despliegue.
+# Es resultado, no código fuente, y tenerlo versionado hacía que cada
+# git pull chocara con el despliegue anterior.
+vocabulario/version.json
+vocabulario/js/version.js
