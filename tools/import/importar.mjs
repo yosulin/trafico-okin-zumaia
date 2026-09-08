@@ -69,6 +69,8 @@ Uso: node importar.mjs --origen <json|csv|anki> --fichero <ruta> [opciones]
   --sin-medios        no subir nada a Storage (los medios los sirve Hosting
                       desde vocabulario/media/, que es el modo del prototipo)
   --inactivas         crear las tarjetas con active:false (para revisarlas antes)
+  --con-repetidos     seguir aunque haya ids repetidos (gana la última de cada
+                      grupo). Sin esta bandera, se para y los enseña
   --sin-mazo          deck:false — entran en el diccionario pero no en el juego
                       de tarjetas (para importaciones grandes tipo Oxford 3000)
 
@@ -240,6 +242,37 @@ async function principal() {
 
     tarjetas.push(tarjeta);
   });
+
+  /* ---------- ids repetidos ----------
+     El id es la llave del documento, así que dos tarjetas con el mismo
+     id no son un aviso: son una que pisa a la otra en silencio, y la
+     palabra perdida no aparece por ningún lado. Pasa con los homógrafos
+     ("bat" el murciélago y "bat" el bate) cuando el origen los trae como
+     notas distintas con el mismo ConceptId. */
+  const porId = new Map();
+  tarjetas.forEach((tarjeta) => {
+    if (!porId.has(tarjeta.id)) porId.set(tarjeta.id, []);
+    porId.get(tarjeta.id).push(tarjeta);
+  });
+
+  const repetidos = [...porId.entries()].filter(([, lista]) => lista.length > 1);
+
+  if (repetidos.length > 0) {
+    const perdidas = repetidos.reduce((total, [, lista]) => total + lista.length - 1, 0);
+    console.log(`\n⚠ ${repetidos.length} identificadores repetidos: ${perdidas} tarjetas se perderían.`);
+    repetidos.slice(0, 10).forEach(([id, lista]) => {
+      console.log(`   ${id}: ` + lista.map((t) => `${t.word} (${t.type || "?"}) = ${t.es}`).join("  ·  "));
+    });
+    if (repetidos.length > 10) console.log(`   … y ${repetidos.length - 10} más`);
+
+    if (!opciones["con-repetidos"]) {
+      console.log("\nNo se escribe nada. Lo suyo es darles ids distintos en el mazo");
+      console.log("(bat → animals_bat_mammal / sports_bat). Si prefieres seguir y que");
+      console.log("gane la última de cada grupo, repite con --con-repetidos.\n");
+      process.exit(1);
+    }
+    console.log("   --con-repetidos: sigue adelante; de cada grupo gana la última.\n");
+  }
 
   console.log(`\nOrigen: ${opciones.origen}  →  ${basename(ficheroEntrada)}`);
   console.log(`Tarjetas listas: ${tarjetas.length}`);

@@ -140,9 +140,13 @@ export function normalizarTarjeta(cruda, opciones = {}) {
     /* Anki separa sus etiquetas por ESPACIOS; los CSV y los JSON, por
        comas o puntos y coma. Se admiten los tres o "oxford3000 a1"
        entra como una sola etiqueta que no sirve para filtrar nada. */
-    tags: Array.isArray(cruda.tags)
-      ? cruda.tags.map(limpiar).filter(Boolean)
-      : limpiar(cruda.tags).split(/[,;\s]+/).filter(Boolean),
+    /* Sin repetidas: el mazo trae etiquetas propias Y un campo Tags, y
+       lo normal es que se solapen ("english-vocab" en las dos). */
+    tags: [...new Set(
+      Array.isArray(cruda.tags)
+        ? cruda.tags.map(limpiar).filter(Boolean)
+        : limpiar(cruda.tags).split(/[,;\s]+/).filter(Boolean)
+    )],
 
     source: {
       type: (cruda.source && cruda.source.type) || opciones.fuente || "general",
