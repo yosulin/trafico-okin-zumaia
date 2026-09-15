@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Un niño en un jardín; el perro aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#FFF1DC}
+    .fur{fill:#D08B45}.fur2{fill:#A96A2C}.collar{fill:#E4572E}.dark{fill:#3A3226}.tongue{fill:#F2789F}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <circle class="g1" cx="330" cy="60" r="34"/><circle class="g1" cx="360" cy="70" r="26"/><circle class="g1" cx="300" cy="72" r="24"/>
+  <path class="g1" d="M0 218 Q120 200 230 216 T400 208 L400 300 L0 300 Z"/>
+  <g class="g2">
+    <rect x="8" y="150" width="11" height="72" rx="5"/><rect x="34" y="150" width="11" height="72" rx="5"/>
+    <rect x="60" y="150" width="11" height="72" rx="5"/><rect x="0" y="166" width="78" height="9" rx="4"/>
+    <rect x="0" y="192" width="78" height="9" rx="4"/>
+  </g>
+  <rect class="g4" x="112" y="150" width="16" height="72" rx="6"/>
+  <circle class="g2" cx="120" cy="126" r="40"/><circle class="g2" cx="90" cy="150" r="27"/><circle class="g2" cx="152" cy="148" r="27"/>
+  <g transform="translate(180,0)">
+    <path class="s4" d="M-17 162 l-15 24"/><path class="s4" d="M17 162 l16 20"/>
+    <circle class="g3" cx="0" cy="132" r="21"/>
+    <path class="g4" d="M-21 131 a21 21 0 0 1 42 0 q-9 -15 -21 -13 q-13 2 -21 13 z"/>
+    <rect class="g4" x="-17" y="152" width="34" height="48" rx="15"/>
+    <rect class="g3" x="-15" y="198" width="11" height="32" rx="5"/><rect class="g3" x="4" y="198" width="11" height="32" rx="5"/>
+    <rect class="g5" x="-18" y="226" width="16" height="9" rx="4"/><rect class="g5" x="2" y="226" width="16" height="9" rx="4"/>
+  </g>
+  <ellipse class="halo" cx="298" cy="196" rx="86" ry="66"/>
+  <g>
+    <path class="fur2" d="M256 190 q-22 -6 -28 -30 q14 4 22 14 z"/>
+    <ellipse class="fur" cx="292" cy="196" rx="46" ry="29"/>
+    <rect class="fur2" x="262" y="212" width="13" height="30" rx="6"/><rect class="fur2" x="306" y="212" width="13" height="30" rx="6"/>
+    <circle class="fur" cx="336" cy="164" r="27"/>
+    <path class="fur2" d="M316 142 q-8 -18 6 -22 q10 8 10 20 z"/><path class="fur2" d="M356 142 q8 -18 -6 -22 q-10 8 -10 20 z"/>
+    <ellipse class="fur" cx="348" cy="176" rx="18" ry="13"/>
+    <circle class="dark" cx="360" cy="172" r="6"/>
+    <path class="tongue" d="M346 186 q6 12 12 2 z"/>
+    <circle class="dark" cx="330" cy="158" r="4"/><circle class="dark" cx="346" cy="157" r="4"/>
+    <rect class="collar" x="308" y="182" width="16" height="26" rx="7" transform="rotate(-18 316 195)"/>
+  </g>
+</svg>
