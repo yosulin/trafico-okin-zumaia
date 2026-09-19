@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-19T03:30:58.069Z",
+  "actualizado": "2026-09-19T03:45:41.124Z",
   "muestras": {
     "zarautz": [
       {
@@ -408,6 +408,10 @@
       },
       {
         "t": 1789788658069,
+        "i": 0
+      },
+      {
+        "t": 1789789541124,
         "i": 0
       }
     ],
@@ -819,6 +823,10 @@
       {
         "t": 1789788658069,
         "i": 0
+      },
+      {
+        "t": 1789789541124,
+        "i": 0
       }
     ],
     "irun": [
@@ -1228,6 +1236,10 @@
       },
       {
         "t": 1789788658069,
+        "i": 0
+      },
+      {
+        "t": 1789789541124,
         "i": 0
       }
     ],
@@ -1639,6 +1651,10 @@
       {
         "t": 1789788658069,
         "i": 0
+      },
+      {
+        "t": 1789789541124,
+        "i": 0
       }
     ]
   },
@@ -1648,37 +1664,37 @@
       "travelTimeMin": 16,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     },
     "zarautz.meagas": {
       "travelTimeMin": 32,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     },
     "donostia.ap8": {
-      "travelTimeMin": 29,
-      "delayMin": 0,
+      "travelTimeMin": 32,
+      "delayMin": 3,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     },
     "donostia.n634": {
-      "travelTimeMin": 47,
-      "delayMin": 0,
+      "travelTimeMin": 50,
+      "delayMin": 3,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 26,
-      "delayMin": 0,
+      "travelTimeMin": 30,
+      "delayMin": 3,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     },
     "irun.ap8": {
-      "travelTimeMin": 40,
-      "delayMin": 0,
+      "travelTimeMin": 43,
+      "delayMin": 3,
       "estadoIndex": 0,
-      "timestamp": 1789788658069
+      "timestamp": 1789789541124
     }
   }
 }
