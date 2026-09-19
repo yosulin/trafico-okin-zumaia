@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Una calle en gris; la lluvia y el paraguas aparecen en color azul">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#EAF4FF}
+    .gota{fill:none;stroke:#2F80ED;stroke-width:5;stroke-linecap:round}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <g class="g2">
+    <rect x="16" y="86" width="96" height="158" rx="8"/><rect x="286" y="106" width="98" height="138" rx="8"/>
+    <rect class="g1" x="30" y="102" width="26" height="30" rx="4"/><rect class="g1" x="70" y="102" width="26" height="30" rx="4"/>
+    <rect class="g1" x="30" y="150" width="26" height="30" rx="4"/><rect class="g1" x="70" y="150" width="26" height="30" rx="4"/>
+    <rect class="g1" x="300" y="124" width="30" height="32" rx="4"/><rect class="g1" x="342" y="124" width="30" height="32" rx="4"/>
+    <rect class="g1" x="300" y="172" width="30" height="32" rx="4"/><rect class="g1" x="342" y="172" width="30" height="32" rx="4"/>
+  </g>
+  <rect class="g1" y="244" width="400" height="56"/>
+  <rect class="g2" y="244" width="400" height="8"/>
+  <ellipse class="halo" cx="230" cy="104" rx="118" ry="86"/>
+  <g class="g3"><rect x="132" y="146" width="10" height="98" rx="5"/><circle cx="137" cy="136" r="14"/></g>
+  <ellipse class="g2" cx="230" cy="268" rx="72" ry="12"/>
+  <g transform="translate(230,0)">
+    <path class="s4" d="M-20 178 l-16 26"/>
+    <path fill="none" stroke="#7C848F" stroke-width="5" stroke-linecap="round" d="M18 178 q22 -4 22 -26"/>
+    <circle class="g3" cx="0" cy="146" r="23"/>
+    <path class="g4" d="M-23 146 a23 23 0 0 1 46 0 q3 -27 -23 -25 q-26 2 -23 25 z"/>
+    <rect class="g4" x="-21" y="166" width="42" height="54" rx="17"/>
+    <rect class="g3" x="-17" y="216" width="14" height="32" rx="6"/><rect class="g3" x="4" y="216" width="14" height="32" rx="6"/>
+    <rect class="g5" x="-24" y="244" width="24" height="14" rx="6"/><rect class="g5" x="2" y="244" width="24" height="14" rx="6"/>
+  </g>
+  <g>
+    <path fill="none" stroke="#2F80ED" stroke-width="6" stroke-linecap="round" d="M270 82 v70"/>
+    <path fill="#2F80ED" d="M182 86 q0 -46 88 -46 q88 0 88 46 q-30 -14 -44 0 q-14 -14 -44 0 q-30 -14 -44 0 q-14 -14 -44 0 z"/>
+    <path fill="#5AA0F5" d="M226 40 q-30 8 -44 46 q-16 -10 -30 -4 q18 -34 74 -42 z"/>
+  </g>
+  <g class="gota">
+    <path d="M64 60 l-8 26"/><path d="M112 40 l-8 26"/><path d="M154 74 l-8 26"/>
+    <path d="M92 120 l-8 26"/><path d="M46 148 l-8 26"/><path d="M132 168 l-8 26"/>
+    <path d="M304 66 l-8 26"/><path d="M352 46 l-8 26"/><path d="M334 122 l-8 26"/>
+    <path d="M300 176 l-8 26"/><path d="M368 158 l-8 26"/><path d="M254 196 l-8 22"/>
+    <path d="M88 204 l-8 22"/><path d="M180 210 l-8 22"/><path d="M360 210 l-8 22"/>
+  </g>
+  <g fill="#2F80ED" opacity=".55">
+    <ellipse cx="90" cy="266" rx="16" ry="4"/><ellipse cx="330" cy="272" rx="20" ry="5"/><ellipse cx="180" cy="284" rx="14" ry="4"/>
+  </g>
+</svg>
