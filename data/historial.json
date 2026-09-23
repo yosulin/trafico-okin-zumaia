@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-23T01:01:13.074Z",
+  "actualizado": "2026-09-23T01:15:44.061Z",
   "muestras": {
     "zarautz": [
       {
@@ -408,6 +408,10 @@
       },
       {
         "t": 1790125273074,
+        "i": 0
+      },
+      {
+        "t": 1790126144061,
         "i": 0
       }
     ],
@@ -819,6 +823,10 @@
       {
         "t": 1790125273074,
         "i": 0
+      },
+      {
+        "t": 1790126144061,
+        "i": 0
       }
     ],
     "irun": [
@@ -1224,6 +1232,10 @@
       },
       {
         "t": 1790125273074,
+        "i": 0
+      },
+      {
+        "t": 1790126144061,
         "i": 0
       }
     ],
@@ -1635,6 +1647,10 @@
       {
         "t": 1790125273074,
         "i": 0
+      },
+      {
+        "t": 1790126144061,
+        "i": 0
       }
     ]
   },
@@ -1644,37 +1660,37 @@
       "travelTimeMin": 16,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790125273074
+      "timestamp": 1790126144061
     },
     "zarautz.meagas": {
       "travelTimeMin": 32,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790125273074
+      "timestamp": 1790126144061
     },
     "donostia.ap8": {
-      "travelTimeMin": 30,
-      "delayMin": 1,
-      "estadoIndex": 0,
-      "timestamp": 1790125273074
-    },
-    "donostia.n634": {
-      "travelTimeMin": 49,
-      "delayMin": 1,
-      "estadoIndex": 0,
-      "timestamp": 1790125273074
-    },
-    "eibar.ap8ap1": {
-      "travelTimeMin": 26,
+      "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790125273074
+      "timestamp": 1790126144061
+    },
+    "donostia.n634": {
+      "travelTimeMin": 48,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1790126144061
+    },
+    "eibar.ap8ap1": {
+      "travelTimeMin": 27,
+      "delayMin": 0,
+      "estadoIndex": 0,
+      "timestamp": 1790126144061
     },
     "irun.ap8": {
       "travelTimeMin": 41,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790125273074
+      "timestamp": 1790126144061
     }
   }
 }
