@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-09-24T03:01:11.737Z",
+  "actualizado": "2026-09-24T03:15:43.033Z",
   "muestras": {
     "zarautz": [
       {
@@ -408,6 +408,10 @@
       },
       {
         "t": 1790218871737,
+        "i": 0
+      },
+      {
+        "t": 1790219743033,
         "i": 0
       }
     ],
@@ -819,6 +823,10 @@
       {
         "t": 1790218871737,
         "i": 0
+      },
+      {
+        "t": 1790219743033,
+        "i": 0
       }
     ],
     "irun": [
@@ -1220,6 +1228,10 @@
       },
       {
         "t": 1790218871737,
+        "i": 0
+      },
+      {
+        "t": 1790219743033,
         "i": 0
       }
     ],
@@ -1631,46 +1643,50 @@
       {
         "t": 1790218871737,
         "i": 0
+      },
+      {
+        "t": 1790219743033,
+        "i": 0
       }
     ]
   },
   "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
-      "travelTimeMin": 17,
+      "travelTimeMin": 16,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     },
     "zarautz.meagas": {
-      "travelTimeMin": 34,
+      "travelTimeMin": 33,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     },
     "donostia.ap8": {
-      "travelTimeMin": 29,
+      "travelTimeMin": 28,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     },
     "donostia.n634": {
-      "travelTimeMin": 47,
+      "travelTimeMin": 46,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 27,
+      "travelTimeMin": 26,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     },
     "irun.ap8": {
-      "travelTimeMin": 40,
+      "travelTimeMin": 39,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1790218871737
+      "timestamp": 1790219743033
     }
   }
 }
