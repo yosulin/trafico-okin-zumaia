@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Una habitación en gris; el libro aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#E8F4FF}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <rect class="g1" y="244" width="400" height="56"/>
+  <g class="g2">
+    <rect x="24" y="60" width="120" height="12" rx="5"/>
+    <rect x="34" y="20" width="14" height="40" rx="3"/><rect x="52" y="26" width="12" height="34" rx="3"/>
+    <rect x="68" y="18" width="16" height="42" rx="3"/><rect x="88" y="28" width="11" height="32" rx="3"/>
+    <rect x="103" y="22" width="14" height="38" rx="3"/>
+  </g>
+  <g>
+    <rect class="g3" x="332" y="128" width="10" height="116" rx="5"/>
+    <path class="g2" d="M312 96 h50 l10 32 h-70 z"/>
+    <rect class="g3" x="316" y="240" width="42" height="10" rx="5"/>
+  </g>
+  <g>
+    <rect class="g2" x="52" y="188" width="300" height="58" rx="18"/>
+    <rect class="g3" x="40" y="150" width="30" height="96" rx="14"/>
+    <rect class="g3" x="70" y="164" width="60" height="30" rx="12"/>
+  </g>
+  <g transform="translate(196,-12)">
+    <circle class="g3" cx="0" cy="126" r="24"/>
+    <path class="g4" d="M-24 128 a24 24 0 0 1 48 0 q4 -28 -24 -26 q-28 2 -24 26 z"/>
+    <circle class="g4" cx="-26" cy="132" r="9"/><circle class="g4" cx="26" cy="132" r="9"/>
+    <rect class="g4" x="-26" y="150" width="52" height="62" rx="20"/>
+    <path class="s4" d="M-24 176 l-22 26"/><path class="s4" d="M24 176 l22 26"/>
+  </g>
+  <ellipse class="halo" cx="200" cy="216" rx="104" ry="50"/>
+  <g>
+    <path fill="#2E7DAF" d="M196 178 q-46 -12 -92 4 v66 q46 -16 92 -4 z"/>
+    <path fill="#3C9BD6" d="M204 178 q46 -12 92 4 v66 q-46 -16 -92 -4 z"/>
+    <path fill="#FFF7E8" d="M196 186 q-40 -10 -80 3 v54 q40 -13 80 -3 z"/>
+    <path fill="#FFFDF6" d="M204 186 q40 -10 80 3 v54 q-40 -13 -80 -3 z"/>
+    <path fill="none" stroke="#B9C6D2" stroke-width="3" stroke-linecap="round" d="M130 202 h50 M130 214 h50 M130 226 h36 M220 202 h50 M220 214 h50 M220 226 h36"/>
+    <rect fill="#1F5F86" x="196" y="176" width="8" height="72" rx="3"/>
+    <path fill="#F4B942" d="M236 176 v40 l10 -10 l10 10 v-40 z"/>
+  </g>
+</svg>
