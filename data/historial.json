@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-16T13:01:17.582Z",
+  "actualizado": "2026-10-16T13:15:41.107Z",
   "muestras": {
     "zarautz": [
       {
@@ -408,6 +408,10 @@
       },
       {
         "t": 1792155677582,
+        "i": 0
+      },
+      {
+        "t": 1792156541107,
         "i": 0
       }
     ],
@@ -819,6 +823,10 @@
       {
         "t": 1792155677582,
         "i": 0
+      },
+      {
+        "t": 1792156541107,
+        "i": 0
       }
     ],
     "irun": [
@@ -1224,6 +1232,10 @@
       },
       {
         "t": 1792155677582,
+        "i": 0
+      },
+      {
+        "t": 1792156541107,
         "i": 0
       }
     ],
@@ -1635,6 +1647,10 @@
       {
         "t": 1792155677582,
         "i": 0
+      },
+      {
+        "t": 1792156541107,
+        "i": 0
       }
     ]
   },
@@ -1644,37 +1660,37 @@
       "travelTimeMin": 19,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     },
     "zarautz.meagas": {
       "travelTimeMin": 36,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     },
     "donostia.ap8": {
-      "travelTimeMin": 34,
-      "delayMin": 2,
+      "travelTimeMin": 31,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     },
     "donostia.n634": {
-      "travelTimeMin": 52,
-      "delayMin": 2,
+      "travelTimeMin": 51,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 32,
-      "delayMin": 2,
+      "travelTimeMin": 30,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     },
     "irun.ap8": {
-      "travelTimeMin": 44,
-      "delayMin": 2,
+      "travelTimeMin": 42,
+      "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1792155677582
+      "timestamp": 1792156541107
     }
   }
 }
