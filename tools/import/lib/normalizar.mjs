@@ -1,0 +1,197 @@
+/**
+ * ============================================================
+ *  NORMALIZAR — de "lo que venga" al documento de Firestore
+ * ============================================================
+ *  Todos los orígenes (JSON, CSV, Anki) acaban aquí, y de aquí sale
+ *  siempre la misma forma de documento. Añadir un origen nuevo es
+ *  escribir un lector que devuelva objetos sueltos; el resto de la
+ *  cadena no cambia.
+ *
+ *  Los campos que todavía no tenemos (euskera, imagen, tema, capa,
+ *  tipo, etiquetas, libro, unidad...) se dejan vacíos a propósito:
+ *  el esquema ya los contempla y se pueden rellenar después sin
+ *  migrar nada.
+ * ============================================================
+ */
+
+export const CAMPOS_VACIOS = {
+  eu: "",
+  theme: "",
+  layer: 1,
+  type: "",
+  imagePath: "",
+  wordAudioPath: "",
+  tags: []
+};
+
+function limpiar(texto) {
+  return String(texto == null ? "" : texto)
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, "")          // los campos de Anki traen HTML
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Capa: la de la tarjeta, la común de la importación o 1. Un "" no es un 0. */
+function capaDe(valor, porDefecto) {
+  const numero = Number(valor);
+  if (valor !== "" && valor !== null && valor !== undefined && Number.isFinite(numero)) return numero;
+  return porDefecto || CAMPOS_VACIOS.layer;
+}
+
+/**
+ * Texto tal y como se busca: sin mayúsculas, sin acentos y sin artículos
+ * sueltos alrededor. Es lo que se guarda en "search" para que el
+ * diccionario pueda encontrar la palabra se escriba como se escriba.
+ */
+export function textoDeBusqueda(texto) {
+  return limpiar(texto)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.,!?;:'"¿¡]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function idDesde(palabra, tema) {
+  const base = limpiar(palabra)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  const prefijo = tema ? tema.replace(/[^a-z0-9]+/gi, "").toLowerCase() : "gen";
+  /* Sin repetir el tema si la palabra ya empieza por él ("school bag"). */
+  return base.startsWith(prefijo + "_") ? base : `${prefijo}_${base}`;
+}
+
+/**
+ * Trocea traducciones con varias acepciones y las normaliza, sin
+ * repetidas y sin vacíos. Firestore limita los arrays de un índice, así
+ * que se corta en 20: de sobra para cualquier palabra real.
+ */
+function acepciones(valores) {
+  const lista = [];
+  valores.filter(Boolean).forEach((valor) => {
+    String(valor).split(/[;,/|]|\bo\b/).forEach((trozo) => {
+      const limpio = textoDeBusqueda(trozo);
+      if (limpio && !lista.includes(limpio)) lista.push(limpio);
+    });
+  });
+  return lista.slice(0, 20);
+}
+
+/** Deja un id de documento que Firestore acepte, o "" si no hay nada. */
+function idValido(bruto) {
+  const limpio = String(bruto || "")
+    .trim()
+    .replace(/[/\\]+/g, "_")      // "/" separa colecciones: prohibido
+    .replace(/\s+/g, "_")
+    .replace(/^\.+$/, "");        // "." y ".." son ids reservados
+  return limpio.slice(0, 400);
+}
+
+/**
+ * @param {object} cruda    lo que ha devuelto el lector de origen.
+ * @param {object} opciones valores comunes a toda la importación
+ *                          (tema, capa, procedencia escolar, libro, unidad).
+ * @returns {object} documento listo para Firestore.
+ */
+export function normalizarTarjeta(cruda, opciones = {}) {
+  const tema = limpiar(cruda.theme || opciones.tema || "");
+  const palabra = limpiar(cruda.word);
+
+  const ejemplo = cruda.example || {};
+  const definicion = cruda.definition || {};
+
+  const tarjeta = {
+    /* Un id que venga del origen (ConceptId) puede traer cualquier cosa,
+       y Firestore no admite "/" ni ".", ni ids vacíos. Se sanea aquí, que
+       es por donde pasan todos los orígenes. */
+    id: idValido(cruda.id) || idDesde(palabra, tema),
+
+    word: palabra,
+    es: limpiar(cruda.es),
+    eu: limpiar(cruda.eu || CAMPOS_VACIOS.eu),
+
+    theme: tema,
+    layer: capaDe(cruda.layer, opciones.capa),
+    type: limpiar(cruda.type || CAMPOS_VACIOS.type),
+
+    imagePath: cruda.imagePath || CAMPOS_VACIOS.imagePath,
+    wordAudioPath: cruda.wordAudioPath || CAMPOS_VACIOS.wordAudioPath,
+
+    example: {
+      en: limpiar(ejemplo.en),
+      es: limpiar(ejemplo.es),
+      eu: limpiar(ejemplo.eu),
+      audioPath: ejemplo.audioPath || ""
+    },
+
+    /* Traducción y definición son cosas distintas: "perro" frente a
+       "animal de cuatro patas que ladra". El diccionario da las dos. */
+    definition: {
+      en: limpiar(definicion.en),
+      es: limpiar(definicion.es),
+      eu: limpiar(definicion.eu)
+    },
+
+    /* Anki separa sus etiquetas por ESPACIOS; los CSV y los JSON, por
+       comas o puntos y coma. Se admiten los tres o "oxford3000 a1"
+       entra como una sola etiqueta que no sirve para filtrar nada. */
+    /* Sin repetidas: el mazo trae etiquetas propias Y un campo Tags, y
+       lo normal es que se solapen ("english-vocab" en las dos). */
+    tags: [...new Set(
+      Array.isArray(cruda.tags)
+        ? cruda.tags.map(limpiar).filter(Boolean)
+        : limpiar(cruda.tags).split(/[,;\s]+/).filter(Boolean)
+    )],
+
+    source: {
+      type: (cruda.source && cruda.source.type) || opciones.fuente || "general",
+      book: (cruda.source && cruda.source.book) || opciones.libro || null,
+      unit: (cruda.source && cruda.source.unit) || opciones.unidad || null
+    },
+
+    /* Entra en el juego de tarjetas. El diccionario, en cambio, busca
+       en todo lo activo: así se puede tener un léxico enorme sin que el
+       mazo de la niña se vuelva inmanejable. */
+    deck: cruda.deck === undefined ? true : Boolean(cruda.deck),
+
+    active: cruda.active === undefined ? true : Boolean(cruda.active)
+  };
+
+  /* Índice de búsqueda: la misma palabra en los tres idiomas, normalizada.
+     Lo calcula el importador para que la app no tenga que hacerlo al vuelo. */
+  tarjeta.search = {
+    en: textoDeBusqueda(tarjeta.word),
+    es: textoDeBusqueda(tarjeta.es),
+    eu: textoDeBusqueda(tarjeta.eu)
+  };
+
+  /* Y además CADA ACEPCIÓN por separado, en una lista.
+     Casi la mitad del Oxford 3000 trae varias acepciones en una sola
+     celda ("correr; dirigir; funcionar"). Con solo el campo entero,
+     buscar "dirigir" no encuentra nada, que para un diccionario es
+     justo lo contrario de lo que se le pide. */
+  tarjeta.terminos = acepciones([tarjeta.word, tarjeta.es, tarjeta.eu]);
+
+  /* Campos extra del origen que no están en el esquema base: se
+     conservan tal cual (nivel CEFR, edad, dificultad, deck...). */
+  Object.keys(cruda).forEach((clave) => {
+    if (!(clave in tarjeta) && clave !== "media") tarjeta[clave] = cruda[clave];
+  });
+
+  return tarjeta;
+}
+
+/** Devuelve la lista de problemas de una tarjeta (vacía si está bien). */
+export function validar(tarjeta) {
+  const problemas = [];
+  if (!tarjeta.id) problemas.push("sin id");
+  if (!tarjeta.word) problemas.push("sin word");
+  if (!tarjeta.es && !tarjeta.eu) problemas.push("sin traducción (es/eu)");
+  if (!/^[a-z0-9_]+$/i.test(tarjeta.id)) problemas.push("id con caracteres raros: " + tarjeta.id);
+  return problemas;
+}

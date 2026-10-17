@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Un parque en gris; la niña jugando y el balón aparecen en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#EAF3FF}
+    .skin{fill:#E8B98E}.top{fill:#3D7EE8}.top2{fill:#2A5FBF}.hair{fill:#3B2E2A}
+    .sc{fill:none;stroke:#3D7EE8;stroke-width:8;stroke-linecap:round}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <path class="g1" d="M0 236 Q160 220 400 232 L400 300 L0 300 Z"/>
+  <g class="g2">
+    <rect x="24" y="96" width="14" height="140" rx="6"/><rect x="128" y="96" width="14" height="140" rx="6"/>
+    <rect x="18" y="88" width="130" height="14" rx="6"/>
+    <rect x="70" y="102" width="8" height="60" rx="4"/><rect x="90" y="102" width="8" height="60" rx="4"/>
+    <rect x="58" y="162" width="52" height="10" rx="5"/>
+  </g>
+  <g class="g2"><circle cx="340" cy="120" r="34"/><circle cx="368" cy="140" r="26"/><rect class="g4" x="334" y="150" width="12" height="86" rx="5"/></g>
+  <g transform="translate(150,0)">
+    <path class="s4" d="M-20 172 l-26 -22"/><path class="s4" d="M20 172 l26 -22"/>
+    <circle class="g3" cx="0" cy="140" r="22"/>
+    <path class="g4" d="M-22 140 a22 22 0 0 1 44 0 q3 -26 -22 -24 q-25 2 -22 24 z"/>
+    <rect class="g4" x="-20" y="160" width="40" height="52" rx="16"/>
+    <rect class="g3" x="-17" y="208" width="13" height="30" rx="6"/><rect class="g3" x="4" y="208" width="13" height="30" rx="6"/>
+    <rect class="g5" x="-21" y="234" width="20" height="10" rx="5"/><rect class="g5" x="1" y="234" width="20" height="10" rx="5"/>
+  </g>
+  <ellipse class="halo" cx="272" cy="168" rx="92" ry="112"/>
+  <g transform="translate(272,0)">
+    <path class="sc" d="M-22 166 l-30 -26"/><path class="sc" d="M22 166 l28 -32"/>
+    <path class="hair" d="M-26 124 q0 -30 26 -30 q26 0 26 30 q0 22 -8 30 q-2 -22 -18 -24 q-16 2 -18 24 q-8 -8 -8 -30 z"/>
+    <circle class="skin" cx="0" cy="128" r="25"/>
+    <path class="hair" d="M-25 124 q3 -25 25 -25 q22 0 25 25 q-13 -14 -25 -12 q-12 -2 -25 12 z"/>
+    <circle fill="#3A3226" cx="-9" cy="127" r="3.4"/><circle fill="#3A3226" cx="9" cy="127" r="3.4"/>
+    <path fill="#8A3B3B" d="M-10 139 q10 14 20 0 q-10 4 -20 0 z"/>
+    <path class="top" d="M-22 152 h44 q10 4 10 16 v34 h-64 v-34 q0 -12 10 -16 z"/>
+    <path class="top2" d="M-30 202 h60 v14 h-60 z"/>
+    <path fill="#2A5FBF" d="M-28 216 l16 -2 l6 30 l-16 4 z"/>
+    <path fill="#2A5FBF" d="M8 214 l18 6 l16 26 l-16 8 l-20 -26 z"/>
+    <rect fill="#E8B98E" x="-16" y="242" width="14" height="10" rx="4"/>
+    <rect fill="#F4B942" x="-20" y="248" width="22" height="10" rx="5"/>
+    <rect fill="#F4B942" x="30" y="242" width="24" height="11" rx="5" transform="rotate(24 42 248)"/>
+  </g>
+  <g transform="translate(84,206)">
+    <circle fill="#FFFFFF" cx="0" cy="0" r="30" stroke="#C9D0D8" stroke-width="2"/>
+    <path fill="#1F2A37" d="M0 -16 l14 10 l-5 17 h-18 l-5 -17 z"/>
+    <path fill="#1F2A37" d="M-30 -6 l12 -10 l-4 14 z M30 -6 l-12 -10 l4 14 z M-14 26 l4 -12 l12 4 l-2 12 z M14 26 l-4 -12 l-12 4 l2 12 z"/>
+  </g>
+  <path fill="none" stroke="#3D7EE8" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12" d="M124 214 q-20 -34 -46 -22"/>
+</svg>

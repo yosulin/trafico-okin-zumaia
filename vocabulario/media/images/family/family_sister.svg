@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Dos hermanos en gris; la hermana aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:6;stroke-linecap:round}
+    .halo{fill:#FFEFF5}
+    .skin{fill:#F2C6A0}.dress{fill:#E8557F}.dress2{fill:#C43D64}.hair{fill:#6B4A2A}.shoe{fill:#7A3E58}
+    .sc{fill:none;stroke:#E8557F;stroke-width:6;stroke-linecap:round}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <rect class="g1" y="250" width="400" height="50"/>
+  <g class="g2">
+    <rect x="26" y="70" width="76" height="60" rx="8"/><rect x="300" y="70" width="76" height="60" rx="8"/>
+    <circle cx="200" cy="54" r="26"/><path d="M200 80 v22" stroke="#CDD2D9" stroke-width="6"/>
+  </g>
+  <g class="g1"><path d="M0 250 h400" stroke="#CDD2D9" stroke-width="4"/></g>
+  <g transform="translate(112,0)">
+    <path class="s4" d="M-22 176 l-24 30"/><path class="s4" d="M22 176 l30 14"/>
+    <circle class="g3" cx="0" cy="140" r="26"/>
+    <path class="g4" d="M-26 140 a26 26 0 0 1 52 0 q4 -30 -26 -28 q-30 2 -26 28 z"/>
+    <rect class="g4" x="-28" y="166" width="56" height="66" rx="20"/>
+    <rect class="g3" x="-22" y="228" width="18" height="26" rx="8"/><rect class="g3" x="6" y="228" width="18" height="26" rx="8"/>
+    <rect class="g5" x="-26" y="248" width="24" height="12" rx="6"/><rect class="g5" x="4" y="248" width="24" height="12" rx="6"/>
+  </g>
+  <ellipse class="halo" cx="268" cy="164" rx="98" ry="118"/>
+  <g transform="translate(268,0)">
+    <path class="sc" d="M-30 178 l-34 12"/><path class="sc" d="M30 178 l-8 0"/>
+    <path class="hair" d="M-32 138 q0 -34 32 -34 q32 0 32 34 q0 34 -10 46 q-4 -30 -22 -34 q-18 4 -22 34 q-10 -12 -10 -46 z"/>
+    <circle class="skin" cx="0" cy="142" r="26"/>
+    <path class="hair" d="M-27 136 q4 -26 27 -26 q23 0 27 26 q-14 -14 -27 -12 q-13 -2 -27 12 z"/>
+    <circle fill="#3A3226" cx="-9" cy="142" r="3.4"/><circle fill="#3A3226" cx="9" cy="142" r="3.4"/>
+    <path fill="none" stroke="#B5714F" stroke-width="3" stroke-linecap="round" d="M-8 154 q8 8 16 0"/>
+    <path class="dress" d="M-20 168 h40 l22 66 h-84 z"/>
+    <path class="dress2" d="M-42 234 h84 l4 12 h-92 z"/>
+    <circle class="dress2" cx="0" cy="186" r="6"/>
+    <rect class="skin" x="-20" y="246" width="16" height="14" rx="6"/><rect class="skin" x="4" y="246" width="16" height="14" rx="6"/>
+    <rect class="shoe" x="-24" y="256" width="22" height="10" rx="5"/><rect class="shoe" x="2" y="256" width="22" height="10" rx="5"/>
+    <path fill="#F4B942" d="M-34 108 l8 -14 l8 14 l-8 6 z"/>
+  </g>
+</svg>
