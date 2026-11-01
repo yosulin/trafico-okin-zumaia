@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-01T18:01:05.667Z",
+  "actualizado": "2026-11-01T18:15:41.416Z",
   "muestras": {
     "zarautz": [
       {
@@ -304,6 +304,10 @@
       },
       {
         "t": 1793556065667,
+        "i": 0
+      },
+      {
+        "t": 1793556941416,
         "i": 0
       }
     ],
@@ -611,6 +615,10 @@
       {
         "t": 1793556065667,
         "i": 2
+      },
+      {
+        "t": 1793556941416,
+        "i": 0
       }
     ],
     "irun": [
@@ -917,6 +925,10 @@
       {
         "t": 1793556065667,
         "i": 1
+      },
+      {
+        "t": 1793556941416,
+        "i": 0
       }
     ],
     "eibar": [
@@ -1223,6 +1235,10 @@
       {
         "t": 1793556065667,
         "i": 0
+      },
+      {
+        "t": 1793556941416,
+        "i": 0
       }
     ]
   },
@@ -1232,37 +1248,37 @@
       "travelTimeMin": 19,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1793556065667
+      "timestamp": 1793556941416
     },
     "zarautz.meagas": {
       "travelTimeMin": 36,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1793556065667
+      "timestamp": 1793556941416
     },
     "donostia.ap8": {
-      "travelTimeMin": 37,
-      "delayMin": 6,
-      "estadoIndex": 1,
-      "timestamp": 1793556065667
+      "travelTimeMin": 36,
+      "delayMin": 5,
+      "estadoIndex": 0,
+      "timestamp": 1793556941416
     },
     "donostia.n634": {
-      "travelTimeMin": 61,
-      "delayMin": 11,
-      "estadoIndex": 2,
-      "timestamp": 1793556065667
+      "travelTimeMin": 55,
+      "delayMin": 5,
+      "estadoIndex": 0,
+      "timestamp": 1793556941416
     },
     "eibar.ap8ap1": {
-      "travelTimeMin": 29,
+      "travelTimeMin": 30,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1793556065667
+      "timestamp": 1793556941416
     },
     "irun.ap8": {
-      "travelTimeMin": 48,
-      "delayMin": 6,
-      "estadoIndex": 1,
-      "timestamp": 1793556065667
+      "travelTimeMin": 47,
+      "delayMin": 5,
+      "estadoIndex": 0,
+      "timestamp": 1793556941416
     }
   }
 }
