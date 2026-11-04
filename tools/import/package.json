@@ -1,0 +1,26 @@
+{
+  "name": "colores-importador",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Importador de contenido (JSON, CSV, mazos Anki .apkg) a Firestore y Firebase Storage. Herramienta de administración: no forma parte de la PWA.",
+  "scripts": {
+    "comprobar": "node comprobar.mjs",
+    "inspeccionar": "node inspeccionar.mjs",
+    "permitidos": "node permitir.mjs listar",
+    "permitir": "node permitir.mjs permitir",
+    "denegar": "node permitir.mjs denegar",
+    "semilla": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media --sin-medios",
+    "semilla-prueba": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media --sin-medios --dry-run",
+    "semilla-storage": "node importar.mjs --origen json --fichero datos/tarjetas-demo.json --media ../../vocabulario/media"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

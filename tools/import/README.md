@@ -1,0 +1,280 @@
+# Importador de contenido
+
+Herramienta de administración. **No forma parte de la PWA** y nunca se despliega
+con ella: entra en Firebase con una **cuenta de servicio**, que es precisamente
+lo que permite que el navegador tenga prohibido escribir tarjetas
+(ver `firestore.rules` y `storage.rules` en la raíz del repositorio).
+
+```
+origen (.apkg / .json / .csv)
+        ↓  leer
+   normalizar  ──────────────→  mismo esquema para todo
+        ↓  subir medios
+Firebase Storage (images/, audio/)
+        ↓  escribir
+Firestore (colección "cards")
+```
+
+---
+
+## Preparación
+
+```bash
+cd tools/import
+npm install          # firebase-admin (+ better-sqlite3, solo para Anki)
+
+# clave de la cuenta de servicio, FUERA del repositorio
+# (Consola de Firebase → Configuración del proyecto → Cuentas de servicio)
+export GOOGLE_APPLICATION_CREDENTIALS=/ruta/absoluta/a/clave.json
+```
+
+Para comprobar que todas las piezas cargan (sin tocar Firebase ni necesitar
+credenciales):
+
+```bash
+npm run comprobar
+```
+
+`--dry-run` no necesita ni dependencias ni credenciales: enseña exactamente qué
+se subiría y qué documento quedaría en Firestore, sin tocar nada.
+
+---
+
+## Las 10 tarjetas de demostración
+
+```bash
+npm run semilla-prueba   # ver qué haría, sin tocar nada
+npm run semilla          # crear las 10 tarjetas en Firestore
+```
+
+Las ilustraciones **no se suben**: viven en `vocabulario/media/` y las sirve
+Hosting con la propia app (Firebase Storage exige plan de pago). Por eso la
+semilla lleva `--sin-medios`.
+
+El día que actives Blaze y quieras usar Storage:
+
+```bash
+npm run semilla-storage   # sube las ilustraciones y reescribe las tarjetas
+```
+
+y pon `MEDIA_SOURCE=storage` en `.env` antes de regenerar la configuración web.
+Las rutas son idénticas en los dos modos, así que no hay nada que migrar.
+
+---
+
+## Quién puede entrar en la app
+
+La app es privada: las reglas de Firestore solo dejan leer a quien tenga su
+correo en la colección `allowed`, que no se puede tocar desde el navegador.
+
+```bash
+npm run permitidos                        # ver la lista
+npm run permitir -- alguien@gmail.com     # dar acceso
+npm run denegar  -- alguien@gmail.com     # quitarlo
+```
+
+Inmediato: no hay que desplegar nada. Quitar a alguien no borra su progreso, por
+si vuelve.
+
+---
+
+## Opciones
+
+```
+--origen <json|csv|anki>   obligatorio
+--fichero <ruta>           obligatorio
+--media <carpeta>          carpeta local de medios (por defecto, la del fichero)
+--dry-run                  no sube ni escribe nada
+--limite <n>               importar como mucho n tarjetas
+--forzar                   volver a subir medios que ya están en Storage
+--sin-medios               no subir nada a Storage (los sirve Hosting)
+--inactivas                crear con active:false, para revisarlas antes de publicarlas
+
+--tema <id>                tema por defecto (animals, food, school...)
+--capa <n>                 capa por defecto
+--fuente <tipo>            source.type: general | escolar | anki
+--libro <texto>            source.book
+--unidad <texto>           source.unit
+
+--campos a=0,b=1           solo Anki: qué posición ocupa cada campo
+```
+
+---
+
+## CSV (vocabulario escolar)
+
+Cabecera admitida (el orden da igual; bastan `word` y una traducción):
+
+```csv
+word,es,eu,theme,type,layer,tags,example_en,example_es,example_eu,image,word_audio,example_audio
+window,ventana,leihoa,school,noun,1,"school,house","Open the window.","Abre la ventana.",,,,
+```
+
+```bash
+node importar.mjs --origen csv --fichero unidad3.csv \
+  --tema school --fuente escolar --libro "Explorers 4" --unidad 3 --dry-run
+```
+
+Hay dos formas de indicar los medios:
+
+- `image`, `word_audio`, `example_audio` → **ficheros** dentro de `--media`; la
+  ruta de Storage se calcula sola.
+- `image_path`, `word_audio_path`, `example_audio_path` → **rutas ya guardadas**,
+  que es lo que exporta la app. Sirven para que exportar, corregir y volver a
+  importar no pierda las imágenes.
+
+También se admiten `id`, `deck` y `active`, así que el CSV que descarga la app
+desde Ajustes se puede reimportar tal cual: como lleva el `id`, actualiza las
+tarjetas en vez de duplicarlas.
+
+Rutas que se calculan solas a partir de `--media`:
+
+```
+images/<tema>/<id>.<ext>
+audio/words/<id>.<ext>
+audio/examples/<id>_example_01.<ext>
+```
+
+---
+
+## JSON
+
+Admite `[ {...} ]` o `{ "tarjetas": [ ... ], "temas": [ ... ] }`, con los campos
+del esquema de Firestore. Si la tarjeta ya trae `imagePath` y el fichero existe
+en `<media>/` con esa misma ruta relativa, se sube ahí (es lo que hace la
+semilla de demostración).
+
+---
+
+## Mazos de Anki (.apkg)
+
+Un `.apkg` es un zip con una base SQLite (`collection.anki2`), un fichero `media`
+que mapea número → nombre original, y los medios numerados. El zip se lee sin
+dependencias (`lib/zip.mjs`); leer SQLite necesita `better-sqlite3`, que instala
+`npm install`.
+
+**Los campos se emparejan por NOMBRE**, no por posición. Como el tipo de nota
+trae los nombres de sus campos, `English`, `Spanish`, `Basque`, `ExampleEN`,
+`ConceptId`… se reconocen solos (sin distinguir mayúsculas, espacios ni
+guiones). Los que no se reconocen **se conservan tal cual**, con su nombre.
+
+Mira antes qué va a entender, sin tocar nada:
+
+```bash
+node inspeccionar.mjs mazo.apkg     # sección "QUÉ ENTENDERÁ EL IMPORTADOR"
+```
+
+`--campos` sigue existiendo para mazos cuyos campos se llaman «Field 1», y
+manda sobre el emparejamiento automático. Anki guarda todos los campos de una
+nota en una sola columna separados por `0x1f`, así que ahí hay que decir qué
+posición ocupa cada uno:
+
+```bash
+# primero, mirar qué trae el mazo
+node importar.mjs --origen anki --fichero oxford3000.apkg \
+  --campos word=0,es=1,example_en=2,example_audio=3 --limite 5 --dry-run
+```
+
+Ajusta los números hasta que la tarjeta de muestra salga bien, y entonces quita
+`--dry-run`. Para un mazo tipo **Oxford 3000** (palabra, traducción, audio de la
+palabra, ejemplo, audio del ejemplo, traducción del ejemplo) lo habitual es algo
+como:
+
+```bash
+node importar.mjs --origen anki --fichero oxford3000.apkg \
+  --campos word=0,word_audio=1,es=2,example_en=3,example_audio=4,example_es=5 \
+  --fuente anki --capa 2 --inactivas
+```
+
+`--inactivas` es buena idea en mazos grandes: las tarjetas se crean con
+`active:false`, no aparecen en la app y puedes ir activando en la consola de
+Firebase las que quieras usar.
+
+Los campos que ese mazo no trae (**euskera, imagen, tema, capa, tipo,
+etiquetas, nivel infantil, libro, unidad**) quedan vacíos: ya están en el
+esquema, así que rellenarlos después no exige migrar nada. El audio de Anki se
+sube tal cual a `audio/words/` y `audio/examples/`, y la app lo usa en lugar de
+la voz sintética en cuanto existe.
+
+> El importador (a diferencia de `inspeccionar.mjs`) todavía solo lee
+> `collection.anki2`. Si el `.apkg` es del formato nuevo, vuelve a exportarlo
+> desde Anki marcando **«Compatibilidad con versiones anteriores»**.
+
+---
+
+## Volver a importar
+
+Todas las escrituras son `merge`, y el `id` es estable (`<tema>_<palabra>`), así
+que reimportar el mismo origen **actualiza** las tarjetas en vez de duplicarlas.
+Los medios que ya están en Storage no se vuelven a subir salvo con `--forzar`.
+
+---
+
+## Ficheros
+
+```
+importar.mjs          la cadena completa y la línea de comandos
+lib/origen-json.mjs   lector JSON
+lib/origen-csv.mjs    lector CSV (con comillas y saltos de línea)
+lib/origen-anki.mjs   lector .apkg
+lib/zip.mjs           lectura de zips sin dependencias
+lib/normalizar.mjs    de "lo que venga" al esquema de Firestore
+lib/firebase.mjs      Admin SDK: escribir en Firestore y subir a Storage
+comprobar.mjs         comprueba que todos los módulos cargan y exportan
+permitir.mjs          gestiona quién puede entrar en la app
+datos/                las 10 tarjetas de demostración
+                      (sus ilustraciones están en vocabulario/media/)
+```
+
+Añadir un origen nuevo es escribir un lector que devuelva objetos sueltos con
+`word`, `es`, `example`... El resto de la cadena no cambia.
+
+---
+
+## Radiografiar un mazo antes de decidir nada
+
+```bash
+node inspeccionar.mjs "mazo.apkg" [--muestras 10] [--json]
+```
+
+**No necesita instalar nada.** Lee el SQLite del mazo con `node:sqlite` y
+descomprime el formato nuevo con el zstd de `node:zlib`: las dos cosas vienen
+dentro de Node desde la 22. En Node 22 puede hacer falta añadir
+`--experimental-sqlite`; desde la 24 no. Si tu Node es anterior, recurre a
+`better-sqlite3` (`npm install`), pero es el camino largo: compila código
+nativo y en Windows suele pedir herramientas de compilación.
+
+Un `.apkg` moderno trae **dos bases**: la real (`collection.anki21b`) y un
+`collection.anki2` **señuelo** con una sola nota que dice «actualiza Anki». La
+herramienta se queda siempre con la más nueva y avisa de que había señuelo. Es
+importante: quedarse con el señuelo hace parecer que un mazo de 3.000 palabras
+tiene una sola nota y miles de audios huérfanos.
+
+Solo lee: **no modifica el `.apkg`**, no sube nada y no necesita credenciales.
+Cuenta notas y tarjetas, saca los tipos de nota con sus campos exactos y en su
+orden, las plantillas, las etiquetas y su frecuencia, y hace un perfil campo a
+campo (cuántas notas lo dejan vacío, longitud media, cuántas llevan audio,
+imagen o HTML). De los medios dice cuántos hay, de qué formato, cuánto ocupan,
+cuáles están en el zip sin que los use nadie y cuáles se citan sin estar.
+
+Termina diciendo qué se perdería al convertirlo, que es la pregunta que importa
+antes de construir nada encima: la programación de repasos, el historial, las
+opciones del mazo, el CSS y las plantillas **no** sobreviven a la conversión;
+los campos de texto, las etiquetas, los medios y el `guid` sí.
+
+---
+
+## Índices de Firestore
+
+Están en **`firestore.indexes.json` de la raíz**, que es el que despliega
+`firebase.json`. Aquí había una copia que no desplegaba nadie, y por eso la
+búsqueda por principio de palabra del diccionario nunca llegó a funcionar en
+producción: la consulta fallaba y el `catch` devolvía una lista vacía.
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
+Tarda unos minutos en construirse. Hasta que termine, el diccionario encuentra
+las palabras exactas pero no las acepciones sueltas ni los principios de
+palabra.
