@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-10T14:15:39.607Z",
+  "actualizado": "2026-11-10T14:30:56.880Z",
   "muestras": {
     "zarautz": [
       {
@@ -799,14 +799,6 @@
     ],
     "irun": [
       {
-        "t": 1794233740837,
-        "i": 0
-      },
-      {
-        "t": 1794234653410,
-        "i": 0
-      },
-      {
         "t": 1794235539154,
         "i": 0
       },
@@ -1192,6 +1184,10 @@
       },
       {
         "t": 1794320139607,
+        "i": 0
+      },
+      {
+        "t": 1794321056880,
         "i": 0
       }
     ],
@@ -1594,7 +1590,34 @@
       }
     ]
   },
-  "ultimosFallos": null,
+  "ultimosFallos": {
+    "zarautz": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
+      },
+      {
+        "ruta": "meagas",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
+      }
+    ],
+    "donostia": [
+      {
+        "ruta": "ap8",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
+      },
+      {
+        "ruta": "n634",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
+      }
+    ],
+    "eibar": [
+      {
+        "ruta": "ap8ap1",
+        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
+      }
+    ]
+  },
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 18,
@@ -1630,7 +1653,7 @@
       "travelTimeMin": 42,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321056880
     }
   }
 }
