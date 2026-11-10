@@ -1,19 +1,7 @@
 {
-  "actualizado": "2026-11-10T14:30:56.880Z",
+  "actualizado": "2026-11-10T14:45:42.743Z",
   "muestras": {
     "zarautz": [
-      {
-        "t": 1794233740837,
-        "i": 0
-      },
-      {
-        "t": 1794234653410,
-        "i": 0
-      },
-      {
-        "t": 1794235539154,
-        "i": 0
-      },
       {
         "t": 1794236466507,
         "i": 0
@@ -396,23 +384,15 @@
       },
       {
         "t": 1794320139607,
+        "i": 0
+      },
+      {
+        "t": 1794321942743,
         "i": 0
       }
     ],
     "donostia": [
       {
-        "t": 1794233740837,
-        "i": 0
-      },
-      {
-        "t": 1794234653410,
-        "i": 0
-      },
-      {
-        "t": 1794235539154,
-        "i": 0
-      },
-      {
         "t": 1794236466507,
         "i": 0
       },
@@ -795,13 +775,13 @@
       {
         "t": 1794320139607,
         "i": 0
+      },
+      {
+        "t": 1794321942743,
+        "i": 0
       }
     ],
     "irun": [
-      {
-        "t": 1794235539154,
-        "i": 0
-      },
       {
         "t": 1794236466507,
         "i": 0
@@ -1189,21 +1169,13 @@
       {
         "t": 1794321056880,
         "i": 0
+      },
+      {
+        "t": 1794321942743,
+        "i": 0
       }
     ],
     "eibar": [
-      {
-        "t": 1794233740837,
-        "i": 0
-      },
-      {
-        "t": 1794234653410,
-        "i": 0
-      },
-      {
-        "t": 1794235539154,
-        "i": 0
-      },
       {
         "t": 1794236466507,
         "i": 0
@@ -1587,73 +1559,50 @@
       {
         "t": 1794320139607,
         "i": 0
+      },
+      {
+        "t": 1794321942743,
+        "i": 0
       }
     ]
   },
-  "ultimosFallos": {
-    "zarautz": [
-      {
-        "ruta": "ap8",
-        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
-      },
-      {
-        "ruta": "meagas",
-        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
-      }
-    ],
-    "donostia": [
-      {
-        "ruta": "ap8",
-        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
-      },
-      {
-        "ruta": "n634",
-        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
-      }
-    ],
-    "eibar": [
-      {
-        "ruta": "ap8ap1",
-        "motivo": "HTTP 503 — upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure"
-      }
-    ]
-  },
+  "ultimosFallos": null,
   "estadoActual": {
     "zarautz.ap8": {
       "travelTimeMin": 18,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321942743
     },
     "zarautz.meagas": {
       "travelTimeMin": 36,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321942743
     },
     "donostia.ap8": {
       "travelTimeMin": 31,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321942743
     },
     "donostia.n634": {
       "travelTimeMin": 50,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321942743
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794320139607
+      "timestamp": 1794321942743
     },
     "irun.ap8": {
       "travelTimeMin": 42,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1794321056880
+      "timestamp": 1794321942743
     }
   }
 }
