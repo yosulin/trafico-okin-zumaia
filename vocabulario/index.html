@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ayuda de Sofía</title>
+  <meta name="description" content="Añade color a tu vida. Aprende un idioma nuevo. Tarjetas de vocabulario en inglés con imagen, audio y traducción al castellano y al euskera.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#FF6B6B">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Ayuda de Sofía">
+
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="armazon">
+
+  <header class="cabecera">
+    <div class="cabecera__marca">
+      <span class="cabecera__logo" aria-hidden="true"></span>
+      <div>
+        <h1 class="cabecera__titulo" data-i18n="app.titulo">Ayuda de Sofía</h1>
+        <p class="cabecera__lema" data-i18n="app.lema">Tus herramientas</p>
+      </div>
+    </div>
+
+    <!-- Con barra lateral la marca ya está a la izquierda, así que la
+         cabecera pasa a decir dónde estás. Por debajo de 56rem no se
+         enseña: allí manda la marca. -->
+    <h2 class="cabecera__pantalla" id="cabecera-pantalla"></h2>
+
+    <div class="cabecera__sesion">
+      <button class="boton-menu" id="boton-menu" type="button" hidden
+              aria-expanded="false" aria-controls="navegacion"
+              data-i18n-attr="aria-label:nav.menu">☰</button>
+      <button class="boton-ajustes" id="boton-ajustes" type="button" hidden
+              aria-expanded="false" aria-controls="pantalla-ajustes"
+              data-i18n-attr="aria-label:comun.ajustes"><span class="boton-ajustes__icono" aria-hidden="true">⚙️</span></button>
+    </div>
+  </header>
+
+  <!-- ========== NAVEGACIÓN ==========
+       Un solo elemento para los cuatro repartos (barra inferior, barra
+       lateral de iconos, barra lateral con texto y cajón). Lo coloca el
+       CSS; navegacion.js solo dibuja la lista. -->
+  <nav class="navegacion" id="navegacion" hidden data-i18n-attr="aria-label:nav.principal">
+    <div class="navegacion__marca">
+      <span class="cabecera__logo" aria-hidden="true"></span>
+      <p class="navegacion__nombre" data-i18n="app.titulo">Ayuda de Sofía</p>
+    </div>
+
+    <ul class="navegacion__lista" id="navegacion-lista"></ul>
+
+    <div class="navegacion__pie">
+      <button class="nav-boton" id="boton-ajustes-lateral" type="button"
+              aria-expanded="false" aria-controls="pantalla-ajustes"
+              data-i18n-attr="aria-label:comun.ajustes;title:comun.ajustes">
+        <span class="nav-boton__icono" aria-hidden="true">⚙️</span>
+        <span class="nav-boton__texto" data-i18n="comun.ajustes">Ajustes</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Velo del cajón: solo existe cuando la navegación está plegada. -->
+  <button class="velo-menu" id="velo-menu" type="button" hidden
+          data-i18n-attr="aria-label:nav.cerrarMenu"></button>
+
+  <main class="escenario">
+
+    <!-- ========== CARGANDO ========== -->
+    <section class="panel panel--inicio" id="pantalla-cargando">
+      <p class="cargando" data-i18n="comun.cargando">Cargando…</p>
+    </section>
+
+    <!-- ========== LOGIN ========== -->
+    <section class="panel panel--inicio" id="pantalla-login" hidden>
+      <p class="login__lema"><span data-i18n="login.lema">Añade color a tu vida.</span><br><span data-i18n="login.lema2">Aprende algo nuevo.</span></p>
+      <p class="inicio__intro" data-i18n="login.texto">Entra con tu cuenta de Google para que la app recuerde lo que ya sabes.</p>
+      <button class="boton boton--grande boton--google" id="boton-entrar" type="button">
+        <span class="boton__icono" aria-hidden="true">🔑</span> <span data-i18n="login.boton">Entrar con Google</span>
+      </button>
+      <p class="error" id="error-login" hidden></p>
+    </section>
+
+    <!-- ========== SIN ACCESO ========== -->
+    <section class="panel panel--inicio" id="pantalla-sin-acceso" hidden>
+      <p class="final__emoji" aria-hidden="true">🔒</p>
+      <h2 class="final__titulo" data-i18n="sinAcceso.titulo">Esta app es privada</h2>
+      <p class="inicio__intro">
+        Has entrado con <b id="sin-acceso-correo"></b>, pero esa cuenta no tiene acceso.
+      </p>
+      <button class="boton boton--grande boton--principal" id="boton-salir-sin-acceso" type="button">
+        <span data-i18n="sinAcceso.boton">Probar con otra cuenta</span>
+      </button>
+    </section>
+
+    <!-- ========== AJUSTES ========== -->
+    <section class="panel panel--inicio panel--ajustes" id="pantalla-ajustes" hidden style="--color-modulo: var(--tinta-suave)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-ajustes" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <h2 class="modulo-cabecera__nombre" data-i18n="comun.ajustes">Ajustes</h2>
+      </div>
+
+      <div class="ficha-usuario">
+        <img class="ficha-usuario__foto" id="ajustes-foto" alt="" width="44" height="44">
+        <div class="ficha-usuario__datos">
+          <b id="ajustes-nombre"></b>
+          <small id="ajustes-correo"></small>
+        </div>
+      </div>
+
+      <div class="ajustes-idioma">
+        <p class="ajustes-idioma__titulo" data-i18n="ajustes.idioma">Idioma de la app</p>
+        <div class="ajustes-idioma__opciones" id="selector-idioma" role="group"></div>
+      </div>
+
+      <div class="ajustes-grupo">
+        <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-instalar" type="button" hidden>
+          <span data-i18n="ajustes.instalar">📲 Instalar la app</span>
+        </button>
+        <p class="ajustes-pista" id="pista-instalar" hidden>
+          En iPhone o iPad: pulsa <b>Compartir</b> ⬆️ y luego <b>«Añadir a pantalla de inicio»</b>.
+        </p>
+        <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-salir" type="button">
+          <span data-i18n="ajustes.salir">👋 Cerrar sesión</span>
+        </button>
+        <button class="boton boton--texto" id="boton-reiniciar" type="button" data-i18n="ajustes.borrar">Borrar todo mi progreso</button>
+      </div>
+
+      <div class="ajustes-grupo ajustes-contenido">
+        <p class="ajustes-idioma__titulo" data-i18n="ajustes.contenido">Contenido</p>
+        <button class="boton boton--grande boton--fantasma boton--bloque" id="boton-descargar" type="button">
+          <span data-i18n="ajustes.descargar">Descargar las tarjetas (CSV)</span>
+        </button>
+        <p class="ajustes-pista" data-i18n="ajustes.descargaPista">Para revisar o corregir el vocabulario fuera de la app.</p>
+      </div>
+
+      <div class="version" id="version">
+        <p class="version__linea"><span data-i18n="ajustes.version">Versión</span> <b id="version-numero">…</b></p>
+        <p class="version__linea"><span data-i18n="ajustes.actualizada">Actualizada</span> <b id="version-fecha">…</b></p>
+        <p class="version__nota" id="version-nota"></p>
+        <button class="boton boton--grande boton--principal" id="boton-actualizar" type="button" hidden>
+          <span data-i18n="ajustes.actualizar">Actualizar a la última versión</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========== ÍNDICE DE MÓDULOS ========== -->
+    <section class="panel panel--inicio" id="pantalla-hub" hidden>
+      <h2 class="saludo" id="hub-saludo">Hola</h2>
+      <p class="saludo-sub" data-i18n="hub.pregunta">¿Qué quieres hacer hoy?</p>
+
+      <ul class="modulos" id="modulos"></ul>
+    </section>
+
+    <!-- ========== DICCIONARIO ========== -->
+    <section class="panel panel--diccionario" id="pantalla-diccionario" hidden style="--color-modulo: var(--cielo)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.diccionario.nombre">Diccionario</h2>
+      </div>
+
+      <form class="buscador" id="form-buscar" autocomplete="off">
+        <label class="respuesta-form__etiqueta" for="campo-buscar">
+          <span data-i18n="dicc.etiqueta">Escribe una palabra en inglés, castellano o euskera</span>
+        </label>
+        <div class="buscador__linea">
+          <input class="buscador__campo" id="campo-buscar" type="search" inputmode="search"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="dog, perro, txakurra…" data-i18n-attr="placeholder:dicc.pista">
+          <button class="boton boton--modulo buscador__boton" type="submit" data-i18n="dicc.buscar">Buscar</button>
+        </div>
+      </form>
+
+      <p class="buscador__estado" id="buscador-estado" hidden></p>
+      <div id="resultados"></div>
+    </section>
+
+    <!-- ========== INICIO ========== -->
+    <section class="panel panel--inicio" id="pantalla-inicio" hidden style="--color-modulo: var(--coral)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-inicio" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.tarjetas.nombre">Tarjetas</h2>
+      </div>
+      <p class="inicio__intro" data-i18n="tarjetas.intro">Escucha la palabra, mira el dibujo y escríbela en inglés.</p>
+      <ul class="marcador" id="marcador-inicio"></ul>
+      <button class="boton boton--grande boton--principal" id="boton-empezar" type="button" data-i18n="tarjetas.empezar">Empezar</button>
+      <p class="inicio__aviso" id="aviso-audio" hidden data-i18n="tarjetas.sinVoz">Este navegador no puede leer las palabras en voz alta.</p>
+    </section>
+
+    <!-- ========== MATEMAGIA: elegir reto ========== -->
+    <section class="panel panel--inicio" id="pantalla-matemagia" hidden style="--color-modulo: var(--menta)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-hub-mates" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre" data-i18n="modulo.matemagia.nombre">Matemagia</h2>
+      </div>
+
+      <ul class="retos" id="retos"></ul>
+
+      <div class="tablas" id="tablas-panel">
+        <p class="tablas__titulo" data-i18n="mates.elegirTabla">O elige una tabla</p>
+        <div class="tablas__rejilla" id="tablas-rejilla"></div>
+        <p class="tablas__leyenda">
+          <span class="punto punto--verde"></span> <span data-i18n="mates.leyendaVerde">te la sabes</span>
+          <span class="punto punto--media"></span> <span data-i18n="mates.leyendaMedia">a medias</span>
+          <span class="punto"></span> <span data-i18n="mates.leyendaNada">sin practicar</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== MATEMAGIA: la ronda ========== -->
+    <section class="panel panel--tarjeta" id="pantalla-mates-reto" hidden style="--color-modulo: var(--menta)">
+      <div class="modulo-cabecera">
+        <button class="modulo-cabecera__volver" id="boton-volver-mates" type="button" data-i18n-attr="aria-label:comun.volver">←</button>
+        <span class="modulo-cabecera__punto" aria-hidden="true"></span>
+        <h2 class="modulo-cabecera__nombre" id="mates-titulo">Matemagia</h2>
+      </div>
+
+      <div class="progreso">
+        <div class="progreso__barra"><span class="progreso__relleno progreso__relleno--modulo" id="mates-progreso"></span></div>
+        <span class="progreso__texto" id="mates-progreso-texto"></span>
+      </div>
+
+      <p class="operacion" id="mates-enunciado"></p>
+
+      <ol class="saltos" id="mates-saltos" hidden></ol>
+
+      <p class="mates-pregunta" id="mates-pregunta"></p>
+      <p class="mates-ayuda" id="mates-ayuda"></p>
+
+      <output class="mates-respuesta" id="mates-respuesta" aria-live="polite"></output>
+
+      <div class="teclado" id="mates-teclado"></div>
+    </section>
+
+    <!-- ========== MATEMAGIA: final de ronda ========== -->
+    <section class="panel panel--final" id="pantalla-mates-final" hidden style="--color-modulo: var(--menta)">
+      <p class="final__emoji" id="mates-final-emoji" aria-hidden="true">🎉</p>
+      <h2 class="final__titulo" id="mates-final-titulo"></h2>
+      <ul class="marcador" id="mates-marcador"></ul>
+      <button class="boton boton--grande boton--modulo" id="boton-mates-otra" type="button" data-i18n="mates.otraRonda">Otra ronda</button>
+      <button class="boton boton--texto" id="boton-mates-menu" type="button" data-i18n="mates.otroReto">Elegir otro reto</button>
+    </section>
+
+    <!-- ========== TARJETA ========== -->
+    <section class="panel panel--tarjeta" id="pantalla-tarjeta" hidden>
+
+      <button class="boton boton--texto boton--volver" id="boton-volver-hub-tarjetas" type="button"><span aria-hidden="true">← </span><span data-i18n="comun.volver">Volver</span></button>
+
+      <div class="progreso">
+        <div class="progreso__barra"><span class="progreso__relleno" id="progreso-relleno"></span></div>
+        <span class="progreso__texto" id="progreso-texto"></span>
+      </div>
+
+      <figure class="escena">
+        <img class="escena__img" id="escena-img" src="" alt="">
+        <figcaption class="escena__tema" id="escena-tema"></figcaption>
+      </figure>
+
+      <!-- Cara A: la pregunta. La palabra en inglés no aparece. -->
+      <div class="cara cara--pregunta" id="cara-pregunta">
+        <button class="boton boton--escuchar" id="boton-escuchar-pregunta" type="button">
+          <span class="boton__icono" aria-hidden="true">🔊</span> <span data-i18n="tarjetas.escucharOtra">Escuchar otra vez</span>
+        </button>
+
+        <form class="respuesta-form" id="form-respuesta" autocomplete="off">
+          <label class="respuesta-form__etiqueta" for="campo-respuesta" data-i18n="tarjetas.escribe">Escríbelo en inglés</label>
+          <input class="respuesta-form__campo" id="campo-respuesta" type="text" inputmode="text"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…">
+          <button class="boton boton--grande boton--principal" type="submit" data-i18n="tarjetas.comprobar">Comprobar</button>
+        </form>
+
+        <button class="boton boton--texto" id="boton-ver-respuesta" type="button" data-i18n="tarjetas.noLoSe">No lo sé, ver la respuesta</button>
+      </div>
+
+      <!-- Cara B: la respuesta. -->
+      <div class="cara cara--respuesta" id="cara-respuesta" hidden>
+        <p class="veredicto" id="veredicto" hidden></p>
+
+        <div class="palabra">
+          <h2 class="palabra__en" id="palabra-en" lang="en"></h2>
+          <button class="boton boton--redondo" id="boton-escuchar-palabra" type="button" data-i18n-attr="aria-label:tarjetas.escucharPalabra">🔊</button>
+        </div>
+
+        <ul class="traducciones">
+          <li><span class="traducciones__idioma">Castellano</span><span class="traducciones__texto" id="palabra-es"></span></li>
+          <li><span class="traducciones__idioma">Euskara</span><span class="traducciones__texto" id="palabra-eu"></span></li>
+        </ul>
+
+        <div class="ejemplo" id="ejemplo">
+          <div class="ejemplo__linea">
+            <p class="ejemplo__en" id="ejemplo-en" lang="en"></p>
+            <button class="boton boton--redondo" id="boton-escuchar-ejemplo" type="button" data-i18n-attr="aria-label:tarjetas.escucharFrase">🔊</button>
+          </div>
+          <button class="boton boton--texto boton--mini" id="boton-ver-traduccion" type="button" aria-expanded="false">Ver la traducción</button>
+          <ul class="ejemplo__traducciones" id="ejemplo-traducciones" hidden>
+            <li><span class="traducciones__idioma">Castellano</span><span id="ejemplo-es"></span></li>
+            <li><span class="traducciones__idioma">Euskara</span><span id="ejemplo-eu"></span></li>
+          </ul>
+        </div>
+
+        <div class="decision">
+          <button class="boton boton--grande boton--repasar" id="boton-repasar" type="button" data-i18n="tarjetas.repasar">🔁 Repasar</button>
+          <button class="boton boton--grande boton--sabia" id="boton-sabia" type="button" data-i18n="tarjetas.sabia">✅ La sabía</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FINAL DE SESIÓN ========== -->
+    <section class="panel panel--final" id="pantalla-final" hidden style="--color-modulo: var(--coral)">
+      <p class="final__emoji" aria-hidden="true">🎉</p>
+      <h2 class="final__titulo" data-i18n="tarjetas.final">¡Ronda terminada!</h2>
+      <ul class="marcador" id="marcador-final"></ul>
+      <button class="boton boton--grande boton--principal" id="boton-otra-vuelta" type="button" data-i18n="tarjetas.otraVuelta">Otra vuelta</button>
+      <button class="boton boton--texto" id="boton-volver-hub-final" type="button" data-i18n="tarjetas.volverMenu">Volver al menú</button>
+    </section>
+
+    <p class="error" id="error" hidden></p>
+    <p class="aviso-red" id="aviso-red" hidden data-i18n="comun.sinConexion">Sin conexión: sigues jugando y tu progreso se guardará al volver la red.</p>
+  </main>
+
+</div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

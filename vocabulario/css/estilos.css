@@ -1,0 +1,1043 @@
+/* ============================================================
+   TOKENS — paleta alegre sobre fondo cálido
+   La idea visual de la app (dibujo en gris + concepto en color)
+   se traslada aquí: interfaz sobria y clara, color solo donde
+   hay algo que mirar o que pulsar.
+   ============================================================ */
+
+:root {
+  --crema: #FFF7EF;
+  --superficie: #FFFFFF;
+  --tinta: #2B3440;
+  --tinta-suave: #6B7683;
+  --borde: #ECE3D8;
+
+  --coral: #FF6B6B;
+  --coral-oscuro: #E24E4E;
+  --menta: #2A9D8F;
+  --menta-oscura: #1F7A70;
+  --sol: #F4B942;
+  --cielo: #3D7EE8;
+
+  --sombra: 0 2px 4px rgba(43, 52, 64, .05), 0 10px 30px rgba(43, 52, 64, .08);
+  --sombra-boton: 0 4px 0 rgba(0, 0, 0, .12);
+
+  --radio: 22px;
+  --radio-chico: 14px;
+
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --texto: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* Las reglas de layout de más abajo (display:flex, display:grid...) ganarían
+   al display:none que el navegador aplica a [hidden]; lo dejamos claro aquí
+   para que ocultar con el atributo hidden funcione siempre. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--crema);
+  color: var(--tinta);
+  font-family: var(--texto);
+  /* Relativo, no 17px fijos: si alguien agranda la letra del sistema
+     —los abuelos, sin ir más lejos— la app tiene que crecer con ella. */
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   CABECERA
+   ============================================================ */
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* El inset de arriba va arriba. Estaba sumado al padding inferior,
+     así que en un móvil con notch la cabecera se separaba por abajo y
+     el título seguía pudiendo quedar tapado. */
+  padding-block: max(14px, env(safe-area-inset-top, 0px)) 14px;
+  padding-inline: 18px;
+}
+
+.cabecera__marca { display: flex; align-items: center; gap: 12px; }
+
+.cabecera__logo {
+  width: 38px; height: 38px; border-radius: 12px; flex: none;
+  background:
+    radial-gradient(circle at 30% 32%, var(--sol) 0 7px, transparent 8px),
+    radial-gradient(circle at 68% 34%, var(--menta) 0 7px, transparent 8px),
+    radial-gradient(circle at 50% 70%, var(--coral) 0 8px, transparent 9px),
+    #FFF;
+  border: 2px solid var(--borde);
+}
+
+.cabecera__titulo {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  white-space: nowrap;
+  line-height: 1.05;
+  letter-spacing: .01em;
+}
+
+.cabecera__lema { margin: 0; font-size: .82rem; color: var(--tinta-suave); }
+
+.cabecera__sesion { display: flex; align-items: center; gap: 8px; }
+
+.cabecera__pantalla {
+  display: none;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boton-ajustes {
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: 50%; width: 42px; height: 42px;
+  font-size: 1.15rem; line-height: 1; cursor: pointer;
+  flex: none;
+  /* por encima del panel: es lo que tapa la costura de la pestaña */
+  position: relative; z-index: 3;
+  transition: width .2s ease, height .2s ease, border-radius .2s ease,
+              margin-bottom .2s ease, border-color .2s ease;
+}
+.boton-ajustes:active { transform: translateY(2px); }
+.boton-ajustes:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+/* El icono gira al abrir: el dedo nota que ha pasado algo. */
+.boton-ajustes__icono { display: block; transition: transform .35s cubic-bezier(.4, 1.5, .5, 1); }
+body.ajustes-abierto .boton-ajustes__icono { transform: rotate(112deg); }
+
+/* ------------------------------------------------------------
+   AJUSTES COMO PESTAÑA
+   Con Ajustes abierto, el engranaje deja de ser un botón suelto y
+   pasa a ser la lengüeta de su panel: se ensancha, pierde la forma
+   redonda y el borde de abajo, y se sienta sobre el canto del panel
+   (de ahí el margen negativo de 2px, justo el grosor del borde).
+   El panel renuncia a su esquina superior derecha para que la unión
+   no tenga costura, y a la sombra, porque ya lleva borde.
+
+   La pestaña solo existe MIENTRAS EL ENGRANAJE ESTÁ ENCIMA DEL PANEL,
+   es decir por debajo de 56rem. Con barra lateral, el engranaje se va
+   al pie de la barra y colgar de él un panel que está en otra columna
+   sería mentira: allí Ajustes es una pantalla más.
+   ------------------------------------------------------------ */
+
+@media (max-width: 55.99rem) {
+  body.ajustes-abierto .cabecera { padding-bottom: 0; }
+  body.ajustes-abierto .escenario { padding-top: 0; }
+
+  body.ajustes-abierto .boton-ajustes {
+    width: 54px;
+    height: 46px;
+    border-radius: var(--radio-chico) var(--radio-chico) 0 0;
+    border-bottom-color: transparent;
+    margin-bottom: -2px;
+  }
+
+  body.ajustes-abierto .panel--ajustes {
+    border: 2px solid var(--borde);
+    border-top-right-radius: 0;
+    box-shadow: none;
+    /* El panel no "aparece": se despliega desde la lengüeta, así que
+       no puede desplazarse o se despegaría de ella. Solo funde. */
+    animation: desplegar .2s ease both;
+    transform-origin: top right;
+    /* El panel manda hasta el canto del engranaje: si se quedara
+       centrado con su ancho máximo, la lengüeta apuntaría al aire. */
+    max-width: none;
+  }
+}
+
+@keyframes desplegar {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ============================================================
+   ARMAZÓN — una rejilla, cuatro repartos
+   ------------------------------------------------------------
+   La navegación es SIEMPRE el mismo elemento: lo único que cambia
+   es dónde lo coloca la rejilla. Por eso al girar la tablet no hay
+   salto, no se pierde el foco del teclado y no hay tres
+   navegaciones que mantener.
+
+       < 56rem              barra inferior
+       56rem – 75rem        barra lateral de iconos
+       ≥ 75rem              barra lateral con texto
+       tumbado y sin alto   cajón que sale de la cabecera
+
+   Los cortes están en rem y los marca el contenido, no el catálogo
+   de ningún fabricante: si alguien agranda la letra del sistema, la
+   estructura cambia ANTES de quedarse apretada.
+   ============================================================ */
+
+.armazon {
+  display: grid;
+  height: 100vh;    /* reserva para navegadores sin dvh */
+  height: 100dvh;   /* dvh y no vh: el teclado y la barra del navegador
+                       cambian la altura real, y con vh el botón de
+                       comprobar se queda debajo del teclado */
+  grid-template-areas:
+    "cabecera"
+    "trabajo"
+    "navegacion";
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cabecera   { grid-area: cabecera; }
+.navegacion { grid-area: navegacion; }
+
+/* ---- 56rem: la navegación se va al lado ---- */
+@media (min-width: 56rem) {
+  .armazon {
+    grid-template-areas:
+      "navegacion cabecera"
+      "navegacion trabajo";
+    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .cabecera { border-bottom: 2px solid var(--borde); }
+}
+
+/* ---- 75rem: la barra lateral gana su texto ---- */
+@media (min-width: 75rem) {
+  .armazon { grid-template-columns: 236px minmax(0, 1fr); }
+}
+
+/* ---- tumbado y con poco alto (o con el teclado abierto):
+        la navegación se pliega y el contenido se queda el sitio ---- */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .armazon {
+    grid-template-areas:
+      "cabecera"
+      "trabajo";
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cabecera { padding-block: max(7px, env(safe-area-inset-top, 0px)) 7px; }
+  .cabecera__lema { display: none; }
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+.navegacion {
+  background: var(--superficie);
+  border-top: 2px solid var(--borde);
+  padding: 6px 8px max(6px, env(safe-area-inset-bottom, 0px));
+  min-width: 0;
+}
+
+.navegacion__marca,
+.navegacion__pie { display: none; }
+
+.navegacion__lista {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; justify-content: space-around; gap: 2px;
+}
+
+.navegacion__lista li { flex: 1; min-width: 0; }
+
+.nav-boton {
+  font-family: var(--texto);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--tinta-suave);
+  border-radius: var(--radio-chico);
+  padding: 7px 6px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 48px;
+}
+
+.nav-boton__icono { font-size: 1.3rem; line-height: 1; }
+
+.nav-boton__texto {
+  font-size: .68rem; font-weight: 800;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.nav-boton[aria-current="page"] { color: var(--tinta); background: var(--crema); }
+.nav-boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: -2px; }
+
+/* Móvil pequeño: el texto no cabe sin apretujarse, y el nombre sigue
+   llegando por aria-label a quien navegue con lector de pantalla. */
+@media (max-width: 26rem) {
+  .nav-boton__texto { display: none; }
+}
+
+/* ---- barra lateral de iconos ---- */
+@media (min-width: 56rem) {
+  .navegacion {
+    border-top: none;
+    border-right: 2px solid var(--borde);
+    padding: 12px 8px max(12px, env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+  .navegacion__lista { flex-direction: column; justify-content: flex-start; gap: 4px; }
+  .navegacion__lista li { flex: none; }
+  .navegacion__marca { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 4px 0 8px; }
+  .navegacion__nombre { display: none; margin: 0; }
+  .navegacion__pie {
+    display: block;
+    margin-top: auto;
+    border-top: 2px solid var(--borde);
+    padding-top: 10px;
+  }
+  .nav-boton { padding: 11px 4px; }
+  /* Barra de ICONOS: el texto se corta en cualquier idioma con palabras
+     largas ("Diccionario", "Ezarpenak"), y media palabra con puntos
+     suspensivos no ayuda a nadie. El nombre completo sigue llegando por
+     aria-label y por el title al pasar el ratón. */
+  .nav-boton__texto { display: none; }
+  .nav-boton__icono { font-size: 1.45rem; }
+
+  /* Con barra lateral, la marca ya está a la izquierda: la cabecera
+     deja de repetirla y el engranaje se va al pie de la barra. */
+  .cabecera__marca { display: none; }
+  .boton-ajustes { display: none; }
+  .cabecera__pantalla { display: block; }
+}
+
+/* ---- barra lateral con texto ---- */
+@media (min-width: 75rem) {
+  .navegacion { padding: 14px 12px max(14px, env(safe-area-inset-bottom, 0px)); }
+  .navegacion__marca { justify-content: flex-start; padding: 4px 8px 14px; }
+  .navegacion__nombre {
+    display: block;
+    font-family: var(--display);
+    font-size: 1rem;
+    line-height: 1.1;
+  }
+  .nav-boton {
+    grid-template-columns: 26px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  .nav-boton__texto { display: block; font-size: .95rem; font-weight: 700; }
+  .nav-boton__icono { font-size: 1.3rem; }
+  .nav-boton[aria-current="page"] {
+    box-shadow: inset 3px 0 0 var(--color-modulo, var(--coral));
+  }
+}
+
+/* ---- cajón ---- */
+.boton-menu {
+  display: none;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: 50%; width: 42px; height: 42px;
+  font-size: 1.05rem; line-height: 1; cursor: pointer; flex: none;
+  color: var(--tinta);
+}
+
+.boton-menu:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+.velo-menu {
+  position: fixed; inset: 0; z-index: 9;
+  border: none; padding: 0; width: 100%;
+  background: rgba(43, 52, 64, .45);
+  cursor: pointer;
+}
+
+@media (orientation: landscape) and (max-height: 32rem) {
+  .boton-menu { display: block; }
+
+  /* El mismo <nav>, ahora fuera de la rejilla y fuera de la pantalla
+     hasta que se pide. No se duplica el marcado en ningún momento. */
+  .navegacion {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 10;
+    width: min(240px, 72vw);
+    border-top: none;
+    border-right: 2px solid var(--borde);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding: 12px 10px max(12px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-102%);
+    /* visibility, y no solo transform: un cajón que se ha ido de la
+       pantalla pero sigue "visible" continúa en el orden de tabulación,
+       y con el tabulador se cae dentro de un menú que no se ve.
+
+       El 0s con retraso no es un adorno: al ABRIR queremos que sea
+       visible ya, para poder llevarle el foco en el acto; al CERRAR
+       esperamos a que termine de salirse, o desaparecería de golpe. */
+    visibility: hidden;
+    transition: transform .22s ease, visibility 0s linear .22s;
+  }
+
+  .navegacion__marca { display: flex; align-items: center; gap: 10px; padding: 4px 6px 10px; }
+  .navegacion__nombre { display: block; margin: 0; font-family: var(--display); font-size: .95rem; }
+  .navegacion__lista { flex-direction: column; gap: 4px; }
+  .navegacion__lista li { flex: none; }
+  .navegacion__pie { display: block; margin-top: auto; border-top: 2px solid var(--borde); padding-top: 10px; }
+
+  .nav-boton {
+    grid-template-columns: 26px minmax(0, 1fr);
+    justify-items: start; align-items: center;
+    gap: 11px; padding: 11px 12px; text-align: left;
+  }
+  .nav-boton__texto { display: block; font-size: .92rem; font-weight: 700; }
+
+  body.menu-abierto .navegacion {
+    transform: none;
+    visibility: visible;
+    transition: transform .22s ease, visibility 0s;
+  }
+}
+
+/* ============================================================
+   DEDO Y RATÓN
+   No es lo mismo señalar que tocar. El ancho no lo distingue: una
+   tablet en horizontal tiene tanto sitio como un portátil y se usa
+   con el dedo igual que un móvil.
+   ============================================================ */
+
+@media (pointer: coarse) {
+  .boton--fantasma,
+  .boton--mini,
+  .nav-boton { min-height: 48px; }
+  .tecla { padding-block: 16px; }
+}
+
+@media (hover: hover) {
+  .nav-boton:hover { color: var(--tinta); background: var(--crema); }
+  .boton:hover { filter: brightness(.97); }
+  .modulo:hover { border-color: var(--color-modulo, var(--borde)); }
+}
+
+/* ============================================================
+   ESTRUCTURA
+   ============================================================ */
+
+.escenario {
+  grid-area: trabajo;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 4px 18px max(28px, env(safe-area-inset-bottom, 0px));
+
+  /* De tamaño y no solo de ancho: la tarjeta necesita preguntar
+     también por el alto para decidir si se reparte en dos columnas. */
+  container-type: size;
+  container-name: trabajo;
+}
+
+/* Lo que se limita en ancho es el panel, no el escenario: así el área
+   de trabajo ocupa todo su hueco y la lectura sigue cómoda.
+   width:100% no sobra: con margin auto dentro de una rejilla, el panel
+   se encogería a su contenido en vez de ocupar la pista. */
+.panel {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 20px;
+  animation: aparecer .25s ease both;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+
+.boton {
+  font-family: var(--texto);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--tinta);
+  background: #F1F3F6;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: transform .08s ease, filter .15s ease;
+  min-height: 48px;
+}
+
+.boton:active { transform: translateY(2px); }
+.boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+
+.boton--grande { width: 100%; font-size: 1.15rem; padding: 16px 22px; min-height: 58px; }
+
+.boton--principal { background: var(--coral); color: #FFF; box-shadow: 0 4px 0 var(--coral-oscuro); }
+.boton--sabia     { background: var(--menta); color: #FFF; box-shadow: 0 4px 0 var(--menta-oscura); }
+.boton--repasar   { background: var(--sol);   color: #4A3200; box-shadow: 0 4px 0 #D0972B; }
+.boton--principal:active, .boton--sabia:active, .boton--repasar:active { box-shadow: none; }
+
+.boton--fantasma { background: transparent; border: 2px solid var(--borde); font-size: .9rem; padding: 8px 14px; min-height: 40px; }
+
+.boton--texto {
+  background: none; color: var(--tinta-suave); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 4px; padding: 10px;
+}
+
+.boton--mini { font-size: .88rem; min-height: 36px; padding: 6px 8px; }
+
+.boton--escuchar {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #EAF1FF; color: var(--cielo);
+}
+
+.boton--redondo {
+  flex: none;
+  width: 52px; height: 52px; padding: 0;
+  font-size: 1.4rem; line-height: 1;
+  background: #EAF1FF;
+}
+
+.boton--google {
+  background: var(--superficie);
+  color: var(--tinta);
+  border: 2px solid var(--borde);
+  box-shadow: 0 4px 0 var(--borde);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+
+.boton--sonando { animation: latido .6s ease infinite; }
+@keyframes latido { 50% { transform: scale(1.06); } }
+
+/* ============================================================
+   INICIO Y FINAL
+   ============================================================ */
+
+.panel--inicio, .panel--final { text-align: center; }
+
+.login__lema {
+  font-family: var(--display);
+  font-size: 1.5rem; line-height: 1.25;
+  margin: 6px 0 10px;
+}
+
+.cargando { color: var(--tinta-suave); font-weight: 700; margin: 10px 0; }
+
+.inicio__intro { margin: 4px 0 18px; font-size: 1.05rem; color: var(--tinta-suave); }
+.panel--inicio .boton--texto { font-size: .88rem; }
+.inicio__aviso { margin: 14px 0 0; font-size: .85rem; color: var(--tinta-suave); }
+
+.marcador {
+  list-style: none; margin: 0 0 20px; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+
+.marcador li {
+  background: #F7F8FA; border-radius: var(--radio-chico); padding: 10px 4px;
+}
+
+.marcador b { display: block; font-family: var(--display); font-size: 1.5rem; line-height: 1; }
+.marcador span { font-size: .72rem; color: var(--tinta-suave); font-weight: 700; }
+
+.marcador li[data-estado="conocida"] b { color: var(--menta); }
+.marcador li[data-estado="repasar"] b  { color: #C98A0E; }
+.marcador li[data-estado="nueva"] b    { color: var(--coral); }
+
+.final__emoji { font-size: 3rem; margin: 4px 0 0; }
+.final__titulo { font-family: var(--display); margin: 4px 0 18px; font-size: 1.7rem; }
+
+/* ============================================================
+   AJUSTES
+   ============================================================ */
+
+.ficha-usuario {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: #F7F8FA; border-radius: var(--radio-chico);
+  padding: 12px 14px; margin-bottom: 18px;
+}
+
+.ficha-usuario__foto { width: 44px; height: 44px; border-radius: 50%; background: #EFF1F4; object-fit: cover; flex: none; }
+.ficha-usuario__datos { display: grid; gap: 2px; min-width: 0; }
+.ficha-usuario__datos b { font-family: var(--display); font-size: 1.15rem; }
+.ficha-usuario__datos small { color: var(--tinta-suave); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; }
+
+.ajustes-idioma { text-align: left; margin-bottom: 20px; }
+
+.ajustes-idioma__titulo {
+  margin: 0 0 8px; font-weight: 800; font-size: .9rem; color: var(--tinta-suave);
+}
+
+.ajustes-idioma__opciones { display: grid; gap: 8px; }
+
+.idioma-boton {
+  font-family: var(--texto); font-weight: 800; font-size: .95rem;
+  text-align: left; padding: 12px 16px; cursor: pointer;
+  background: var(--superficie); color: var(--tinta);
+  border: 2px solid var(--borde); border-radius: var(--radio-chico);
+}
+
+.idioma-boton[aria-pressed="true"] {
+  border-color: var(--cielo); background: #EAF1FF; color: var(--cielo-oscuro);
+}
+
+.idioma-boton:focus-visible { outline: 3px solid var(--cielo); outline-offset: 2px; }
+
+.ajustes-grupo { display: grid; gap: 10px; margin-bottom: 22px; }
+.ajustes-contenido { text-align: left; border-top: 2px solid var(--borde); padding-top: 16px; }
+.boton--bloque { width: 100%; }
+
+.ajustes-pista {
+  margin: -4px 0 0; font-size: .82rem; color: var(--tinta-suave);
+  background: #FFFBF3; border: 2px dashed #F0E2CB;
+  border-radius: var(--radio-chico); padding: 10px 12px; text-align: left;
+}
+
+/* Versión: lo que hay publicado y lo que estás usando. Si no coinciden,
+   el aviso y el botón de actualizar. */
+.version {
+  border-top: 2px solid var(--borde); padding-top: 14px; text-align: left;
+}
+
+.version__linea {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  margin: 0 0 6px; font-size: .9rem; color: var(--tinta-suave);
+}
+
+.version__linea b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+
+.version__nota { margin: 10px 0 0; font-size: .85rem; color: var(--tinta-suave); }
+
+.version__nota[data-estado="vieja"] {
+  color: #A96A00; background: #FFF3E0; font-weight: 700;
+  border-radius: var(--radio-chico); padding: 10px 12px;
+}
+
+.version #boton-actualizar { margin-top: 10px; }
+
+/* ============================================================
+   ÍNDICE DE MÓDULOS
+   Cada herramienta tiene su color, y ese color viaja con ella:
+   la barra de la tarjeta, la cabecera de dentro y sus botones.
+   Así se sabe en qué módulo se está sin leer nada.
+   ============================================================ */
+
+/* El índice se alinea a la izquierda aunque el panel esté centrado:
+   es una lista que se recorre, no un mensaje. */
+#pantalla-hub { text-align: left; }
+
+.saludo { margin: 0 0 4px; font-family: var(--display); font-size: 1.6rem; }
+.saludo-sub { margin: 0 0 16px; color: var(--tinta-suave); font-size: .95rem; }
+
+.modulos {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+
+.modulo {
+  width: 100%; height: 100%;
+  display: grid; gap: 6px; align-content: start;
+  background: var(--superficie);
+  border: 2px solid var(--borde);
+  border-top: 6px solid var(--color-modulo, var(--coral));
+  border-radius: var(--radio);
+  padding: 14px;
+  text-align: left; cursor: pointer;
+  font-family: var(--texto); color: var(--tinta);
+  box-shadow: var(--sombra);
+  transition: transform .08s ease, border-color .15s ease;
+}
+
+.modulo:hover { border-color: var(--color-modulo); border-top-color: var(--color-modulo); }
+.modulo:active { transform: translateY(2px); }
+.modulo:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 3px; }
+
+.modulo__icono {
+  width: 44px; height: 44px; border-radius: 13px;
+  display: grid; place-items: center; font-size: 1.5rem;
+  background: color-mix(in srgb, var(--color-modulo) 14%, #FFF);
+}
+
+.modulo__nombre { font-family: var(--display); font-size: 1.15rem; line-height: 1.1; }
+.modulo__que { font-size: .78rem; color: var(--tinta-suave); font-weight: 600; line-height: 1.35; }
+
+.modulo__estado {
+  justify-self: start; margin-top: 4px;
+  font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--color-modulo) 16%, #FFF);
+  color: var(--color-modulo);
+}
+
+/* Un módulo que todavía no existe se ve, pero no se puede pulsar:
+   sirve para que se note que esto va a crecer. */
+.modulo--pronto { opacity: .72; border-style: dashed; border-top-style: solid; cursor: default; }
+.modulo--pronto:hover { border-color: var(--borde); }
+.modulo--pronto .modulo__estado { background: #F1F3F6; color: var(--tinta-suave); }
+
+/* ============================================================
+   CABECERA DE MÓDULO
+   ============================================================ */
+
+.modulo-cabecera { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+.modulo-cabecera__volver {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.5rem; line-height: 1;
+  color: var(--color-modulo); padding: 4px 8px 4px 0;
+}
+
+.modulo-cabecera__volver:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+
+.modulo-cabecera__punto {
+  width: 12px; height: 12px; border-radius: 50%; flex: none;
+  background: var(--color-modulo);
+}
+
+.modulo-cabecera__nombre { font-family: var(--display); font-size: 1.3rem; margin: 0; flex: 1; }
+
+/* Botón teñido con el color del módulo en el que estamos. */
+.boton--modulo {
+  background: var(--color-modulo); color: #FFF;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--color-modulo) 75%, #000);
+}
+.boton--modulo:active { box-shadow: none; }
+
+/* ============================================================
+   MATEMAGIA
+   ============================================================ */
+
+.retos { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+
+.reto {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px; text-align: left;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio); padding: 14px;
+  font-family: var(--texto); color: var(--tinta); cursor: pointer;
+}
+
+.reto:hover { border-color: var(--color-modulo); }
+.reto:active { transform: translateY(2px); }
+.reto:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 3px; }
+
+.reto__icono { font-size: 1.6rem; flex: none; }
+.reto__texto { display: grid; gap: 2px; }
+.reto__texto b { font-family: var(--display); font-size: 1.2rem; line-height: 1.1; }
+.reto__texto small { color: var(--tinta-suave); font-size: .82rem; font-weight: 600; }
+
+.tablas__titulo { margin: 0 0 8px; font-weight: 800; color: var(--tinta-suave); font-size: .9rem; }
+
+.tablas__rejilla { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+
+.tabla-boton {
+  font-family: var(--display); font-size: 1.25rem;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio-chico); padding: 12px 0; cursor: pointer;
+  color: var(--tinta);
+}
+
+.tabla-boton:active { transform: translateY(2px); }
+.tabla-boton:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+.tabla-boton[data-nivel="verde"] { border-color: var(--menta); background: #E6F5F2; }
+.tabla-boton[data-nivel="media"] { border-color: var(--sol); background: #FFF7E8; }
+.tabla-boton--mezcla { grid-column: span 5; font-size: 1.05rem; font-family: var(--texto); font-weight: 800; }
+
+.tablas__leyenda {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 12px 0 0; font-size: .78rem; color: var(--tinta-suave); font-weight: 700;
+}
+
+.punto {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--borde); background: var(--superficie);
+  display: inline-block; margin-left: 8px;
+}
+.punto--verde { border-color: var(--menta); background: #E6F5F2; }
+.punto--media { border-color: var(--sol); background: #FFF7E8; }
+
+/* Doble clase a propósito: la regla base de .progreso__relleno vive más
+   abajo y, a igual especificidad, ganaría ella. */
+.progreso__relleno.progreso__relleno--modulo { background: var(--color-modulo); }
+
+.operacion {
+  font-family: var(--display); font-size: 2.6rem; text-align: center;
+  margin: 10px 0 6px; letter-spacing: .03em;
+}
+
+/* La recta ABN: los saltos se van rellenando según responde. */
+.saltos {
+  list-style: none; margin: 0 0 14px; padding: 0;
+  display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+}
+
+.salto {
+  min-width: 54px; padding: 8px 10px;
+  font-family: var(--display); font-size: 1.2rem; text-align: center;
+  border: 2px dashed var(--borde); border-radius: var(--radio-chico);
+  color: var(--tinta-suave);
+}
+
+.salto[data-hecho="si"] {
+  border-style: solid; border-color: var(--color-modulo);
+  background: color-mix(in srgb, var(--color-modulo) 12%, #FFF);
+  color: var(--tinta);
+}
+
+.salto-flecha { color: var(--tinta-suave); font-weight: 800; }
+
+.mates-pregunta {
+  margin: 0 0 4px; text-align: center; font-weight: 800; font-size: 1.1rem;
+}
+
+.mates-ayuda {
+  margin: 0 0 12px; text-align: center; color: var(--tinta-suave); font-size: .88rem;
+  min-height: 1.2em;
+}
+
+.mates-respuesta {
+  display: block; margin: 0 auto 14px; min-width: 120px; padding: 12px;
+  font-family: var(--display); font-size: 2rem; text-align: center;
+  border: 3px solid var(--borde); border-radius: var(--radio-chico);
+  background: #FFFDFA; min-height: 62px;
+}
+
+.mates-respuesta[data-estado="bien"] { border-color: var(--menta); background: #E6F5F2; }
+.mates-respuesta[data-estado="mal"] { border-color: var(--coral); background: #FFECEC; }
+
+.teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+.tecla {
+  font-family: var(--display); font-size: 1.5rem;
+  background: var(--superficie); border: 2px solid var(--borde);
+  border-radius: var(--radio-chico); padding: 14px 0; cursor: pointer;
+  color: var(--tinta);
+}
+
+.tecla:active { transform: translateY(2px); }
+.tecla:focus-visible { outline: 3px solid var(--color-modulo); outline-offset: 2px; }
+.tecla--ok { background: var(--menta); color: #FFF; border-color: var(--menta-oscura); }
+.tecla--borrar { color: var(--tinta-suave); }
+
+/* ============================================================
+   DICCIONARIO
+   ============================================================ */
+
+.buscador { display: grid; gap: 10px; margin-bottom: 16px; }
+.buscador__linea { display: flex; gap: 10px; }
+
+.buscador__campo {
+  flex: 1; min-width: 0;
+  font-family: var(--display); font-size: 1.3rem;
+  padding: 12px 16px;
+  border: 3px solid var(--borde); border-radius: var(--radio-chico);
+  background: #FFFDFA; color: var(--tinta);
+}
+
+.buscador__campo:focus { outline: none; border-color: var(--cielo); }
+.buscador__boton { flex: none; }
+
+.buscador__estado {
+  margin: 0 0 12px; text-align: center; color: var(--tinta-suave); font-weight: 700;
+}
+
+.entrada {
+  border: 2px solid var(--borde); border-radius: var(--radio);
+  padding: 16px; margin-bottom: 14px;
+}
+
+.entrada__cabecera { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.entrada__palabra { margin: 0; font-family: var(--display); font-size: 2rem; line-height: 1; flex: 1; }
+.entrada__tipo { font-size: .72rem; font-weight: 800; text-transform: uppercase; color: var(--tinta-suave); }
+
+.entrada__dibujo {
+  width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: var(--radio-chico); background: #F4F5F7; margin-bottom: 12px;
+}
+
+.entrada .traducciones { margin-bottom: 12px; }
+.entrada .ejemplo { margin-top: 12px; }
+.entrada__definicion { margin: 0 0 12px; color: var(--tinta-suave); font-size: .95rem; }
+
+.panel--diccionario { display: flex; flex-direction: column; }
+
+/* ============================================================
+   PROGRESO DE LA RONDA
+   ============================================================ */
+
+.progreso { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.progreso__barra { flex: 1; height: 10px; border-radius: 999px; background: #EFF1F4; overflow: hidden; }
+.progreso__relleno { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--coral); transition: width .3s ease; }
+.progreso__texto { font-size: .82rem; font-weight: 800; color: var(--tinta-suave); }
+
+/* ============================================================
+   ESCENA (la ilustración)
+   ============================================================ */
+
+.escena { margin: 0 0 18px; position: relative; }
+
+.escena__img {
+  display: block; width: 100%; height: auto;
+  border-radius: var(--radio-chico);
+  background: #F4F5F7;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.escena__tema {
+  position: absolute; left: 10px; bottom: 10px;
+  background: rgba(255, 255, 255, .92);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: .78rem; font-weight: 800; color: var(--tinta-suave);
+}
+
+/* ============================================================
+   CARA A — PREGUNTA
+   ============================================================ */
+
+.cara { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+.cara--pregunta > .boton--escuchar { align-self: center; }
+
+.respuesta-form { display: flex; flex-direction: column; gap: 10px; }
+
+.respuesta-form__etiqueta { font-weight: 700; font-size: .92rem; color: var(--tinta-suave); text-align: center; }
+
+.respuesta-form__campo {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  text-align: center;
+  padding: 14px 16px;
+  border: 3px solid var(--borde);
+  border-radius: var(--radio-chico);
+  background: #FFFDFA;
+  color: var(--tinta);
+  width: 100%;
+}
+
+.respuesta-form__campo:focus { outline: none; border-color: var(--cielo); }
+.respuesta-form__campo.es-correcta { border-color: var(--menta); }
+.respuesta-form__campo.es-fallo { border-color: var(--coral); }
+
+/* ============================================================
+   CARA B — RESPUESTA
+   ============================================================ */
+
+.veredicto {
+  margin: 0; text-align: center; font-weight: 800;
+  border-radius: var(--radio-chico); padding: 10px;
+}
+
+.veredicto[data-tipo="bien"] { background: #E6F5F2; color: var(--menta-oscura); }
+.veredicto[data-tipo="casi"] { background: #FFF3E0; color: #A96A00; }
+
+.palabra { display: flex; align-items: center; justify-content: center; gap: 14px; }
+
+.palabra__en {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 12vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.traducciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.traducciones li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  background: #F7F8FA; border-radius: var(--radio-chico); padding: 10px 16px;
+}
+
+.traducciones__idioma { font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-suave); }
+.traducciones__texto { font-size: 1.15rem; font-weight: 700; text-align: right; }
+
+.ejemplo { background: #FFFBF3; border: 2px dashed #F0E2CB; border-radius: var(--radio-chico); padding: 14px; }
+.ejemplo__linea { display: flex; align-items: center; gap: 12px; }
+.ejemplo__en { margin: 0; flex: 1; font-size: 1.1rem; font-weight: 700; }
+
+.ejemplo__traducciones { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: .95rem; }
+.ejemplo__traducciones li { display: flex; gap: 10px; align-items: baseline; }
+.ejemplo__traducciones .traducciones__idioma { flex: none; min-width: 92px; }
+
+.decision { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.decision .boton { font-size: 1.05rem; white-space: nowrap; padding: 16px 10px; }
+
+/* ============================================================
+   VARIOS
+   ============================================================ */
+
+.error {
+  background: #FFECEC; color: #A32020; border-radius: var(--radio-chico);
+  padding: 14px 16px; font-weight: 700; text-align: center;
+}
+
+.aviso-red {
+  background: #FFF3E0; color: #A96A00; border-radius: var(--radio-chico);
+  padding: 10px 14px; font-weight: 700; text-align: center; font-size: .88rem;
+  margin-top: 14px;
+}
+
+@media (max-width: 380px) {
+  .decision { grid-template-columns: 1fr; }
+  .marcador { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   DICCIONARIO — definiciones
+   Traducción y definición son cosas distintas, y aquí se ven
+   distintas: la traducción es una palabra, la definición una
+   frase. Cada una con su idioma marcado.
+   ============================================================ */
+
+.definiciones {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  background: var(--crema);
+  border-radius: var(--radio-chico);
+}
+
+.definiciones__titulo {
+  margin: 0 0 8px;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.definiciones__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+
+.definiciones__lista li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+
+.definiciones__texto { font-size: .93rem; line-height: 1.45; }
+
+@media (max-width: 26rem) {
+  .definiciones__lista li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}

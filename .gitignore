@@ -1,1 +1,24 @@
 .DS_Store
+
+# Configuración local de Firebase (se genera con tools/generar-config.mjs)
+.env
+.firebaserc
+vocabulario/js/firebase-config.js
+
+# Claves de cuenta de servicio: nunca al repositorio
+*serviceaccount*.json
+*service-account*.json
+clave-*.json
+
+node_modules/
+
+# El lockfile del importador se genera en cada máquina: better-sqlite3 se
+# compila para su plataforma, así que compartirlo solo provoca choques
+# al hacer pull entre Windows y Linux.
+tools/import/package-lock.json
+
+# Sello de versión: lo genera tools/sellar-version.mjs en cada despliegue.
+# Es resultado, no código fuente, y tenerlo versionado hacía que cada
+# git pull chocara con el despliegue anterior.
+vocabulario/version.json
+vocabulario/js/version.js
