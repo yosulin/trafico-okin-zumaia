@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Un aula con alumnos en gris; la profesora aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .s4{fill:none;stroke:#7C848F;stroke-width:5;stroke-linecap:round}
+    .halo{fill:#E9F7F2}
+    .skin{fill:#E8B98E}.dress{fill:#2A9D8F}.dress2{fill:#1F7A70}.hair{fill:#3B2E2A}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <rect class="g1" y="252" width="400" height="48"/>
+  <g>
+    <rect class="g4" x="20" y="34" width="196" height="112" rx="8"/>
+    <rect class="g2" x="28" y="42" width="180" height="96" rx="5"/>
+    <path fill="none" stroke="#7C848F" stroke-width="4" stroke-linecap="round" d="M46 70 h100 M46 92 h130 M46 114 h74"/>
+    <rect class="g3" x="20" y="146" width="196" height="8" rx="4"/>
+  </g>
+  <g class="g2"><rect x="300" y="28" width="76" height="58" rx="8"/><rect class="g0" x="308" y="36" width="60" height="42" rx="4"/></g>
+  <g transform="translate(96,0)">
+    <rect class="g3" x="-46" y="212" width="92" height="14" rx="6"/>
+    <rect class="g4" x="-40" y="226" width="10" height="34" rx="4"/><rect class="g4" x="30" y="226" width="10" height="34" rx="4"/>
+    <circle class="g3" cx="0" cy="176" r="20"/>
+    <path class="g4" d="M-20 176 a20 20 0 0 1 40 0 q3 -24 -20 -22 q-23 2 -20 22 z"/>
+    <rect class="g4" x="-18" y="194" width="36" height="24" rx="12"/>
+  </g>
+  <g transform="translate(216,0)">
+    <rect class="g3" x="-46" y="212" width="92" height="14" rx="6"/>
+    <rect class="g4" x="-40" y="226" width="10" height="34" rx="4"/><rect class="g4" x="30" y="226" width="10" height="34" rx="4"/>
+    <circle class="g3" cx="0" cy="176" r="20"/>
+    <path class="g4" d="M-22 178 q0 -24 22 -24 q22 0 22 24 q-4 -18 -22 -16 q-18 -2 -22 16 z"/>
+    <rect class="g4" x="-18" y="194" width="36" height="24" rx="12"/>
+  </g>
+  <ellipse class="halo" cx="318" cy="176" rx="80" ry="112"/>
+  <g transform="translate(318,0)">
+    <path fill="none" stroke="#2A9D8F" stroke-width="7" stroke-linecap="round" d="M-24 158 l-40 -22"/>
+    <path fill="none" stroke="#2A9D8F" stroke-width="7" stroke-linecap="round" d="M24 158 l16 30"/>
+    <path class="hair" d="M-26 118 q0 -30 26 -30 q26 0 26 30 q0 26 -8 34 q-2 -22 -18 -24 q-16 2 -18 24 q-8 -8 -8 -34 z"/>
+    <circle class="skin" cx="0" cy="122" r="24"/>
+    <path class="hair" d="M-24 118 q2 -24 24 -24 q22 0 24 24 q-12 -14 -24 -12 q-12 -2 -24 12 z"/>
+    <circle fill="#3A3226" cx="-8" cy="122" r="3.2"/><circle fill="#3A3226" cx="8" cy="122" r="3.2"/>
+    <path fill="none" stroke="#B5714F" stroke-width="3" stroke-linecap="round" d="M-7 133 q7 7 14 0"/>
+    <path class="dress" d="M-22 146 h44 q10 4 10 16 v46 h-64 v-46 q0 -12 10 -16 z"/>
+    <path class="dress2" d="M-32 208 h64 l6 44 h-76 z"/>
+    <rect class="skin" x="-18" y="252" width="14" height="10" rx="4"/><rect class="skin" x="4" y="252" width="14" height="10" rx="4"/>
+    <rect fill="#1F7A70" x="-22" y="258" width="20" height="9" rx="4"/><rect fill="#1F7A70" x="2" y="258" width="20" height="9" rx="4"/>
+    <rect fill="#F4B942" x="-70" y="128" width="16" height="8" rx="3" transform="rotate(-28 -62 132)"/>
+  </g>
+</svg>

@@ -1,0 +1,483 @@
+# Ayuda de Sofía
+
+> **Añade color a tu vida. Aprende algo nuevo.**
+
+PWA con las herramientas de Sofía. Empezó siendo solo vocabulario en inglés y
+ahora es un índice de módulos: tarjetas, diccionario y Matemagia.
+
+El módulo de **tarjetas** («Colores») refuerza y amplía vocabulario en inglés. No sustituye al colegio ni a
+Duolingo: es una herramienta personal, pensada para alimentarla poco a poco con
+palabras de los libros del cole, de sus intereses y de conversaciones reales.
+
+Cada palabra se presenta con una **escena dibujada en gris** donde **solo el
+concepto que hay que aprender aparece en color**.
+
+El contenido y el progreso viven en **Firebase**: Firestore es la fuente de
+verdad y cada persona entra con su cuenta de Google para que la app recuerde lo
+que ya sabe. Las imágenes y los audios se sirven **con la propia app** (carpeta
+`media/`), y el día que haga falta se pasan a Firebase Storage cambiando una
+palabra en la configuración.
+
+---
+
+## Arquitectura
+
+```
+Navegador (esta PWA, estática, sin build step)
+   │
+   ├── Firebase Authentication ── entrar con Google
+   │
+   ├── Firestore  cards/{cardId}                 ← contenido (solo lectura)
+   │              themes/{themeId}               ← etiquetas de tema (opcional)
+   │              users/{uid}/progress/{cardId}  ← progreso, privado
+   │
+   └── medios     ./media/images/… (Hosting)  ó  Firebase Storage
+
+tools/import/  ← el ÚNICO sitio que escribe contenido (Admin SDK)
+```
+
+La app **nunca escribe en `cards`**: las reglas de Firestore no se lo permiten.
+El contenido entra por el importador, que usa una cuenta de servicio.
+
+---
+
+## Las herramientas
+
+Tras entrar aparece un **índice**, y de ahí se elige:
+
+- **Tarjetas** — el juego: dibujo, audio y escribir la palabra en inglés.
+- **Diccionario** — se escribe una palabra en **cualquiera de los tres idiomas**
+  y devuelve los otros dos, con su dibujo, su audio y su ejemplo si los tiene.
+- **Matemagia** — cálculo con **método ABN**: tablas del 1 al 10, sumas y restas
+  que cruzan la decena. Ver más abajo.
+
+**Tarjetas y diccionario** leen la **misma** colección `cards`: una tarjeta ya es
+una entrada trilingüe, así que no hay dos contenidos que mantener. Lo que las
+separa es un campo:
+
+- `deck: true` → entra en el juego de tarjetas.
+- `active: true` → se puede buscar en el diccionario.
+
+Así se puede importar un léxico de miles de palabras (`--sin-mazo`) para el
+diccionario sin que el mazo de la niña se vuelva inmanejable.
+
+Añadir una herramienta nueva es añadir un botón al índice y una pantalla: el
+login, el audio, los datos y el progreso ya están hechos y se comparten.
+
+---
+
+## Cómo funciona una tarjeta
+
+**Pregunta** → dibujo grande, audio automático de la palabra en inglés, botón
+para volver a escucharla y un campo para escribirla. La palabra en inglés no
+aparece.
+
+**Respuesta** → palabra en inglés en grande (con audio), traducción al
+castellano y al euskera, frase de ejemplo en inglés (con audio) y su traducción
+a los dos idiomas, plegable.
+
+**Después** → «La sabía» o «Repasar», que escriben el progreso en Firestore. No
+hay repaso espaciado (SRS): en la ronda siguiente van primero las de «Repasar»
+y las nuevas.
+
+---
+
+## Matemagia
+
+Tres retos, al nivel de 4º de primaria (`js/matemagia.js`):
+
+| Reto | Qué pregunta |
+|---|---|
+| **Tablas** | `7 × 6` del 1 al 10. Guarda aciertos y fallos **por tabla**, y el menú las pinta en verde, ámbar o gris para ver de un vistazo cuál cojea. |
+| **Sumas ABN** | `85 + 8` → *¿cuánto le falta a 85 para llegar a 90?* → *¿cuánto te queda por sumar?* → `90 + 3`. |
+| **Restas ABN** | `52 − 7` → *¿cuánto le quitas para bajar a 50?* → *¿cuánto queda por quitar?* → `50 − 5`. |
+
+La diferencia con un ejercicio corriente está en **qué se pregunta**. En ABN no
+se pide el resultado y ya: se pide cada salto, que es donde está el
+razonamiento. La pantalla enseña la recta (`85 → 90 → 93`) y las casillas se van
+rellenando según responde.
+
+Fallar un paso intermedio no cuenta como fallo del ejercicio: se enseña la
+respuesta, se sigue, y solo se anota mal si falló en algún salto. La idea es que
+pensar en voz alta no se castigue.
+
+Los generadores garantizan que la suma **siempre cruza la decena** (si no, el
+método no se practica) y que ningún paso da negativo.
+
+Progreso en `users/{uid}/mates/{reto}`, separado del de las tarjetas.
+
+**Todavía no**: multiplicación por descomposición, divisiones y problemas.
+
+---
+
+## Idiomas de la interfaz (i18n)
+
+La app se ve en **castellano, euskera o inglés**, y se elige en Ajustes. Vale
+para todo lo que dice la app.
+
+Lo que **no** se traduce es el contenido que se está aprendiendo: la palabra
+inglesa de una tarjeta sigue siendo la palabra inglesa, y sus traducciones al
+castellano y al euskera son datos, no interfaz. Traducir eso vaciaría de sentido
+el ejercicio.
+
+Todos los textos viven en **`js/i18n.js`**, en un único objeto por idioma:
+corregir una frase es cambiar una línea. Se usan así:
+
+```html
+<b data-i18n="hub.pregunta"></b>
+<input data-i18n-attr="placeholder:dicc.pista">
+```
+
+```js
+t("mates.tablaDel", { n: 7 })
+```
+
+Si falta una clave en el idioma elegido, cae al castellano antes que enseñar la
+clave cruda. El idioma se guarda **en el dispositivo** (`localStorage`): es una
+preferencia de cómo se ve la app, no parte del progreso. Si algún día queremos
+que la siga entre el móvil y la tablet, se mueve a Firestore (10 líneas y una
+regla).
+
+> El euskera lo escribió Claude y **está sin revisar por un hablante**. Las
+> frases de Matemagia son las más delicadas, porque llevan números declinados
+> (`80ra iristeko`).
+
+### Revisar las traducciones fuera del código
+
+Para repasarlas con un LLM, con alguien que sepa euskera o en una hoja de
+cálculo, hay un viaje de ida y vuelta a CSV:
+
+```bash
+node tools/textos-csv.mjs exportar > textos.csv
+#  (se corrige textos.csv: una fila por texto, columnas clave,es,eu,en)
+node tools/textos-csv.mjs importar textos.csv
+```
+
+Al importar solo se tocan los textos: el resto de `i18n.js` se queda igual. Las
+claves que falten en el CSV se conservan, y las que sobren se avisan y se
+ignoran.
+
+---
+
+## Descargar el contenido en CSV
+
+En **Ajustes → Contenido** hay un botón que descarga **todas las tarjetas
+activas** en CSV, con las mismas columnas que entiende el importador:
+
+```
+id,word,es,eu,theme,type,layer,tags,
+example_en,example_es,example_eu,
+image_path,word_audio_path,example_audio_path,deck,active
+```
+
+El círculo se cierra así:
+
+```
+Ajustes → Descargar CSV        (la app lee Firestore)
+   ↓  se corrige donde sea cómodo
+tools/import --origen csv      (el importador escribe Firestore)
+```
+
+La app **no** puede subirlo: escribir contenido está prohibido desde el
+navegador, y eso no se toca. Se sube con:
+
+```bash
+cd tools/import
+node importar.mjs --origen csv --fichero tarjetas-2026-09-06.csv --sin-medios --dry-run
+```
+
+Como el CSV lleva el `id`, reimportar **actualiza** las tarjetas existentes en
+vez de duplicarlas — incluso si has cambiado la palabra. (El fichero lleva un BOM
+para que Excel abra bien los acentos; el importador lo quita al leer.)
+
+---
+
+## Ajustes y versiones
+
+El engranaje de la cabecera abre **Ajustes**: quién ha entrado, instalar la app,
+cerrar sesión, borrar el progreso y **la versión**.
+
+Ahí se ven dos cosas que pueden no coincidir:
+
+- la versión que **estás usando** (`js/version.js`, que va dentro de la app y la
+  cachea el service worker),
+- la **publicada** (`version.json`, que se pide siempre a la red).
+
+Si difieren, el navegador se ha quedado con una copia vieja y aparece un botón
+**«Actualizar a la última versión»** que tira las cachés, quita el service worker
+y recarga. Es exactamente el lío que nos costó una tarde de diagnóstico.
+
+Las tres cosas las escribe `tools/sellar-version.mjs`, que **se ejecuta solo al
+desplegar** (está como `predeploy` en `firebase.json`), así que no se puede
+olvidar. También renombra las cachés del service worker con el sello del
+despliegue, para que cada publicación estrene caché.
+
+El número sale del fichero `VERSION` de la raíz, que se sube a mano:
+
+```
+0.4.0   →  0.5.0 cuando entre un módulo nuevo
+        →  0.4.1 para arreglos
+```
+
+Después de un despliegue, `version.json` y `js/version.js` aparecen modificados:
+son el sello de lo que acabas de publicar. Comitéalos si quieres dejar constancia
+de qué versión está viva, o descártalos, que se regeneran solos.
+
+---
+
+## Puesta en marcha
+
+### 1. Crear el proyecto Firebase
+
+En [console.firebase.google.com](https://console.firebase.google.com):
+
+1. **Crear un proyecto** (puedes desactivar Google Analytics).
+2. **Authentication** → *Comenzar* → pestaña *Sign-in method* → habilitar
+   **Google** → guardar.
+   En *Settings → Authorized domains* añade el dominio desde el que vayas a
+   abrir la app (`localhost` ya viene; añade el de Hosting o el de GitHub Pages
+   si publicas ahí).
+3. **Firestore Database** → *Crear base de datos* → modo **producción** →
+   elige región (`eur3` o `europe-west1`).
+4. **Configuración del proyecto → Tus apps → Web (`</>`)** → registra la app y
+   copia el objeto de configuración.
+
+> **Storage no hace falta.** Desde finales de 2024 exige el plan Blaze (de pago).
+> El prototipo sirve imágenes y audios desde `vocabulario/media/`, con la propia
+> app. Cuando quieras dar el salto: activa Blaze, crea el bucket, pon
+> `MEDIA_SOURCE=storage` en `.env`, vuelve a generar la configuración y sube los
+> ficheros con `npm run semilla-storage`. Las rutas guardadas en Firestore
+> (`images/animals/animals_dog.svg`) son las mismas en los dos sitios, así que no
+> hay que tocar ni una tarjeta.
+
+### 2. Configurar este repositorio
+
+Lo más seguro es no copiar la configuración a mano: con `firebase login` hecho,
+la CLI se la pide al propio proyecto.
+
+```bash
+node tools/config-desde-firebase.mjs   # → vocabulario/js/firebase-config.js
+```
+
+(Copiar la `apiKey` a mano funciona, pero un carácter de más —o un editor que
+guarde algo raro— produce un `auth/api-key-not-valid` que no dice por qué.)
+
+Alternativas, si prefieres no depender de la CLI: rellenar `.env` a partir de
+`.env.example` y ejecutar `node tools/generar-config.mjs`, o copiar
+`vocabulario/js/firebase-config.example.js` a `vocabulario/js/firebase-config.js`
+y editarlo.
+
+`vocabulario/js/firebase-config.js` está en `.gitignore`. Esos valores **no son
+secretos** —viajan en cualquier app web de Firebase—, pero así cada instalación
+apunta a su propio proyecto. Lo que protege los datos de verdad son las reglas.
+
+### 3. Publicar las reglas
+
+```bash
+npm install -g firebase-tools
+firebase login
+cp .firebaserc.example .firebaserc     # y poner el id del proyecto
+firebase deploy --only firestore:rules
+```
+
+### 4. Subir las 10 tarjetas de demostración
+
+```bash
+cd tools/import
+npm install
+export GOOGLE_APPLICATION_CREDENTIALS=/ruta/a/clave-cuenta-de-servicio.json
+npm run semilla-prueba   # ver qué haría
+npm run semilla          # crear las 10 tarjetas en Firestore
+```
+
+Detalles y más orígenes (CSV escolar, mazos de Anki): **[tools/import/README.md](../tools/import/README.md)**.
+
+### 5. Probar en local
+
+Hace falta servirlo por HTTP (los módulos y el service worker no funcionan
+abriendo el fichero directamente):
+
+```bash
+cd vocabulario
+python3 -m http.server 8000
+# http://localhost:8000
+```
+
+### 6. Desplegar
+
+```bash
+firebase deploy --only hosting     # publica la carpeta vocabulario/
+```
+
+También sirve cualquier hosting estático (GitHub Pages incluido): la app solo
+son ficheros. En ese caso hay que **comitear** `js/firebase-config.js` (o
+generarlo en el despliegue) y añadir ese dominio a los *Authorized domains* de
+Authentication.
+
+---
+
+## Estructura
+
+```
+vocabulario/
+├── index.html                  → login, inicio, tarjeta y final
+├── manifest.webmanifest        → instalación como PWA
+├── service-worker.js           → cachés de shell, SDK y medios (sube VERSION al publicar)
+├── css/estilos.css
+├── icons/
+├── media/images/…              → las ilustraciones (las sirve Hosting)
+└── js/
+    ├── firebase.js             → inicialización única (Auth y Firestore)
+    ├── firebase-config.js      → generado, fuera del repositorio
+    ├── sesion.js               → entrar/salir con Google
+    ├── datos.js                → lee "cards" y "themes" de Firestore
+    ├── progreso.js             → users/{uid}/progress/{cardId}
+    ├── media.js                → rutas → URLs (Hosting o Storage)
+    ├── audio.js                → audio grabado con respaldo de voz sintética
+    └── app.js                  → la interfaz de la tarjeta
+```
+
+---
+
+## El esquema de una tarjeta
+
+```json
+{
+  "id": "animals_dog",
+  "word": "dog",
+  "es": "perro",
+  "eu": "txakurra",
+  "theme": "animals",
+  "layer": 1,
+  "type": "noun",
+  "imagePath": "images/animals/animals_dog.svg",
+  "wordAudioPath": "audio/words/animals_dog.mp3",
+  "example": {
+    "en": "I play with my dog.",
+    "es": "Juego con mi perro.",
+    "eu": "Txakurrarekin jolasten dut.",
+    "audioPath": "audio/examples/animals_dog_example_01.mp3"
+  },
+  "tags": ["animal", "pet"],
+  "source": { "type": "general", "book": null, "unit": null },
+  "active": true
+}
+```
+
+En Firestore se guardan **rutas**, no URLs: así el contenido no depende de
+tokens de descarga que pueden regenerarse, y cambiar de sitio los ficheros no
+obliga a reescribir las tarjetas. `media.js` las resuelve según la opción
+`medios` de la configuración: `"hosting"` las convierte en `./media/…` y
+`"storage"` se las pide a Firebase Storage (y guarda la URL en `localStorage`).
+
+`search` lo calcula el importador: la palabra en los tres idiomas, en minúsculas
+y sin acentos. Es lo que permite que el diccionario encuentre la entrada se
+escriba `dog`, `Perro` o `txakurra`.
+
+`datos.js` conserva cualquier **campo extra** del documento (nivel CEFR, edad,
+dificultad, procedencia...), así que ampliar el esquema no exige tocar la app.
+De hecho el diccionario ya enseña `definition.es` / `.en` / `.eu` si algún día
+aparecen: no hay nada que cambiar para empezar a usarlas.
+
+---
+
+## Progreso
+
+`users/{uid}/progress/{cardId}`:
+
+```json
+{
+  "status": "known",
+  "seenCount": 8,
+  "knownCount": 6,
+  "reviewCount": 2,
+  "lastSeen": "timestamp",
+  "updatedAt": "timestamp"
+}
+```
+
+Cuatro estados: `new`, `learning`, `known`, `review`. Nada de estadísticas ni de
+SRS todavía. Se escribe con `setDoc(merge)` + `increment()`, así que **sin
+conexión Firestore encola la escritura y la envía sola al volver la red**: la app
+no lleva ninguna cola propia.
+
+---
+
+## El audio
+
+Toda la app pide sonido por `js/audio.js`, con dos funciones:
+
+```js
+playWordAudio(tarjeta)      // ¿wordAudioPath? → fichero de Storage; si no → voz sintética
+playExampleAudio(tarjeta)   // ídem con example.audioPath
+```
+
+Hoy casi todo suena con la Web Speech API pidiendo voz **inglesa británica**
+(`en-GB`). Ir sustituyéndolo por MP3 reales no exige tocar ni la interfaz ni las
+tarjetas: basta con subir el audio y rellenar esas rutas (el importador de Anki
+ya lo hace solo).
+
+---
+
+## Offline
+
+- El **shell** (HTML, CSS, JS, iconos e ilustraciones) se precachea: la app abre
+  sin red.
+- El **SDK de Firebase** y las tipografías se guardan al usarlas.
+- Las **imágenes y audios** ya vistos se guardan al usarlos.
+- Las **tarjetas** salen de la caché persistente de Firestore.
+- El **progreso** hecho sin red se sincroniza solo al volver la conexión.
+
+Lo que no funciona sin red es **entrar por primera vez**: el login necesita
+conexión. Una vez dentro, la sesión se mantiene.
+
+---
+
+## Las ilustraciones
+
+SVG de 400 × 300 hechos a mano, con una regla fija:
+
+- El escenario y los personajes que dan contexto van en **grises**
+  (`#F4F5F7`, `#E4E7EB`, `#CDD2D9`, `#AAB1BB`, `#7C848F`, `#4B525C`).
+- El concepto que hay que aprender va en **color**, con un halo pálido detrás
+  para que no haya duda de cuál es el elemento objetivo.
+
+Están en `vocabulario/media/images/`, organizadas por tema. Cambiar una escena
+por una ilustración mejor (SVG, WebP...) es dejar el fichero nuevo ahí y apuntar
+`imagePath` a él.
+
+---
+
+## Quién puede entrar
+
+La app es **privada**. Cualquiera puede pulsar «Entrar con Google» —eso no se
+puede impedir en el plan gratuito—, pero solo ve algo quien tenga su correo en
+la colección `allowed` de Firestore. Quien no esté se encuentra una pantalla que
+se lo dice, y ni una tarjeta.
+
+El filtro está en las **reglas**, no en la página: no se puede saltar desde el
+navegador. Y la lista solo se toca con la cuenta de servicio:
+
+```bash
+cd tools/import
+npm run permitidos                        # ver quién puede entrar
+npm run permitir -- alguien@gmail.com     # dar acceso
+npm run denegar  -- alguien@gmail.com     # quitarlo
+```
+
+Los cambios son inmediatos: no hay que desplegar ni volver a publicar nada.
+
+---
+
+## Seguridad
+
+`firestore.rules` y `storage.rules`, en la raíz del repositorio:
+
+- Solo lee tarjetas quien ha entrado **y está en la lista**, y solo las activas.
+- Escribir en `cards` está prohibido desde cualquier cliente: el contenido entra
+  por `tools/import/`, con Admin SDK, que no pasa por las reglas.
+- Cada persona solo lee y escribe **su** progreso, y solo si está en la lista.
+- Todo lo demás, denegado.
+
+La clave de la cuenta de servicio del importador nunca va al repositorio
+(`.gitignore` la cubre); se indica con `GOOGLE_APPLICATION_CREDENTIALS`.

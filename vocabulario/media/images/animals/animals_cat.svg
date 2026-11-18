@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Un salón con un sofá; el gato aparece en color">
+  <style>
+    .g0{fill:#F4F5F7}.g1{fill:#E4E7EB}.g2{fill:#CDD2D9}.g3{fill:#AAB1BB}.g4{fill:#7C848F}.g5{fill:#4B525C}
+    .halo{fill:#FFF1DC}
+    .fur{fill:#F0A04B}.fur2{fill:#D2792C}.nose{fill:#F2789F}.eye{fill:#3E8E7E}
+  </style>
+  <rect class="g0" width="400" height="300"/>
+  <rect class="g1" y="236" width="400" height="64"/>
+  <rect class="g2" x="28" y="52" width="86" height="66" rx="8"/><rect class="g0" x="36" y="60" width="70" height="50" rx="5"/>
+  <path class="g3" d="M44 110 l24 -30 l18 22 l12 -14 l16 22 z"/>
+  <rect class="g2" x="318" y="132" width="14" height="104" rx="6"/>
+  <path class="g3" d="M300 132 l25 -34 l25 34 z"/>
+  <g>
+    <rect class="g3" x="40" y="150" width="300" height="86" rx="22"/>
+    <rect class="g2" x="56" y="164" width="80" height="52" rx="14"/>
+    <rect class="g2" x="146" y="164" width="80" height="52" rx="14"/>
+    <rect class="g2" x="236" y="164" width="80" height="52" rx="14"/>
+    <rect class="g4" x="28" y="146" width="26" height="92" rx="12"/><rect class="g4" x="326" y="146" width="26" height="92" rx="12"/>
+    <rect class="g5" x="52" y="232" width="16" height="18" rx="6"/><rect class="g5" x="312" y="232" width="16" height="18" rx="6"/>
+  </g>
+  <ellipse class="halo" cx="196" cy="150" rx="82" ry="52"/>
+  <g>
+    <path class="fur2" d="M244 168 q30 -4 22 -32 q-4 -8 -12 -4 q6 22 -14 26 z"/>
+    <ellipse class="fur" cx="196" cy="164" rx="52" ry="26"/>
+    <ellipse class="fur2" cx="176" cy="158" rx="12" ry="7"/><ellipse class="fur2" cx="214" cy="166" rx="14" ry="7"/>
+    <path class="fur" d="M140 126 l-4 -26 l24 14 z"/><path class="fur" d="M188 122 l14 -24 l6 26 z"/>
+    <circle class="fur" cx="164" cy="138" r="29"/>
+    <circle class="eye" cx="153" cy="134" r="6"/><circle class="eye" cx="176" cy="134" r="6"/>
+    <path fill="none" stroke="#3A3226" stroke-width="3" stroke-linecap="round" d="M153 128 v12 M176 128 v12"/>
+    <path class="nose" d="M164 146 l6 5 l-6 5 l-6 -5 z"/>
+    <path fill="none" stroke="#3A3226" stroke-width="2" stroke-linecap="round" d="M158 152 q-16 -2 -24 -8 M158 156 q-16 4 -24 6 M170 152 q16 -2 24 -8 M170 156 q16 4 24 6"/>
+  </g>
+</svg>
