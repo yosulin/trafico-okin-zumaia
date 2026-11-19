@@ -1,11 +1,7 @@
 {
-  "actualizado": "2026-11-19T08:49:52.942Z",
+  "actualizado": "2026-11-19T09:01:10.654Z",
   "muestras": {
     "zarautz": [
-      {
-        "t": 1794992462241,
-        "i": 0
-      },
       {
         "t": 1794993341202,
         "i": 0
@@ -400,15 +396,15 @@
       },
       {
         "t": 1795078192942,
+        "i": 0
+      },
+      {
+        "t": 1795078870654,
         "i": 0
       }
     ],
     "donostia": [
       {
-        "t": 1794992462241,
-        "i": 0
-      },
-      {
         "t": 1794993341202,
         "i": 0
       },
@@ -802,15 +798,15 @@
       },
       {
         "t": 1795078192942,
+        "i": 0
+      },
+      {
+        "t": 1795078870654,
         "i": 0
       }
     ],
     "irun": [
       {
-        "t": 1794992462241,
-        "i": 0
-      },
-      {
         "t": 1794993341202,
         "i": 0
       },
@@ -1197,13 +1193,13 @@
       {
         "t": 1795078192942,
         "i": 0
+      },
+      {
+        "t": 1795078870654,
+        "i": 0
       }
     ],
     "eibar": [
-      {
-        "t": 1794992462241,
-        "i": 0
-      },
       {
         "t": 1794993341202,
         "i": 0
@@ -1598,6 +1594,10 @@
       },
       {
         "t": 1795078192942,
+        "i": 0
+      },
+      {
+        "t": 1795078870654,
         "i": 0
       }
     ]
@@ -1608,37 +1608,37 @@
       "travelTimeMin": 18,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     },
     "zarautz.meagas": {
       "travelTimeMin": 34,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     },
     "donostia.ap8": {
       "travelTimeMin": 31,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     },
     "donostia.n634": {
       "travelTimeMin": 49,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     },
     "eibar.ap8ap1": {
       "travelTimeMin": 29,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     },
     "irun.ap8": {
       "travelTimeMin": 41,
       "delayMin": 0,
       "estadoIndex": 0,
-      "timestamp": 1795078192942
+      "timestamp": 1795078870654
     }
   }
 }
